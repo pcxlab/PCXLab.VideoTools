@@ -1,0 +1,46 @@
+@{
+
+RootModule = 'PCXLab.VideoTools.psm1'
+
+ModuleVersion = '1.0.0'
+
+GUID = '11111111-1111-1111-1111-111111111111'
+
+Author = 'PCXLab'
+
+CompanyName = 'PCXLab'
+
+Copyright = '(c) PCXLab'
+
+Description = 'Professional PowerShell Video Automation Module'
+
+PowerShellVersion = '7.2'
+
+#FunctionsToExport = @()
+FunctionsToExport = '*'
+
+CmdletsToExport = @()
+
+#VariablesToExport = '*'
+VariablesToExport = @()
+
+AliasesToExport = @()
+
+PrivateData = @{
+
+    PSData = @{
+
+        Tags = @(
+            'Video'
+            'FFmpeg'
+            'Automation'
+            'PowerShell'
+        )
+
+        ProjectUri = ''
+
+    }
+
+}
+
+}
