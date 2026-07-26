@@ -32,3 +32,34 @@ Get-PCXVideoInformation "C:\Videos\Test.mp4" | Format-List
 Get-PCXAudioInformation "C:\Videos\Test.mp4"
 
 Get-PCXAudioInformation "C:\Videos\Test.mp4" | Format-List *
+
+Remove-Module PCXLab.VideoTools -Force
+Import-Module .\src\Modules\PCXLab.VideoTools
+
+Get-PCXMediaInformation "C:\Videos\Test.mp4" | Format-List *
+
+$Media = Get-PCXMediaInformation "C:\Videos\Test.mp4"
+
+$Media.Video
+
+$Media.Audio
+
+$Media.Video.Width
+
+$Media.Audio.SampleRate
+
+
+Remove-Module PCXLab.VideoTools -Force
+Import-Module .\src\Modules\PCXLab.VideoTools
+
+Get-PCXAudioInformation "C:\Videos\Test.mp4" | Format-List *
+
+$Media = Invoke-PCXFFprobe "C:\Videos\Test.mp4"
+
+Get-PCXSubtitleStreams -InputObject $Media
+
+
+cls
+Remove-Module PCXLab.VideoTools -Force -ErrorAction SilentlyContinue
+
+Import-Module .\src\Modules\PCXLab.VideoTools
