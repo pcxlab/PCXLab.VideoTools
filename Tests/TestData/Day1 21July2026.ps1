@@ -60,6 +60,73 @@ Get-PCXSubtitleStreams -InputObject $Media
 
 
 cls
+
 Remove-Module PCXLab.VideoTools -Force -ErrorAction SilentlyContinue
 
-Import-Module .\src\Modules\PCXLab.VideoTools
+Import-Module .\src\Modules\PCXLab.VideoTools -Force
+
+Get-PCXVideoInformation "C:\Videos\Test.mp4" | Format-List *
+
+
+Get-Content "C:\Projects\PCXLab.VideoTools\src\Modules\PCXLab.VideoTools\1.0.0\Private\Models\New-PCXMediaInformationObject.ps1"
+
+Get-ChildItem "C:\Projects\PCXLab.VideoTools\src\Modules\PCXLab.VideoTools\1.0.0\Private\Models"
+
+cls
+
+Remove-Module PCXLab.VideoTools -Force -ErrorAction SilentlyContinue
+
+Import-Module .\src\Modules\PCXLab.VideoTools -Force
+
+Get-PCXMediaInformation "C:\Videos\Test.mp4" | Format-List *
+
+
+vds.exe
+
+
+Get-ChildItem "C:\Projects\PCXLab.VideoTools\src\Modules\PCXLab.VideoTools\1.0.0\Private\Models" |
+Select-Object Name
+
+
+
+Remove-Module PCXLab.VideoTools -Force -ErrorAction SilentlyContinue
+
+Import-Module .\src\Modules\PCXLab.VideoTools -Force
+
+Get-PCXAudioInformation "C:\Videos\Test.mp4" | Format-List *
+
+Get-PCXMediaInformation "C:\Videos\Test.mp4" | Format-List *
+
+
+########################################
+cls
+Remove-Module PCXLab.VideoTools -Force -ErrorAction SilentlyContinue
+
+Import-Module .\src\Modules\PCXLab.VideoTools -Force
+
+Get-PCXVideoInformation "C:\Videos\Test.mp4" | Format-List *
+
+Get-PCXMediaInformation "C:\Videos\Test.mp4" | Format-List *
+
+Get-Content "C:\Projects\PCXLab.VideoTools\src\Modules\PCXLab.VideoTools\1.0.0\Private\Converters\ConvertTo-PCXVideoInformation.ps1"
+Get-Content "C:\Projects\PCXLab.VideoTools\src\Modules\PCXLab.VideoTools\1.0.0\Private\Converters\ConvertTo-PCXVideoInformation.ps1"
+Get-Content "C:\Projects\PCXLab.VideoTools\src\Modules\PCXLab.VideoTools\1.0.0\Public\Analysis\Get-PCXMediaInformation.ps1"
+
+Get-ChildItem "C:\Projects\PCXLab.VideoTools\src\Modules\PCXLab.VideoTools\1.0.0\Private\Models"
+
+Remove-Module PCXLab.VideoTools -Force -ErrorAction SilentlyContinue
+
+Import-Module .\src\Modules\PCXLab.VideoTools -Force
+
+Get-PCXVideoInformation "C:\Videos\Test.mp4" | Format-List *
+
+Get-PCXMediaInformation "C:\Videos\Test.mp4" | Format-List *
+
+
+cls
+Remove-Module PCXLab.VideoTools -Force -ErrorAction SilentlyContinue
+
+Import-Module .\src\Modules\PCXLab.VideoTools -Force
+
+Get-PCXVideoInformation C:\Videos\Test.mp4
+Get-PCXAudioInformation C:\Videos\Test.mp4
