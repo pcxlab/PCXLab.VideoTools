@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<Types>
+
+    <Type>
+        <Name>PCXLab.VideoInformation</Name>
+    </Type>
+
+    <Type>
+        <Name>PCXLab.AudioInformation</Name>
+    </Type>
+
+    <Type>
+        <Name>PCXLab.SubtitleInformation</Name>
+    </Type>
+
+    <Type>
+        <Name>PCXLab.ChapterInformation</Name>
+    </Type>
+
+    <Type>
+        <Name>PCXLab.MediaInformation</Name>
+    </Type>
+
+    <Type>
+        <Name>PCXLab.MediaStream</Name>
+    </Type>
+
+</Types>
