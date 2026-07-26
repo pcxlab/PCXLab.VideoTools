@@ -1,0 +1,19 @@
+{
+    "Logging": {
+        "Enabled": true,
+        "LogLevel": "Information",
+        "LogFolder": "%TEMP%\\PCXLab\\Logs"
+    },
+
+    "Tools": {
+        "FFmpeg": "",
+        "FFprobe": "",
+        "MediaInfo": "",
+        "Whisper": ""
+    },
+
+    "Analysis": {
+        "SilenceThreshold": -35,
+        "MinimumSilenceDuration": 1.0
+    }
+}

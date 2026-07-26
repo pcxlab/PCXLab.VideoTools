@@ -1,0 +1,422 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<Configuration>
+
+  <ViewDefinitions>
+
+    <!-- ========================================================= -->
+    <!-- Video Information                                          -->
+    <!-- ========================================================= -->
+
+    <View>
+
+      <Name>PCXLab.VideoInformation.Default</Name>
+
+      <ViewSelectedBy>
+        <TypeName>PCXLab.VideoInformation</TypeName>
+      </ViewSelectedBy>
+
+      <TableControl>
+
+        <TableHeaders>
+
+          <TableColumnHeader>
+            <Label>File Name</Label>
+            <Width>30</Width>
+          </TableColumnHeader>
+
+          <TableColumnHeader>
+            <Label>Resolution</Label>
+            <Width>14</Width>
+          </TableColumnHeader>
+
+          <TableColumnHeader>
+            <Label>Duration</Label>
+            <Width>12</Width>
+          </TableColumnHeader>
+
+          <TableColumnHeader>
+            <Label>Video</Label>
+            <Width>12</Width>
+          </TableColumnHeader>
+
+          <TableColumnHeader>
+            <Label>Audio</Label>
+            <Width>10</Width>
+          </TableColumnHeader>
+
+        </TableHeaders>
+
+        <TableRowEntries>
+
+          <TableRowEntry>
+
+            <TableColumnItems>
+
+              <TableColumnItem>
+                <PropertyName>FileName</PropertyName>
+              </TableColumnItem>
+
+              <TableColumnItem>
+                <PropertyName>Resolution</PropertyName>
+              </TableColumnItem>
+
+              <TableColumnItem>
+                <PropertyName>Duration</PropertyName>
+              </TableColumnItem>
+
+              <TableColumnItem>
+                <PropertyName>VideoCodec</PropertyName>
+              </TableColumnItem>
+
+              <TableColumnItem>
+                <PropertyName>AudioCodec</PropertyName>
+              </TableColumnItem>
+
+            </TableColumnItems>
+
+          </TableRowEntry>
+
+        </TableRowEntries>
+
+      </TableControl>
+
+    </View>
+
+    <!-- ========================================================= -->
+    <!-- Audio Information                                          -->
+    <!-- ========================================================= -->
+
+    <View>
+
+      <Name>PCXLab.AudioInformation.Default</Name>
+
+      <ViewSelectedBy>
+        <TypeName>PCXLab.AudioInformation</TypeName>
+      </ViewSelectedBy>
+
+      <TableControl>
+
+        <TableHeaders>
+
+          <TableColumnHeader>
+            <Label>File Name</Label>
+            <Width>30</Width>
+          </TableColumnHeader>
+
+          <TableColumnHeader>
+            <Label>Duration</Label>
+            <Width>12</Width>
+          </TableColumnHeader>
+
+          <TableColumnHeader>
+            <Label>Codec</Label>
+            <Width>10</Width>
+          </TableColumnHeader>
+
+          <TableColumnHeader>
+            <Label>Channels</Label>
+            <Width>10</Width>
+          </TableColumnHeader>
+
+          <TableColumnHeader>
+            <Label>Sample Rate</Label>
+            <Width>14</Width>
+          </TableColumnHeader>
+
+          <TableColumnHeader>
+            <Label>Language</Label>
+            <Width>10</Width>
+          </TableColumnHeader>
+
+        </TableHeaders>
+
+        <TableRowEntries>
+
+          <TableRowEntry>
+
+            <TableColumnItems>
+
+              <TableColumnItem>
+                <PropertyName>FileName</PropertyName>
+              </TableColumnItem>
+
+              <TableColumnItem>
+                <PropertyName>Duration</PropertyName>
+              </TableColumnItem>
+
+              <TableColumnItem>
+                <PropertyName>AudioCodec</PropertyName>
+              </TableColumnItem>
+
+              <TableColumnItem>
+                <PropertyName>Channels</PropertyName>
+              </TableColumnItem>
+
+              <TableColumnItem>
+                <PropertyName>SampleRate</PropertyName>
+              </TableColumnItem>
+
+              <TableColumnItem>
+                <PropertyName>Language</PropertyName>
+              </TableColumnItem>
+
+            </TableColumnItems>
+
+          </TableRowEntry>
+
+        </TableRowEntries>
+
+      </TableControl>
+
+    </View>
+
+    <!-- ========================================================= -->
+    <!-- Subtitle Information                                       -->
+    <!-- ========================================================= -->
+
+    <View>
+
+      <Name>PCXLab.SubtitleInformation.Default</Name>
+
+      <ViewSelectedBy>
+        <TypeName>PCXLab.SubtitleInformation</TypeName>
+      </ViewSelectedBy>
+
+      <TableControl>
+
+        <TableHeaders>
+
+          <TableColumnHeader>
+            <Label>File Name</Label>
+            <Width>30</Width>
+          </TableColumnHeader>
+
+          <TableColumnHeader>
+            <Label>Language</Label>
+            <Width>10</Width>
+          </TableColumnHeader>
+
+          <TableColumnHeader>
+            <Label>Codec</Label>
+            <Width>12</Width>
+          </TableColumnHeader>
+
+          <TableColumnHeader>
+            <Label>Default</Label>
+            <Width>8</Width>
+          </TableColumnHeader>
+
+          <TableColumnHeader>
+            <Label>Forced</Label>
+            <Width>8</Width>
+          </TableColumnHeader>
+
+        </TableHeaders>
+
+        <TableRowEntries>
+
+          <TableRowEntry>
+
+            <TableColumnItems>
+
+              <TableColumnItem>
+                <PropertyName>FileName</PropertyName>
+              </TableColumnItem>
+
+              <TableColumnItem>
+                <PropertyName>Language</PropertyName>
+              </TableColumnItem>
+
+              <TableColumnItem>
+                <PropertyName>SubtitleCodec</PropertyName>
+              </TableColumnItem>
+
+              <TableColumnItem>
+                <PropertyName>Default</PropertyName>
+              </TableColumnItem>
+
+              <TableColumnItem>
+                <PropertyName>Forced</PropertyName>
+              </TableColumnItem>
+
+            </TableColumnItems>
+
+          </TableRowEntry>
+
+        </TableRowEntries>
+
+      </TableControl>
+
+    </View>
+
+    <!-- ========================================================= -->
+    <!-- Media Information                                          -->
+    <!-- ========================================================= -->
+
+    <View>
+
+      <Name>PCXLab.MediaInformation.Default</Name>
+
+      <ViewSelectedBy>
+        <TypeName>PCXLab.MediaInformation</TypeName>
+      </ViewSelectedBy>
+
+      <TableControl>
+
+        <TableHeaders>
+
+          <TableColumnHeader>
+            <Label>File Name</Label>
+            <Width>30</Width>
+          </TableColumnHeader>
+
+          <TableColumnHeader>
+            <Label>Resolution</Label>
+            <Width>15</Width>
+          </TableColumnHeader>
+
+          <TableColumnHeader>
+            <Label>Duration</Label>
+            <Width>12</Width>
+          </TableColumnHeader>
+
+          <TableColumnHeader>
+            <Label>Video</Label>
+            <Width>10</Width>
+          </TableColumnHeader>
+
+          <TableColumnHeader>
+            <Label>Audio</Label>
+            <Width>10</Width>
+          </TableColumnHeader>
+
+        </TableHeaders>
+
+        <TableRowEntries>
+
+          <TableRowEntry>
+
+            <TableColumnItems>
+
+              <TableColumnItem>
+                <PropertyName>FileName</PropertyName>
+              </TableColumnItem>
+
+              <TableColumnItem>
+                <PropertyName>Resolution</PropertyName>
+              </TableColumnItem>
+
+              <TableColumnItem>
+                <PropertyName>Duration</PropertyName>
+              </TableColumnItem>
+
+              <TableColumnItem>
+                <PropertyName>VideoCodec</PropertyName>
+              </TableColumnItem>
+
+              <TableColumnItem>
+                <PropertyName>AudioCodec</PropertyName>
+              </TableColumnItem>
+
+            </TableColumnItems>
+
+          </TableRowEntry>
+
+        </TableRowEntries>
+
+      </TableControl>
+
+    </View>
+
+    <!-- ========================================================= -->
+    <!-- Media Stream                                               -->
+    <!-- ========================================================= -->
+
+    <View>
+
+      <Name>PCXLab.MediaStream.Default</Name>
+
+      <ViewSelectedBy>
+        <TypeName>PCXLab.MediaStream</TypeName>
+      </ViewSelectedBy>
+
+      <TableControl>
+
+        <TableHeaders>
+
+          <TableColumnHeader>
+            <Label>Index</Label>
+            <Width>6</Width>
+          </TableColumnHeader>
+
+          <TableColumnHeader>
+            <Label>Type</Label>
+            <Width>10</Width>
+          </TableColumnHeader>
+
+          <TableColumnHeader>
+            <Label>Codec</Label>
+            <Width>12</Width>
+          </TableColumnHeader>
+
+          <TableColumnHeader>
+            <Label>Language</Label>
+            <Width>10</Width>
+          </TableColumnHeader>
+
+          <TableColumnHeader>
+            <Label>Default</Label>
+            <Width>8</Width>
+          </TableColumnHeader>
+
+          <TableColumnHeader>
+            <Label>Forced</Label>
+            <Width>8</Width>
+          </TableColumnHeader>
+
+        </TableHeaders>
+
+        <TableRowEntries>
+
+          <TableRowEntry>
+
+            <TableColumnItems>
+
+              <TableColumnItem>
+                <PropertyName>Index</PropertyName>
+              </TableColumnItem>
+
+              <TableColumnItem>
+                <PropertyName>StreamType</PropertyName>
+              </TableColumnItem>
+
+              <TableColumnItem>
+                <PropertyName>Codec</PropertyName>
+              </TableColumnItem>
+
+              <TableColumnItem>
+                <PropertyName>Language</PropertyName>
+              </TableColumnItem>
+
+              <TableColumnItem>
+                <PropertyName>Default</PropertyName>
+              </TableColumnItem>
+
+              <TableColumnItem>
+                <PropertyName>Forced</PropertyName>
+              </TableColumnItem>
+
+            </TableColumnItems>
+
+          </TableRowEntry>
+
+        </TableRowEntries>
+
+      </TableControl>
+
+    </View>
+
+  </ViewDefinitions>
+
+</Configuration>

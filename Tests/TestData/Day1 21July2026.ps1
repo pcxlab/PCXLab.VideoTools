@@ -130,3 +130,90 @@ Import-Module .\src\Modules\PCXLab.VideoTools -Force
 
 Get-PCXVideoInformation C:\Videos\Test.mp4
 Get-PCXAudioInformation C:\Videos\Test.mp4
+
+
+Remove-Module PCXLab.VideoTools -Force -ErrorAction SilentlyContinue
+
+Import-Module .\src\Modules\PCXLab.VideoTools\1.1.0 -Force
+Get-Module PCXLab.VideoTools
+
+Get-PCXVideoInformation C:\Videos\Test.mp4
+Get-PCXAudioInformation C:\Videos\Test.mp4
+Get-PCXAudioInformation C:\Videos\Test.mp4
+
+
+
+Remove-Module PCXLab.VideoTools -Force -ErrorAction SilentlyContinue
+
+Import-Module .\src\Modules\PCXLab.VideoTools -Force
+
+Get-PCXAudioInformation C:\Videos\Test.mp4
+
+Get-PCXSubtitleInformation C:\Videos\Test.mp4 | Format-List *
+
+
+
+Run:
+Remove-Module PCXLab.VideoTools -Force -ErrorAction SilentlyContinue
+Import-Module .\src\Modules\PCXLab.VideoTools -Force
+
+Get-PCXMediaInformation C:\Videos\Test.mp4 | Format-List *
+
+cls
+Remove-Module PCXLab.VideoTools -Force -ErrorAction SilentlyContinue
+Import-Module .\src\Modules\PCXLab.VideoTools -Force
+
+Get-PCXMediaStreams C:\Videos\Test.mp4
+Get-PCXMediaInformation C:\Videos\Test.mp4
+
+Get-PCXVideoInformation | Format-List *
+
+Get-PCXVideoInformation | Format-List
+
+
+Describe 'Get-PCXVideoInformation' {
+
+    It 'Returns the correct type' {
+
+        $Video = Get-PCXVideoInformation C:\Videos\Test.mp4
+
+        $Video.PSTypeNames[0] |
+            Should -Be 'PCXLab.VideoInformation'
+
+    }
+
+}
+
+
+$Video.Width | Should -Be 1360
+
+$Video.Height | Should -Be 768
+
+$Video.VideoCodec | Should -Be 'h264'
+
+Get-Module Pester -ListAvailable | Sort-Object Version -Descending
+
+#IMPORTENT
+Install-Module Pester -Scope CurrentUser -Force -SkipPublisherCheck
+
+Invoke-Pester .\Tests\Public\Get-PCXVideoInformation.Tests.ps1
+
+
+$TestVideo = Join-Path $PSScriptRoot '..\TestData\Test.mp4'
+
+$TestVideo = Join-Path $PSScriptRoot '.\Tests\TestData\Test.mp4'
+$TestVideo = (Resolve-Path $TestVideo).Path
+
+$Video = Get-PCXVideoInformation $TestVideo
+
+
+$TestVideo = Join-Path $PSScriptRoot '..\TestData\Test.mp4'
+$TestVideo = (Resolve-Path $TestVideo).Path
+
+
+Invoke-Pester .\Tests
+
+
+Invoke-Pester .\Tests
+
+
