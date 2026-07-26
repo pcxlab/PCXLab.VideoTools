@@ -77,7 +77,8 @@ function ConvertTo-PCXVideoInformation {
         # General
         #------------------------------------------------------
 
-        Duration     = $Duration
+        #Duration     = $Duration
+        Duration     = ConvertTo-PCXDuration -Seconds ([double]$Format.duration)
 
         #FileSize     = [Int64]$Format.size
         #BitRate      = [Int64]$Format.bit_rate
@@ -98,6 +99,9 @@ function ConvertTo-PCXVideoInformation {
         VideoCodec   = $VideoStream.codec_name
         Width        = $VideoStream.width
         Height       = $VideoStream.height
+
+        Resolution = '{0} x {1}' -f $VideoStream.width, $VideoStream.height
+        
         PixelFormat  = $VideoStream.pix_fmt
         FrameRate    = ConvertTo-PCXFrameRate -FrameRate $VideoStream.r_frame_rate
 
