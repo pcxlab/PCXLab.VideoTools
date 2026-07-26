@@ -29,3 +29,6 @@ tree /f "C:\Users\Admin\Downloads\Compressed\ffmpeg-8.1.2-essentials_build\ffmpe
 
 Get-PCXVideoInformation "C:\Videos\Test.mp4" | Format-List
 
+Get-PCXAudioInformation "C:\Videos\Test.mp4"
+
+Get-PCXAudioInformation "C:\Videos\Test.mp4" | Format-List *
