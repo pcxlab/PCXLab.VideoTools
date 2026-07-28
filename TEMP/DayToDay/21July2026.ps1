@@ -217,19 +217,3 @@ Invoke-Pester .\Tests
 Invoke-Pester .\Tests
 
 
-$s = New-PCXSilenceObject `
-    -Start ([TimeSpan]::FromSeconds(15.32)) `
-    -End ([TimeSpan]::FromSeconds(22.94)) `
-    -DurationSeconds 7.62
-
-$s | Format-List *
-
-
-Get-ChildItem `
-    .\src\Modules\PCXLab.VideoTools\1.1.0\Private\Models
-
-    Get-Command New-PCXVideoInformationObject
-
-    Get-Command New-PCXSilenceObject
-
-    get-command -module PCXLab.VideoTools
