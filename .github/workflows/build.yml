@@ -1,4 +1,4 @@
-name: Build
+name: Build and Test
 
 on:
   push:
@@ -7,23 +7,91 @@ on:
       - master
 
   pull_request:
+    branches:
+      - main
+      - master
+
+  workflow_dispatch:
 
 jobs:
 
-  Test:
+  Build:
+
+    name: Build and Test
 
     runs-on: windows-latest
 
     steps:
 
-    - uses: actions/checkout@v4
+      - name: Checkout Repository
+        uses: actions/checkout@v4
 
-    - name: Install Pester
-      shell: pwsh
-      run: |
-        Install-Module Pester -Force -Scope CurrentUser -SkipPublisherCheck
+      - name: Install PowerShell Modules
+        shell: pwsh
+        run: |
 
-    - name: Run Tests
-      shell: pwsh
-      run: |
-        Invoke-Pester Tests -CI
+          Set-PSRepository PSGallery -InstallationPolicy Trusted
+
+          Install-Module Pester `
+            -RequiredVersion 5.7.1 `
+            -Force `
+            -Scope CurrentUser `
+            -SkipPublisherCheck
+
+          Install-Module PSScriptAnalyzer `
+            -Force `
+            -Scope CurrentUser `
+            -SkipPublisherCheck
+
+      - name: Display PowerShell Version
+        shell: pwsh
+        run: |
+          $PSVersionTable
+
+      - name: Display Installed Modules
+        shell: pwsh
+        run: |
+
+          Get-Module Pester -ListAvailable |
+              Sort-Object Version -Descending |
+              Select-Object -First 1
+
+          Get-Module PSScriptAnalyzer -ListAvailable |
+              Sort-Object Version -Descending |
+              Select-Object -First 1
+
+      - name: Import Module
+        shell: pwsh
+        run: |
+
+          Import-Module ./src/Modules/PCXLab.VideoTools -Force
+
+          Get-Module PCXLab.VideoTools
+
+      - name: Run PSScriptAnalyzer
+        shell: pwsh
+        run: |
+
+          Invoke-ScriptAnalyzer `
+            -Path ./src `
+            -Recurse `
+            -Severity Error,Warning
+
+      - name: Run Pester Tests
+        shell: pwsh
+        run: |
+
+          Import-Module Pester -RequiredVersion 5.7.1 -Force
+
+          Invoke-Pester `
+            -Path ./Tests `
+            -CI
+
+      - name: Build Summary
+        shell: pwsh
+        run: |
+
+          Write-Host ""
+          Write-Host "======================================"
+          Write-Host " Build Completed Successfully"
+          Write-Host "======================================"

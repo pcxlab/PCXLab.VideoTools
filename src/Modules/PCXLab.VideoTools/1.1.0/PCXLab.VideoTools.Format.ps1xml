@@ -84,6 +84,76 @@
     </View>
 
     <!-- ========================================================= -->
+    <!-- Silence                                                     -->
+    <!-- ========================================================= -->
+
+    <View>
+
+      <Name>PCXLab.Silence.Default</Name>
+
+      <ViewSelectedBy>
+        <TypeName>PCXLab.Silence</TypeName>
+      </ViewSelectedBy>
+
+      <TableControl>
+
+        <TableHeaders>
+
+          <TableColumnHeader>
+            <Label>Start</Label>
+            <Width>14</Width>
+          </TableColumnHeader>
+
+          <TableColumnHeader>
+            <Label>End</Label>
+            <Width>14</Width>
+          </TableColumnHeader>
+
+          <TableColumnHeader>
+            <Label>Duration</Label>
+            <Width>14</Width>
+          </TableColumnHeader>
+
+          <TableColumnHeader>
+            <Label>Classification</Label>
+            <Width>18</Width>
+          </TableColumnHeader>
+
+        </TableHeaders>
+
+        <TableRowEntries>
+
+          <TableRowEntry>
+
+            <TableColumnItems>
+
+              <TableColumnItem>
+                <PropertyName>Start</PropertyName>
+              </TableColumnItem>
+
+              <TableColumnItem>
+                <PropertyName>End</PropertyName>
+              </TableColumnItem>
+
+              <TableColumnItem>
+                <PropertyName>Duration</PropertyName>
+              </TableColumnItem>
+
+              <TableColumnItem>
+                <PropertyName>Classification</PropertyName>
+              </TableColumnItem>
+
+            </TableColumnItems>
+
+          </TableRowEntry>
+
+        </TableRowEntries>
+
+      </TableControl>
+
+    </View>
+
+    <!-- ========================================================= -->
     <!-- Audio Information                                          -->
     <!-- ========================================================= -->
 
