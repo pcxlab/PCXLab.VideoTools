@@ -4,7 +4,10 @@ function ConvertTo-PCXSilence {
     param(
 
         [Parameter(Mandatory, ValueFromPipeline)]
-        [string]$InputObject
+        [string]$InputObject,
+    
+        [Parameter(Mandatory)]
+        [string]$SourcePath
 
     )
 
@@ -35,6 +38,7 @@ function ConvertTo-PCXSilence {
             $duration = [double]$endMatch.Groups['Duration'].Value
 
             New-PCXSilenceObject `
+                -SourcePath $SourcePath `
                 -Start ([TimeSpan]::FromSeconds($currentStart)) `
                 -End ([TimeSpan]::FromSeconds($end)) `
                 -DurationSeconds $duration

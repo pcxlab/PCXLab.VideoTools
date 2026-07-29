@@ -37,6 +37,13 @@ Find-PCXSilence `
 Remove-Module PCXLab.VideoTools
 Import-Module .\src\Modules\PCXLab.VideoTools # -Force
 
+Find-PCXSilence -Path 'C:\Videos\Tutorial.mp4' |
+Export-PCXPremiereMarkers `
+    -OutputPath 'C:\Videos\Tutorial-SilenceMarkers.jsx' `
+    -IncludeShortPause
+
+############----------------------------------------------------------------
+    
 Find-PCXSilence -Path 'C:\Videos\Test.mp4' |
 Export-PCXPremiereMarkers `
     -OutputPath 'C:\Videos\Tutorial-SilenceMarkers.jsx'
@@ -46,15 +53,18 @@ Export-PCXPremiereMarkers `
     -OutputPath 'C:\Videos\Tutorial-SilenceMarkersIncludeShortPause.jsx' `
     -IncludeShortPause
 
-Find-PCXSilence -Path 'C:\Videos\Tutorial.mp4' |
-Export-PCXPremiereMarkers `
-    -OutputPath 'C:\Videos\Tutorial-SilenceMarkers.jsx' `
-    -IncludeShortPause
-
 Find-PCXSilence -Path 'C:\Videos\Test.mp4' |
 Export-PCXPremiereEditPoints `
     -OutputPath 'C:\Videos\Tutorial-EditPoints.jsx'
 
+Find-PCXSilence -Path 'C:\Videos\Test.mp4' |
+Export-PCXPremiereEditPoints `
+    -OutputPath 'C:\Videos\Tutorial-EditPoints.jsx' 
+
+Find-PCXSilence -Path 'C:\Videos\Test.mp4' |
+Export-PCXPremiereEditPoints `
+    -OutputPath 'C:\Videos\Tutorial-EditPointsAllTracks.jsx' `
+    -AllTracks
 
 Get-ChildItem -Recurse -Include *.ps1, *.psm1 |
 Select-String "ConvertTo-PCXPremiereEditPointScript"
@@ -88,6 +98,16 @@ git rm --cached Tools/FFmpeg/bin/ffplay.exe
 git rm --cached Tools/FFmpeg/bin/ffprobe.exe
 
 git commit -m "Stop tracking FFmpeg executables"
+
+git rm --cached Tools/FFmpeg/bin/ffprobe.exe
+
+git rm --cached Tests/TestData/Test.mp4
+
+git commit -m "Stop tracking FFmpeg executables 1"
+
+git log --stat --oneline origin/main..HEAD
+
+#################################
 
 
 
