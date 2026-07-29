@@ -76,9 +76,9 @@ function ConvertTo-PCXPremiereEditPointScript {
     $allTracksLiteral = if ($AllTracks) { 'true' } else { 'false' }
 
     # NOTE:
-    # The current implementation creates razor cuts on the selected video track.
-    # Audio-track cutting can be added later once it has been fully implemented
-    # and validated.
+    # Premiere's supported scripting API does not expose a split operation.
+    # This script uses the QE razor API to create edit points on the selected
+    # video/audio tracks or across all tracks.
 
     @"
 #target premierepro
@@ -87,6 +87,7 @@ function ConvertTo-PCXPremiereEditPointScript {
 
     var editPoints = $json;
     var videoTrackIndex = $VideoTrackIndex;
+    var audioTrackIndex = $AudioTrackIndex;
     var cutAllTracks = $allTracksLiteral;
 
     app.enableQE();
@@ -107,10 +108,24 @@ function ConvertTo-PCXPremiereEditPointScript {
         try {
 
             if (cutAllTracks) {
+
                 qeSequence.razor(timecode);
+
             }
             else {
-                qeSequence.getVideoTrackAt(videoTrackIndex).razor(timecode);
+
+                var videoTrack = qeSequence.getVideoTrackAt(videoTrackIndex);
+
+                if (videoTrack) {
+                    videoTrack.razor(timecode);
+                }
+
+                var audioTrack = qeSequence.getAudioTrackAt(audioTrackIndex);
+
+                if (audioTrack) {
+                    audioTrack.razor(timecode);
+                }
+
             }
 
             created++;
