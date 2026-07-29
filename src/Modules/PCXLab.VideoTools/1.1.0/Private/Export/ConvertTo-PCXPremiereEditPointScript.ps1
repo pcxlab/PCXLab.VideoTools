@@ -75,10 +75,10 @@ function ConvertTo-PCXPremiereEditPointScript {
     $json = ConvertTo-Json -InputObject $editPoints -Compress
     $allTracksLiteral = if ($AllTracks) { 'true' } else { 'false' }
 
-    # TODO:
-    # Premiere's QE API currently performs reliable razor cuts on video tracks.
-    # Audio-track razor operations have shown inconsistent behavior across
-    # Premiere versions and are intentionally disabled until validated.
+    # NOTE:
+    # The current implementation creates razor cuts on the selected video track.
+    # Audio-track cutting can be added later once it has been fully implemented
+    # and validated.
 
     @"
 #target premierepro
