@@ -33,12 +33,23 @@ function Export-PCXPremiereEditPoints {
     .PARAMETER AudioTrackIndex
         Zero-based target audio-track index. The default is 0 (A1).
 
-    .PARAMETER AllTracks
-        Creates edit points on every sequence track rather than V1 and A1.
+    .PARAMETER TrackMode
+        Controls which tracks receive edit points.
+
+        Selected
+            Creates edit points on the specified video and audio tracks.
+
+        All
+            Creates edit points on every video and audio track in the active sequence.
 
     .EXAMPLE
         Find-PCXSilence -Path 'C:\Videos\Tutorial.mp4' |
             Export-PCXPremiereEditPoints -OutputPath '.\Tutorial-EditPoints.jsx'
+
+        Find-PCXSilence -Path 'C:\Videos\Tutorial.mp4' |
+            Export-PCXPremiereEditPoints `
+                -OutputPath '.\Tutorial-TrackMode-All.jsx' `
+                -TrackMode All
 
     .OUTPUTS
         System.IO.FileInfo
@@ -52,7 +63,7 @@ function Export-PCXPremiereEditPoints {
         [ValidateNotNull()]
         [object]$InputObject,
 
-        [Parameter(Mandatory)]
+        [Parameter()]
         [ValidateNotNullOrEmpty()]
         [string]$OutputPath,
 
@@ -71,7 +82,8 @@ function Export-PCXPremiereEditPoints {
         [int]$AudioTrackIndex = 0,
 
         [Parameter()]
-        [switch]$AllTracks
+        [ValidateSet('Selected', 'All')]
+        [string]$TrackMode = 'Selected'
 
     )
 
@@ -95,7 +107,21 @@ function Export-PCXPremiereEditPoints {
             return
         }
 
-        $resolvedOutputPath = [System.IO.Path]::GetFullPath($OutputPath)
+        if ($TrackMode -eq 'All') {
+            $outputName = 'PremiereEditPoints-AllTracks'
+        }
+        else {
+            $outputName = 'PremiereEditPoints'
+        }
+
+        $sourcePath = $silences[0].SourcePath
+
+        $resolvedOutputPath = Resolve-PCXOutputPath `
+            -SourcePath $sourcePath `
+            -OutputPath $OutputPath `
+            -OutputName $outputName `
+            -Extension '.jsx'
+
         $outputFolder = Split-Path -Path $resolvedOutputPath -Parent
 
         if (-not (Test-Path -LiteralPath $outputFolder -PathType Container)) {
@@ -112,7 +138,7 @@ function Export-PCXPremiereEditPoints {
                 -TimeOffsetSeconds $TimeOffsetSeconds `
                 -VideoTrackIndex $VideoTrackIndex `
                 -AudioTrackIndex $AudioTrackIndex `
-                -AllTracks:$AllTracks
+                -TrackMode $TrackMode
 
             Set-Content -LiteralPath $resolvedOutputPath -Value $scriptContent -Encoding utf8
             Get-Item -LiteralPath $resolvedOutputPath

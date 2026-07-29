@@ -58,7 +58,8 @@ function Find-PCXSilence {
                 -MinimumDuration $MinimumDuration
 
             $rawOutput -split "`r?`n" |
-                ConvertTo-PCXSilence
+                ConvertTo-PCXSilence `
+                    -SourcePath $mediaFile
         }
     }
 }

@@ -43,7 +43,7 @@ function Export-PCXPremiereMarkers {
         [ValidateNotNull()]
         [object]$InputObject,
 
-        [Parameter(Mandatory)]
+        [Parameter()]
         [ValidateNotNullOrEmpty()]
         [string]$OutputPath,
 
@@ -75,7 +75,21 @@ function Export-PCXPremiereMarkers {
             return
         }
 
-        $resolvedOutputPath = [System.IO.Path]::GetFullPath($OutputPath)
+        if ($IncludeShortPause) {
+            $outputName = 'PremiereMarkers-ShortPause'
+        }
+        else {
+            $outputName = 'PremiereMarkers'
+        }
+
+        $sourcePath = $markers[0].SourcePath
+
+        $resolvedOutputPath = Resolve-PCXOutputPath `
+            -SourcePath $sourcePath `
+            -OutputPath $OutputPath `
+            -OutputName $outputName `
+            -Extension '.jsx'
+    
         $outputFolder = Split-Path -Path $resolvedOutputPath -Parent
 
         if (-not (Test-Path -LiteralPath $outputFolder -PathType Container)) {

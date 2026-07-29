@@ -21,8 +21,14 @@ function ConvertTo-PCXPremiereEditPointScript {
     .PARAMETER AudioTrackIndex
         Zero-based target audio-track index.
 
-    .PARAMETER AllTracks
-        Creates edits on every sequence track instead of specified tracks.
+    .PARAMETER TrackMode
+        Controls which tracks receive edit points.
+
+        Selected
+            Creates edit points on the specified video and audio tracks.
+
+        All
+            Creates edit points on every video and audio track in the active sequence.
 
     .OUTPUTS
         System.String
@@ -56,8 +62,8 @@ function ConvertTo-PCXPremiereEditPointScript {
         [int]$AudioTrackIndex = 0,
 
         [Parameter()]
-        [switch]$AllTracks
-
+        [ValidateSet('Selected', 'All')]
+        [string]$TrackMode = 'Selected'
     )
 
     $editPoints = foreach ($item in $Silence) {
@@ -73,7 +79,7 @@ function ConvertTo-PCXPremiereEditPointScript {
 
     $editPoints = @($editPoints | Sort-Object -Unique)
     $json = ConvertTo-Json -InputObject $editPoints -Compress
-    $allTracksLiteral = if ($AllTracks) { 'true' } else { 'false' }
+    $trackModeLiteral = "'$TrackMode'"
 
     # NOTE:
     # Premiere's supported scripting API does not expose a split operation.
@@ -85,10 +91,18 @@ function ConvertTo-PCXPremiereEditPointScript {
 
 (function () {
 
+    // ------------------------------------------------------------------
+    // Configuration
+    // ------------------------------------------------------------------
+
     var editPoints = $json;
     var videoTrackIndex = $VideoTrackIndex;
     var audioTrackIndex = $AudioTrackIndex;
-    var cutAllTracks = $allTracksLiteral;
+    var trackMode = $trackModeLiteral;
+
+    // ------------------------------------------------------------------
+    // Initialize Premiere QE API
+    // ------------------------------------------------------------------
 
     app.enableQE();
 
@@ -99,6 +113,73 @@ function ConvertTo-PCXPremiereEditPointScript {
         return;
     }
 
+    // ------------------------------------------------------------------
+    // Razor Helpers
+    // ------------------------------------------------------------------
+
+    // Creates razor edits on the configured video/audio tracks.
+    function RazorSelectedTracks(timecode) {
+
+        var videoTrack = qeSequence.getVideoTrackAt(videoTrackIndex);
+
+        if (videoTrack) {
+            videoTrack.razor(timecode);
+        }
+
+        var audioTrack = qeSequence.getAudioTrackAt(audioTrackIndex);
+
+        if (audioTrack) {
+            audioTrack.razor(timecode);
+        }
+
+    }
+
+    // Creates razor edits on every video and audio track.
+    function RazorAllTracks(timecode) {
+
+        for (var index = 0; index < qeSequence.numVideoTracks; index++) {
+
+            var videoTrack = qeSequence.getVideoTrackAt(index);
+
+            if (videoTrack) {
+                videoTrack.razor(timecode);
+            }
+
+        }
+
+        for (var index = 0; index < qeSequence.numAudioTracks; index++) {
+
+            var audioTrack = qeSequence.getAudioTrackAt(index);
+
+            if (audioTrack) {
+                audioTrack.razor(timecode);
+            }
+
+        }
+
+    }
+
+    // Routes razor requests to the appropriate implementation.
+    function RazorTracks(timecode) {
+
+        switch (trackMode) {
+
+            case 'All':
+                RazorAllTracks(timecode);
+                break;
+
+            case 'Selected':
+            default:
+                RazorSelectedTracks(timecode);
+                break;
+        }
+
+    }
+
+    // ------------------------------------------------------------------
+    // Process Edit Points
+    // ------------------------------------------------------------------
+
     var created = 0;
 
     for (var index = 0; index < editPoints.length; index++) {
@@ -107,26 +188,7 @@ function ConvertTo-PCXPremiereEditPointScript {
 
         try {
 
-            if (cutAllTracks) {
-
-                qeSequence.razor(timecode);
-
-            }
-            else {
-
-                var videoTrack = qeSequence.getVideoTrackAt(videoTrackIndex);
-
-                if (videoTrack) {
-                    videoTrack.razor(timecode);
-                }
-
-                var audioTrack = qeSequence.getAudioTrackAt(audioTrackIndex);
-
-                if (audioTrack) {
-                    audioTrack.razor(timecode);
-                }
-
-            }
+            RazorTracks(timecode);
 
             created++;
 
@@ -143,6 +205,10 @@ function ConvertTo-PCXPremiereEditPointScript {
             break;
         }
     }
+
+    // ------------------------------------------------------------------
+    // Summary
+    // ------------------------------------------------------------------
 
     alert(
         'PCXLab.VideoTools created ' +
