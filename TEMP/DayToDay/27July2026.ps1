@@ -83,3 +83,11 @@ Get-Command ConvertTo-PCXPremiereTimecode
 
 Get-Command ConvertTo-PCXPremiereEditPointScript
 
+git rm --cached Tools/FFmpeg/bin/ffmpeg.exe
+git rm --cached Tools/FFmpeg/bin/ffplay.exe
+git rm --cached Tools/FFmpeg/bin/ffprobe.exe
+
+git commit -m "Stop tracking FFmpeg executables"
+
+
+
