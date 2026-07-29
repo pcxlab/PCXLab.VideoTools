@@ -81,50 +81,85 @@ ForEach-Object {
 }
 
 Find-PCXSilence -Path 'C:\Videos\Test.mp4' |
-    Select-Object -First 1 |
-    Format-List *
+Select-Object -First 1 |
+Format-List *
 
 
-    ################ TESTS BEFore commits 
+################ TESTS BEFore commits 
 
-    Test 1 - Edit Points (Automatic Output) ⭐ New Feature
+#Test 1 - Edit Points (Automatic Output) ⭐ New Feature
 Find-PCXSilence -Path 'C:\Videos\Test.mp4' |
-    Export-PCXPremiereEditPoints
+Export-PCXPremiereEditPoints
+
 Expected:
 C:\Videos\Test-PremiereEditPoints.jsx
+
 Test 2 - Edit Points (All Tracks)
 Find-PCXSilence -Path 'C:\Videos\Test.mp4' |
-    Export-PCXPremiereEditPoints `
-        -TrackMode All
+Export-PCXPremiereEditPoints `
+    -TrackMode All
 Expected:
 C:\Videos\Test-PremiereEditPoints-AllTracks.jsx
 Test 3 - Edit Points (Explicit OutputPath)
 Find-PCXSilence -Path 'C:\Videos\Test.mp4' |
-    Export-PCXPremiereEditPoints `
-        -OutputPath 'C:\Videos\MyEditPoints.jsx'
+Export-PCXPremiereEditPoints `
+    -OutputPath 'C:\Videos\MyEditPoints.jsx'
 Expected:
 C:\Videos\MyEditPoints.jsx
 This confirms that a user-specified path overrides the automatic naming.
 Test 4 - Markers (Automatic Output)
 Find-PCXSilence -Path 'C:\Videos\Test.mp4' |
-    Export-PCXPremiereMarkers
+Export-PCXPremiereMarkers
 Expected:
 C:\Videos\Test-PremiereMarkers.jsx
 Test 5 - Markers (Include Short Pause)
 Find-PCXSilence -Path 'C:\Videos\Test.mp4' |
-    Export-PCXPremiereMarkers `
-        -IncludeShortPause
+Export-PCXPremiereMarkers `
+    -IncludeShortPause
 Expected:
 C:\Videos\Test-PremiereMarkers-ShortPause.jsx
 Test 6 - Markers (Explicit OutputPath)
 Find-PCXSilence -Path 'C:\Videos\Test.mp4' |
-    Export-PCXPremiereMarkers `
-        -OutputPath 'C:\Videos\MyMarkers.jsx'
+Export-PCXPremiereMarkers `
+    -OutputPath 'C:\Videos\MyMarkers.jsx'
 Expected:
 C:\Videos\MyMarkers.jsx
 One extra test (important)
 Since we introduced SourcePath into PCXLab.Silence, let's verify it's actually there:
 Find-PCXSilence -Path 'C:\Videos\Test.mp4' |
-    Select-Object -First 1 |
-    Format-List SourcePath, Start, End, Classification
+Select-Object -First 1 |
+Format-List SourcePath, Start, End, Classification
 Expected:
+SourcePath     : C:\Videos\Test.mp4
+Start          : ...
+End            : ...
+Classification : ...
+
+
+
+#################################
+
+Clear-Host
+
+Remove-Module PCXLab.VideoTools -Force
+Import-Module .\src\Modules\PCXLab.VideoTools
+
+
+Find-PCXSilence `
+    -Path C:\Videos\Test.mp4 |
+Export-PCXSilence `
+    -OutputPath C:\Videos\Test.silence.json
+
+
+Import-PCXSilence `
+    -Path C:\Videos\Test.silence.json
+
+
+Import-PCXSilence `
+    -Path C:\Videos\Test.silence.json |
+Export-PCXPremiereMarkers
+
+
+Import-PCXSilence `
+    -Path C:\Videos\Test.silence.json |
+Export-PCXPremiereEditPoints
