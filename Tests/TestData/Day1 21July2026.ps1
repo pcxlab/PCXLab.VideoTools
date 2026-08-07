@@ -343,12 +343,7 @@ Select-Object FullName
 
 Get-PCXVideoInformation -Path C:\Videos\Test.mp4
 
-Clear-Host
 
-Remove-Module PCXLab.VideoTools #-Force
-Import-Module .\src\Modules\PCXLab.VideoTools
-Get-Module -Name PCXLab.VideoTools
-Get-Command -Module PCXLab.VideoTools
 
 
 $Segments |
@@ -404,3 +399,66 @@ Import-Module .\src\Modules\PCXLab.VideoTools
 
 Remove-PCXSilence `
     -Path "C:\Videos\Test.mp4"
+
+
+Clear-Host
+
+Remove-Module PCXLab.VideoTools #-Force
+Import-Module .\src\Modules\PCXLab.VideoTools
+Get-Module -Name PCXLab.VideoTools
+Get-Command -Module PCXLab.VideoTools
+
+Analyze-PCXVideo -Path "C:\Videos\Test.mp4"
+
+$Analysis = Analyze-PCXVideo "C:\Videos\Test.mp4"
+
+$Analysis.Media
+
+$Analysis.Analysis.Silence
+
+$Analysis.Analysis.Segments
+
+$Analysis.Analysis.SilenceStatistics
+
+$analysis = Analyze-PCXVideo -Path "C:\Videos\Test.mp4"
+
+$analysis | Export-PCXCSV
+$analysis | Export-PCXPremiereMarkers
+$analysis | Remove-PCXSilence
+$analysis | Export-PCXEDL
+
+
+Analyze-PCXVideo `
+    -Path "C:\Videos\Test.mp4" |
+Get-PCXSilence
+
+Verify with:
+
+Analyze-PCXVideo `
+    -Path "C:\Videos\Test.mp4" |
+Get-PCXSilence |
+Get-Member
+
+or
+
+Analyze-PCXVideo `
+    -Path "C:\Videos\Test.mp4" |
+Get-PCXSilence |
+Measure-Object
+
+The count should match:
+
+Find-PCXSilence `
+    -Path "C:\Videos\Test.mp4" |
+Measure-Object
+
+
+$Analysis = Analyze-PCXVideo -Path "C:\Videos\Test.mp4"
+
+$Analysis.Analysis.Silence.Count
+
+$Analysis.Analysis.Segments.Count
+
+$Analysis.Analysis.SilenceStatistics
+
+$Analysis | Format-List *

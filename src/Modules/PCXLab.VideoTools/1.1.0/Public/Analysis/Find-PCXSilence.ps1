@@ -1,65 +1,100 @@
 function Find-PCXSilence {
 
-    <#
-    .SYNOPSIS
-        Finds silent regions in one or more media files.
+<#
+.SYNOPSIS
+    Finds silent regions in one or more media files.
 
-    .DESCRIPTION
-        Uses FFmpeg's silencedetect filter to find audio regions below the
-        requested noise floor. Results are returned as PCXLab.Silence objects
-        for review or export to an editor-marker workflow.
+.DESCRIPTION
+    Uses FFmpeg's silencedetect filter to find audio regions below the
+    requested noise floor. Results are returned as PCXLab.Silence objects
+    for review or export to an editor-marker workflow.
 
-    .PARAMETER Path
-        One or more media files to analyse.
+.PARAMETER Path
+    One or more media files to analyse.
 
-    .PARAMETER NoiseFloor
-        Audio level at or below which audio is considered silence, in decibels.
-        The default is -35 dB.
+.PARAMETER NoiseFloor
+    Audio level at or below which audio is considered silence, in decibels.
 
-    .PARAMETER MinimumDuration
-        Minimum silence duration, in seconds. The default is 2 seconds.
+.PARAMETER MinimumDuration
+    Minimum silence duration, in seconds.
 
-    .EXAMPLE
-        Find-PCXSilence -Path 'C:\Videos\Tutorial.mp4'
+    Defaults to the module setting
+    'Analysis.MinimumSilenceDuration'.
+    If the setting does not exist, a default value of 1 second is used.
 
-    .EXAMPLE
-        Get-ChildItem 'C:\Videos' -Filter *.mp4 |
-            Find-PCXSilence -MinimumDuration 5 -NoiseFloor -35
+.EXAMPLE
+    Find-PCXSilence -Path 'C:\Videos\Tutorial.mp4'
 
-    .OUTPUTS
-        PCXLab.Silence
-    #>
+.EXAMPLE
+    Get-ChildItem 'C:\Videos' -Filter *.mp4 |
+        Find-PCXSilence
+
+.EXAMPLE
+    Find-PCXSilence `
+        -Path 'C:\Videos\Tutorial.mp4' `
+        -MinimumDuration 5 `
+        -NoiseFloor -35
+
+.OUTPUTS
+    PCXLab.Silence
+#>
 
     [CmdletBinding()]
     [OutputType('PCXLab.Silence')]
     param(
 
-        [Parameter(Mandatory, ValueFromPipeline, ValueFromPipelineByPropertyName)]
+        [Parameter(
+            Mandatory,
+            ValueFromPipeline,
+            ValueFromPipelineByPropertyName
+        )]
         [Alias('FullName')]
         [ValidateNotNullOrEmpty()]
         [string[]]$Path,
 
         [Parameter()]
-        [ValidateRange(-120, 0)]
-        [double]$NoiseFloor = -35,
+        [ValidateRange(-120,0)]
+        [double]$NoiseFloor = (
+            Get-PCXSetting `
+                -Name 'Analysis.SilenceThreshold' `
+                -DefaultValue -35
+        ),
 
         [Parameter()]
-        [ValidateRange(0.1, 3600)]
-        [double]$MinimumDuration = 2
+        [ValidateRange(0.1,3600)]
+        [double]$MinimumDuration = (
+            Get-PCXSetting `
+                -Name 'Analysis.MinimumSilenceDuration' `
+                -DefaultValue 1
+        )
 
     )
 
     process {
 
-        foreach ($mediaFile in $Path) {
-            $rawOutput = Invoke-PCXSilenceDetection `
-                -Path $mediaFile `
+        foreach ($MediaFile in $Path) {
+
+            $RawOutput = Invoke-PCXSilenceDetection `
+                -Path $MediaFile `
                 -NoiseFloor $NoiseFloor `
                 -MinimumDuration $MinimumDuration
 
-            $rawOutput -split "`r?`n" |
+            $Silence = @(
+                $RawOutput -split "`r?`n" |
                 ConvertTo-PCXSilence `
-                    -SourcePath $mediaFile
+                    -SourcePath $MediaFile
+            )
+
+            Write-Verbose (
+                "Detected {0} silence region(s) in '{1}'." -f
+                $Silence.Count,
+                $MediaFile
+            )
+
+            $Silence
+
         }
+
     }
+
 }
