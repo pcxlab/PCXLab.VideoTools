@@ -8,13 +8,14 @@ function Export-PCXPremiereMarkers {
         Creates an ExtendScript (.jsx) file that adds range comment markers to
         the active Adobe Premiere Pro sequence. By default, only actionable
         silence regions are exported; use IncludeShortPause to include every
-        detected silence region.
+        detected silence region. If -Path is not specified, a default output
+        path is generated based on the source media file.
 
     .PARAMETER InputObject
         PCXLab.Silence objects, normally from Find-PCXSilence.
 
-    .PARAMETER OutputPath
-        Destination path for the generated .jsx file.
+    .PARAMETER Path
+        Destination path for the generated .jsx file. If omitted, a default path is generated.
 
     .PARAMETER IncludeShortPause
         Includes silence regions classified as ShortPause.
@@ -25,11 +26,11 @@ function Export-PCXPremiereMarkers {
 
     .EXAMPLE
         Find-PCXSilence -Path 'C:\Videos\Tutorial.mp4' |
-            Export-PCXPremiereMarkers -OutputPath '.\Tutorial-SilenceMarkers.jsx'
+            Export-PCXPremiereMarkers -Path '.\Tutorial-SilenceMarkers.jsx'
 
     .EXAMPLE
         Find-PCXSilence -Path 'C:\Videos\Tutorial.mp4' |
-            Export-PCXPremiereMarkers -OutputPath '.\Markers.jsx' -TimeOffsetSeconds 15
+            Export-PCXPremiereMarkers -Path '.\Markers.jsx' -TimeOffsetSeconds 15
 
     .OUTPUTS
         System.IO.FileInfo
@@ -44,8 +45,9 @@ function Export-PCXPremiereMarkers {
         [object]$InputObject,
 
         [Parameter()]
+        [Alias('OutputPath')]
         [ValidateNotNullOrEmpty()]
-        [string]$OutputPath,
+        [string]$Path,
 
         [Parameter()]
         [switch]$IncludeShortPause,
@@ -56,7 +58,7 @@ function Export-PCXPremiereMarkers {
     )
 
     begin {
-        $markers = [System.Collections.Generic.List[object]]::new()
+        $Markers = [System.Collections.Generic.List[object]]::new()
     }
 
     process {
@@ -65,48 +67,44 @@ function Export-PCXPremiereMarkers {
         }
 
         if ($IncludeShortPause -or $InputObject.Classification -ne 'ShortPause') {
-            [void]$markers.Add($InputObject)
+            [void]$Markers.Add($InputObject)
         }
     }
 
     end {
-        if ($markers.Count -eq 0) {
+        if ($Markers.Count -eq 0) {
             Write-Warning 'No silence markers matched the export criteria.'
             return
         }
 
-        if ($IncludeShortPause) {
-            $outputName = 'PremiereMarkers-ShortPause'
-        }
-        else {
-            $outputName = 'PremiereMarkers'
-        }
-
-        $sourcePath = $markers[0].SourcePath
-
-        $resolvedOutputPath = Resolve-PCXOutputPath `
-            -SourcePath $sourcePath `
-            -OutputPath $OutputPath `
-            -OutputName $outputName `
-            -Extension '.jsx'
-    
-        $outputFolder = Split-Path -Path $resolvedOutputPath -Parent
-
-        if (-not (Test-Path -LiteralPath $outputFolder -PathType Container)) {
-            throw "Output folder does not exist: $outputFolder"
+        if ([string]::IsNullOrWhiteSpace($Path)) {
+            $Suffix = if ($IncludeShortPause) { 'PremiereMarkers-ShortPause' } else { 'PremiereMarkers' }
+            $Path = Get-PCXDefaultOutputPath `
+                -SourcePath $Markers[0].SourcePath `
+                -Suffix $Suffix `
+                -Extension '.jsx'
         }
 
-        if ([System.IO.Path]::GetExtension($resolvedOutputPath) -ne '.jsx') {
-            throw 'OutputPath must use the .jsx extension.'
+        $Parent = Split-Path -Path $Path -Parent
+
+        if (-not [string]::IsNullOrWhiteSpace($Parent) -and -not (Test-Path -LiteralPath $Parent)) {
+            New-Item `
+                -ItemType Directory `
+                -Path $Parent `
+                -Force | Out-Null
         }
 
-        if ($PSCmdlet.ShouldProcess($resolvedOutputPath, 'Create Premiere Pro marker script')) {
-            $scriptContent = ConvertTo-PCXPremiereMarkerScript `
-                -Marker $markers.ToArray() `
+        if ([System.IO.Path]::GetExtension($Path) -ne '.jsx') {
+            throw 'Path must use the .jsx extension.'
+        }
+
+        if ($PSCmdlet.ShouldProcess($Path, 'Create Premiere Pro marker script')) {
+            $ScriptContent = ConvertTo-PCXPremiereMarkerScript `
+                -Marker $Markers.ToArray() `
                 -TimeOffsetSeconds $TimeOffsetSeconds
 
-            Set-Content -LiteralPath $resolvedOutputPath -Value $scriptContent -Encoding utf8
-            Get-Item -LiteralPath $resolvedOutputPath
+            Set-Content -LiteralPath $Path -Value $ScriptContent -Encoding UTF8
+            Get-Item -LiteralPath $Path
         }
     }
 }

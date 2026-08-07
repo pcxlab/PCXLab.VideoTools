@@ -487,6 +487,216 @@
 
     </View>
 
+
+    <View>
+      <Name>PCXLab.SilenceReport.Default</Name>
+
+      <ViewSelectedBy>
+        <TypeName>PCXLab.SilenceReport</TypeName>
+      </ViewSelectedBy>
+
+      <ListControl>
+        <ListEntries>
+          <ListEntry>
+            <ListItems>
+
+              <ListItem>
+                <Label>Source</Label>
+                <PropertyName>Source</PropertyName>
+              </ListItem>
+
+              <ListItem>
+                <Label>Total Silences</Label>
+                <PropertyName>TotalSilences</PropertyName>
+              </ListItem>
+
+              <ListItem>
+                <Label>Total Silent Seconds</Label>
+                <PropertyName>TotalSilentSeconds</PropertyName>
+              </ListItem>
+
+              <ListItem>
+                <Label>Average Duration</Label>
+                <PropertyName>AverageDuration</PropertyName>
+              </ListItem>
+
+              <ListItem>
+                <Label>Shortest Silence</Label>
+                <PropertyName>ShortestSilence</PropertyName>
+              </ListItem>
+
+              <ListItem>
+                <Label>Longest Silence</Label>
+                <PropertyName>LongestSilence</PropertyName>
+              </ListItem>
+
+              <ListItem>
+                <Label>Short Pauses</Label>
+                <PropertyName>ShortPauses</PropertyName>
+              </ListItem>
+
+              <ListItem>
+                <Label>Edit Candidates</Label>
+                <PropertyName>EditCandidates</PropertyName>
+              </ListItem>
+
+              <ListItem>
+                <Label>Recording Breaks</Label>
+                <PropertyName>RecordingBreaks</PropertyName>
+              </ListItem>
+
+            </ListItems>
+          </ListEntry>
+        </ListEntries>
+      </ListControl>
+    </View>
+
+    <View>
+
+      <Name>PCXLab.SilenceReport</Name>
+
+      <ViewSelectedBy>
+        <TypeName>PCXLab.SilenceReport</TypeName>
+      </ViewSelectedBy>
+
+      <ListControl>
+
+        <ListEntries>
+
+          <ListEntry>
+
+            <ListItems>
+
+              <ListItem>
+                <Label>Source</Label>
+                <PropertyName>Source</PropertyName>
+              </ListItem>
+
+              <ListItem>
+                <Label>Total Silences</Label>
+                <PropertyName>TotalSilences</PropertyName>
+              </ListItem>
+
+              <ListItem>
+                <Label>Total Silent Seconds</Label>
+                <PropertyName>TotalSilentSeconds</PropertyName>
+              </ListItem>
+
+              <ListItem>
+                <Label>Average Duration</Label>
+                <PropertyName>AverageDuration</PropertyName>
+              </ListItem>
+
+              <ListItem>
+                <Label>Shortest Silence</Label>
+                <PropertyName>ShortestSilence</PropertyName>
+              </ListItem>
+
+              <ListItem>
+                <Label>Longest Silence</Label>
+                <PropertyName>LongestSilence</PropertyName>
+              </ListItem>
+
+              <ListItem>
+                <Label>Short Pauses</Label>
+                <PropertyName>ShortPauses</PropertyName>
+              </ListItem>
+
+              <ListItem>
+                <Label>Edit Candidates</Label>
+                <PropertyName>EditCandidates</PropertyName>
+              </ListItem>
+
+              <ListItem>
+                <Label>Recording Breaks</Label>
+                <PropertyName>RecordingBreaks</PropertyName>
+              </ListItem>
+
+            </ListItems>
+
+          </ListEntry>
+
+        </ListEntries>
+
+      </ListControl>
+
+    </View>
+
+    <View>
+
+      <Name>PCXLab.EditPoint.Default</Name>
+    
+      <ViewSelectedBy>
+        <TypeName>PCXLab.EditPoint</TypeName>
+      </ViewSelectedBy>
+    
+      <TableControl>
+    
+        <TableHeaders>
+    
+          <TableColumnHeader>
+            <Label>Start</Label>
+            <Width>14</Width>
+          </TableColumnHeader>
+    
+          <TableColumnHeader>
+            <Label>End</Label>
+            <Width>14</Width>
+          </TableColumnHeader>
+    
+          <TableColumnHeader>
+            <Label>Duration</Label>
+            <Width>12</Width>
+          </TableColumnHeader>
+    
+          <TableColumnHeader>
+            <Label>Reason</Label>
+            <Width>18</Width>
+          </TableColumnHeader>
+    
+          <TableColumnHeader>
+            <Label>Confidence</Label>
+            <Width>10</Width>
+          </TableColumnHeader>
+    
+        </TableHeaders>
+    
+        <TableRowEntries>
+    
+          <TableRowEntry>
+    
+            <TableColumnItems>
+    
+              <TableColumnItem>
+                <PropertyName>Start</PropertyName>
+              </TableColumnItem>
+    
+              <TableColumnItem>
+                <PropertyName>End</PropertyName>
+              </TableColumnItem>
+    
+              <TableColumnItem>
+                <PropertyName>Duration</PropertyName>
+              </TableColumnItem>
+    
+              <TableColumnItem>
+                <PropertyName>Reason</PropertyName>
+              </TableColumnItem>
+    
+              <TableColumnItem>
+                <PropertyName>Confidence</PropertyName>
+              </TableColumnItem>
+    
+            </TableColumnItems>
+    
+          </TableRowEntry>
+    
+        </TableRowEntries>
+    
+      </TableControl>
+    
+    </View>
+
   </ViewDefinitions>
 
 </Configuration>

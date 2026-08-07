@@ -11,31 +11,33 @@ function Import-PCXSilence {
         Import-PCXSilence Test.silence.json
     #>
     
-        [CmdletBinding()]
-        param(
+    [CmdletBinding()]
+    param(
     
-            [Parameter(Mandatory)]
-            [ValidateScript({
+        [Parameter(Mandatory)]
+        [ValidateScript({
     
                 Test-Path $_ -PathType Leaf
     
             })]
-            [string]$Path
+        [string]$Path
     
-        )
+    )
     
-        $document =
-            Get-Content `
-                -LiteralPath $Path `
-                -Raw |
-            ConvertFrom-Json
+    $document =
+    Get-Content `
+        -LiteralPath $Path `
+        -Raw |
+    ConvertFrom-Json
     
-        foreach ($item in $document.Silence) {
-    
-            $item.PSTypeNames.Insert(0,'PCXLab.Silence')
-    
-            $item
-    
-        }
+    foreach ($item in $document.Silence) {
+
+        New-PCXSilenceObject `
+            -SourcePath $item.SourcePath `
+            -Start (ConvertTo-PCXTimeSpan $item.Start) `
+            -End (ConvertTo-PCXTimeSpan $item.End) `
+            -DurationSeconds $item.DurationSeconds
     
     }
+    
+}

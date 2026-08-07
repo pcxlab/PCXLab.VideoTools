@@ -137,14 +137,6 @@ Classification : ...
 
 
 
-#################################
-
-Clear-Host
-
-Remove-Module PCXLab.VideoTools -Force
-Import-Module .\src\Modules\PCXLab.VideoTools
-
-
 Find-PCXSilence `
     -Path C:\Videos\Test.mp4 |
 Export-PCXSilence `
@@ -163,3 +155,141 @@ Export-PCXPremiereMarkers
 Import-PCXSilence `
     -Path C:\Videos\Test.silence.json |
 Export-PCXPremiereEditPoints
+
+
+Import-PCXSilence "C:\Videos\Test.silence.json" |
+Get-PCXSilence
+
+
+Import-PCXSilence "C:\Videos\Test.silence.json" |
+Get-PCXSilence
+
+
+Get-Command New-PCXSilenceObject -Syntax
+
+(Get-Command New-PCXSilenceObject).Parameters.Keys
+
+Import-PCXSilence "C:\Videos\Test.silence.json"
+
+Find-PCXSilence -Path "C:\Videos\Test.mp4"
+
+Import-PCXSilence "C:\Videos\Test.silence.json" |
+Get-Member
+
+Remove-Module PCXLab.VideoTools -ErrorAction Ignore
+
+Import-Module .\src\Modules\PCXLab.VideoTools -Force
+
+
+
+#################################
+
+Clear-Host 
+
+Remove-Module PCXLab.VideoTools -Force
+Import-Module .\src\Modules\PCXLab.VideoTools
+
+
+
+Find-PCXSilence "C:\Videos\Test.mp4" |
+Measure-PCXSilence
+
+
+Find-PCXSilence "C:\Videos\Test.mp4" |
+Get-PCXEditPoint
+
+
+Find-PCXSilence "C:\Videos\Test.mp4" |
+Get-PCXEditPoint
+
+
+
+Get-ChildItem -Path .\src\Modules\PCXLab.VideoTools\1.1.0\  -Recurse -Include *.ps1, *.psm1, *.psd1, *.md |
+Select-String -Pattern '\bConvertFrom-Json\b' |
+Select-Object Path, LineNumber, Line
+ 
+$finder = "\bAnalysis.EditPoints\b"
+
+Get-ChildItem -Path .\src\Modules\PCXLab.VideoTools\1.1.0\  -Recurse -Include *.ps1, *.psm1, *.psd1, *.md |
+Select-String -Pattern $finder |
+Select-Object Path, LineNumber, Line
+
+
+###################
+
+Test 1
+Find-PCXSilence "C:\Videos\Test.mp4" |
+Get-PCXEditPoint
+Verify:
+Returns PCXLab.EditPoint
+Reason comes from Settings.json
+Confidence comes from Settings.json
+Disabled rules are ignored
+Test 2
+Find-PCXSilence "C:\Videos\Test.mp4" |
+Get-PCXEditPoint |
+Export-PCXEditPoint `
+    -Path .\EditPoints.json
+Verify:
+File exists
+JSON is valid
+SchemaVersion
+ModuleVersion
+GeneratedOn
+EditPoints collection
+Test 3
+Import-PCXEditPoint `
+    -Path .\EditPoints.json
+Verify
+Get-Member
+shows
+PSTypeName : PCXLab.EditPoint
+Test 4 (Most Important)
+This is the one many people forget.
+$Original =
+Find-PCXSilence "C:\Videos\Test.mp4" |
+Get-PCXEditPoint
+
+$Original |
+Export-PCXEditPoint `
+    -Path .\EditPoints.json
+
+$Imported =
+Import-PCXEditPoint `
+    -Path .\EditPoints.json
+Then compare.
+For example:
+Compare-Object `
+    $Original `
+    $Imported `
+    -Property `
+    SourcePath,
+StartSeconds,
+EndSeconds,
+DurationSeconds,
+Classification,
+Reason,
+Confidence
+There should be no differences.
+If there are no differences, your export/import is effectively lossless for those properties.
+
+
+Compare-Object `
+    -ReferenceObject $Original `
+    -DifferenceObject $Imported `
+    -Property `
+    Source,
+SourcePath,
+StartSeconds,
+EndSeconds,
+DurationSeconds,
+Classification,
+Reason,
+Confidence
+
+
+Verify the object type
+Also check that the imported objects are the correct custom type:
+$Imported | Get-Member
+or
+$Imported[0].PSTypeNames

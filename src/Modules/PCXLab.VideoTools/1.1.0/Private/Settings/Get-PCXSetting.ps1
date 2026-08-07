@@ -24,34 +24,37 @@ function Get-PCXSetting {
         Get-PCXSetting -Name "Tools.Unknown" -DefaultValue ""
     #>
     
-        [CmdletBinding()]
-        param(
-            [Parameter(Mandatory)]
-            [ValidateNotNullOrEmpty()]
-            [string]$Name,
+    [CmdletBinding()]
+    param(
+        [Parameter(Mandatory)]
+        [ValidateNotNullOrEmpty()]
+        [string]$Name,
     
-            [Parameter()]
-            $DefaultValue = $null
-        )
+        [Parameter()]
+        $DefaultValue = $null
+    )
+
+    if ($null -eq $script:PCXSettings) {
+        throw "Module settings have not been loaded. Call Import-PCXSettings first."
+    }
+
+    $Value = $script:PCXSettings
     
-        $Value = $script:PCXSettings
+    $Value = $script:PCXSettings
     
-        foreach ($Part in ($Name -split '\.'))
-        {
-            if ($null -eq $Value)
-            {
-                return $DefaultValue
-            }
-    
-            $Property = $Value.PSObject.Properties[$Part]
-    
-            if ($null -eq $Property)
-            {
-                return $DefaultValue
-            }
-    
-            $Value = $Property.Value
+    foreach ($Part in ($Name -split '\.')) {
+        if ($null -eq $Value) {
+            return $DefaultValue
         }
     
-        return $Value
+        $Property = $Value.PSObject.Properties[$Part]
+    
+        if ($null -eq $Property) {
+            return $DefaultValue
+        }
+    
+        $Value = $Property.Value
     }
+    
+    return $Value
+}
