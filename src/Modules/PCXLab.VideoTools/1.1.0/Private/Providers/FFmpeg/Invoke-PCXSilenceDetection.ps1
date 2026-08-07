@@ -40,7 +40,7 @@ function Invoke-PCXSilenceDetection {
 
     $filter = 'silencedetect=noise={0}dB:d={1}' -f $NoiseFloor, $MinimumDuration
 
-    Invoke-PCXFFmpeg -ArgumentList @(
+    $Output = Invoke-PCXFFmpeg -ArgumentList @(
         '-hide_banner'
         '-nostats'
         '-i'
@@ -52,4 +52,8 @@ function Invoke-PCXSilenceDetection {
         'null'
         '-'
     )
+
+    $Output | Set-Content "$env:TEMP\PCXSilence.txt"
+
+    return $Output
 }

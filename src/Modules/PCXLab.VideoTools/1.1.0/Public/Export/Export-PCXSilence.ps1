@@ -71,10 +71,14 @@ function Export-PCXSilence {
                 -SourcePath $Silence[0].SourcePath `
                 -Suffix 'Silence' `
                 -Extension '.json'
-
         }
 
-        $Parent = Split-Path -LiteralPath $Path -Parent
+        $Parent = [System.IO.Path]::GetDirectoryName($Path)
+
+        if ([string]::IsNullOrWhiteSpace($Parent)) {
+            throw "Unable to determine parent folder from path '$Path'."
+        }
+
         if (-not (Test-Path -LiteralPath $Parent)) {
 
             New-Item `
