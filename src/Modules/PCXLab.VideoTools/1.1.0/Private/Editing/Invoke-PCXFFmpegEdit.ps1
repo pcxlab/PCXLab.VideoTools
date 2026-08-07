@@ -1,73 +1,43 @@
 function Invoke-PCXFFmpegEdit {
 
     <#
-    .SYNOPSIS
-        Executes an FFmpeg editing operation.
+.SYNOPSIS
+    Executes an FFmpeg editing job.
 
-    .DESCRIPTION
-        Builds the FFmpeg command line required to edit a media file
-        using a supplied filter graph.
+.DESCRIPTION
+    Executes a PCXLab.EditJob by building the FFmpeg command
+    and invoking FFmpeg.
 
-    .PARAMETER SourcePath
-        Source media file.
+.PARAMETER EditJob
+    PCXLab.EditJob object.
 
-    .PARAMETER OutputPath
-        Destination media file.
-
-    .PARAMETER Filter
-        FFmpeg filter_complex string.
-
-    .PARAMETER VideoCodec
-        Video codec.
-
-    .PARAMETER AudioCodec
-        Audio codec.
-
-    .OUTPUTS
-        System.IO.FileInfo
-    #>
+.OUTPUTS
+    System.IO.FileInfo
+#>
 
     [CmdletBinding()]
     [OutputType([System.IO.FileInfo])]
     param(
 
         [Parameter(Mandatory)]
-        [ValidateScript({
-                Test-Path $_ -PathType Leaf
-            })]
-        [string]$SourcePath,
-
-        [Parameter(Mandatory)]
-        [ValidateNotNullOrEmpty()]
-        [string]$OutputPath,
-
-        [Parameter(Mandatory)]
-        [ValidateNotNullOrEmpty()]
-        [string]$Filter,
-
-        [Parameter()]
-        [ValidateNotNullOrEmpty()]
-        [string]$VideoCodec = 'libx264',
-
-        [Parameter()]
-        [ValidateNotNullOrEmpty()]
-        [string]$AudioCodec = 'aac',
-
-        [Parameter()]
-        [ValidateRange(0, 100)]
-        [int]$InputIndex = 0
+        [ValidateNotNull()]
+        [object]$EditJob
 
     )
+
+    if ($EditJob.PSTypeNames -notcontains 'PCXLab.EditJob') {
+        throw 'InputObject must be a PCXLab.EditJob object.'
+    }
 
     $Arguments = @(
 
         '-y'
 
         '-i'
-        $SourcePath
+        $EditJob.SourcePath
 
         '-filter_complex'
-        $Filter
+        $EditJob.FilterGraph
 
         '-map'
         '[outv]'
@@ -76,12 +46,12 @@ function Invoke-PCXFFmpegEdit {
         '[outa]'
 
         '-c:v'
-        $VideoCodec
+        $EditJob.VideoCodec
 
         '-c:a'
-        $AudioCodec
+        $EditJob.AudioCodec
 
-        $OutputPath
+        $EditJob.OutputPath
 
     )
 
@@ -89,6 +59,6 @@ function Invoke-PCXFFmpegEdit {
         -ArgumentList $Arguments |
     Out-Null
 
-    Get-Item $OutputPath
+    Get-Item $EditJob.OutputPath
 
 }

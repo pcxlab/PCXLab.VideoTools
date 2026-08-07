@@ -1,28 +1,28 @@
 function Remove-PCXSilence {
 
     <#
-    .SYNOPSIS
-        Removes silent sections from a video.
+.SYNOPSIS
+    Removes silent sections from a video.
 
-    .DESCRIPTION
-        Detects silence, builds an optimized timeline and creates
-        a new edited video using FFmpeg.
+.DESCRIPTION
+    Detects silence, builds an optimized timeline and creates
+    a new edited video using FFmpeg.
 
-    .PARAMETER Path
-        Source media file.
+.PARAMETER Path
+    Source media file.
 
-    .PARAMETER OutputPath
-        Destination media file.
+.PARAMETER OutputPath
+    Destination media file.
 
-    .PARAMETER NoiseFloor
-        Silence threshold in dB.
+.PARAMETER NoiseFloor
+    Silence threshold in dB.
 
-    .PARAMETER MinimumDuration
-        Minimum silence duration.
+.PARAMETER MinimumDuration
+    Minimum silence duration.
 
-    .OUTPUTS
-        System.IO.FileInfo
-    #>
+.OUTPUTS
+    System.IO.FileInfo
+#>
 
     [CmdletBinding()]
     [OutputType([System.IO.FileInfo])]
@@ -60,6 +60,10 @@ function Remove-PCXSilence {
 
     process {
 
+        #
+        # Resolve output path
+        #
+
         if ([string]::IsNullOrWhiteSpace($OutputPath)) {
 
             $OutputPath = Get-PCXDefaultOutputPath `
@@ -68,6 +72,10 @@ function Remove-PCXSilence {
                 -Extension '.mp4'
 
         }
+
+        #
+        # Build timeline
+        #
 
         $Segments = Find-PCXSilence `
             -Path $Path `
@@ -79,14 +87,29 @@ function Remove-PCXSilence {
             throw 'No video segments were generated.'
         }
 
-        $Filter = $Segments |
+        #
+        # Build FFmpeg filter graph
+        #
+
+        $FilterGraph = $Segments |
         ConvertTo-PCXConcatFilter `
             -InputIndex 0
 
-        Invoke-PCXFFmpegEdit `
+        #
+        # Create editing job
+        #
+
+        $Job = New-PCXEditJobObject `
             -SourcePath $Path `
             -OutputPath $OutputPath `
-            -Filter $Filter
+            -FilterGraph $FilterGraph
+
+        #
+        # Execute job
+        #
+
+        Invoke-PCXFFmpegEdit `
+            -EditJob $Job
 
     }
 
