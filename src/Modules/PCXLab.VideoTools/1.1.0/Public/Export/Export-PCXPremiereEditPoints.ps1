@@ -8,7 +8,8 @@ function Export-PCXPremiereEditPoints {
         Creates an ExtendScript (.jsx) file that adds edits at the beginning
         and end of actionable silence regions in the active Premiere Pro
         sequence. It creates cuts only; it never removes or ripple-deletes
-        media.
+        media. If -Path is not specified, a default output path is generated
+        based on the source media file.
 
         The generated script uses Premiere Pro's QE razor interface because
         Premiere's supported scripting API does not currently provide a split
@@ -17,8 +18,8 @@ function Export-PCXPremiereEditPoints {
     .PARAMETER InputObject
         PCXLab.Silence objects, normally from Find-PCXSilence.
 
-    .PARAMETER OutputPath
-        Destination path for the generated .jsx file.
+    .PARAMETER Path
+        Destination path for the generated .jsx file. If omitted, a default path is generated.
 
     .PARAMETER IncludeShortPause
         Includes silence regions classified as ShortPause.
@@ -44,11 +45,11 @@ function Export-PCXPremiereEditPoints {
 
     .EXAMPLE
         Find-PCXSilence -Path 'C:\Videos\Tutorial.mp4' |
-            Export-PCXPremiereEditPoints -OutputPath '.\Tutorial-EditPoints.jsx'
+            Export-PCXPremiereEditPoints -Path '.\Tutorial-EditPoints.jsx'
 
         Find-PCXSilence -Path 'C:\Videos\Tutorial.mp4' |
             Export-PCXPremiereEditPoints `
-                -OutputPath '.\Tutorial-TrackMode-All.jsx' `
+                -Path '.\Tutorial-TrackMode-All.jsx' `
                 -TrackMode All
 
     .OUTPUTS
@@ -64,8 +65,9 @@ function Export-PCXPremiereEditPoints {
         [object]$InputObject,
 
         [Parameter()]
+        [Alias('OutputPath')]
         [ValidateNotNullOrEmpty()]
-        [string]$OutputPath,
+        [string]$Path,
 
         [Parameter()]
         [switch]$IncludeShortPause,
@@ -88,7 +90,7 @@ function Export-PCXPremiereEditPoints {
     )
 
     begin {
-        $silences = [System.Collections.Generic.List[object]]::new()
+        $Silences = [System.Collections.Generic.List[object]]::new()
     }
 
     process {
@@ -97,51 +99,47 @@ function Export-PCXPremiereEditPoints {
         }
 
         if ($IncludeShortPause -or $InputObject.Classification -ne 'ShortPause') {
-            [void]$silences.Add($InputObject)
+            [void]$Silences.Add($InputObject)
         }
     }
 
     end {
-        if ($silences.Count -eq 0) {
+        if ($Silences.Count -eq 0) {
             Write-Warning 'No silence regions matched the export criteria.'
             return
         }
 
-        if ($TrackMode -eq 'All') {
-            $outputName = 'PremiereEditPoints-AllTracks'
-        }
-        else {
-            $outputName = 'PremiereEditPoints'
-        }
-
-        $sourcePath = $silences[0].SourcePath
-
-        $resolvedOutputPath = Resolve-PCXOutputPath `
-            -SourcePath $sourcePath `
-            -OutputPath $OutputPath `
-            -OutputName $outputName `
-            -Extension '.jsx'
-
-        $outputFolder = Split-Path -Path $resolvedOutputPath -Parent
-
-        if (-not (Test-Path -LiteralPath $outputFolder -PathType Container)) {
-            throw "Output folder does not exist: $outputFolder"
+        if ([string]::IsNullOrWhiteSpace($Path)) {
+            $Suffix = if ($TrackMode -eq 'All') { 'PremiereEditPoints-AllTracks' } else { 'PremiereEditPoints' }
+            $Path = Get-PCXDefaultOutputPath `
+                -SourcePath $Silences[0].SourcePath `
+                -Suffix $Suffix `
+                -Extension '.jsx'
         }
 
-        if ([System.IO.Path]::GetExtension($resolvedOutputPath) -ne '.jsx') {
-            throw 'OutputPath must use the .jsx extension.'
+        $Parent = Split-Path -Path $Path -Parent
+
+        if (-not [string]::IsNullOrWhiteSpace($Parent) -and -not (Test-Path -LiteralPath $Parent)) {
+            New-Item `
+                -ItemType Directory `
+                -Path $Parent `
+                -Force | Out-Null
         }
 
-        if ($PSCmdlet.ShouldProcess($resolvedOutputPath, 'Create Premiere Pro edit-point script')) {
-            $scriptContent = ConvertTo-PCXPremiereEditPointScript `
-                -Silence $silences.ToArray() `
+        if ([System.IO.Path]::GetExtension($Path) -ne '.jsx') {
+            throw 'Path must use the .jsx extension.'
+        }
+
+        if ($PSCmdlet.ShouldProcess($Path, 'Create Premiere Pro edit-point script')) {
+            $ScriptContent = ConvertTo-PCXPremiereEditPointScript `
+                -Silence $Silences.ToArray() `
                 -TimeOffsetSeconds $TimeOffsetSeconds `
                 -VideoTrackIndex $VideoTrackIndex `
                 -AudioTrackIndex $AudioTrackIndex `
                 -TrackMode $TrackMode
 
-            Set-Content -LiteralPath $resolvedOutputPath -Value $scriptContent -Encoding utf8
-            Get-Item -LiteralPath $resolvedOutputPath
+            Set-Content -LiteralPath $Path -Value $ScriptContent -Encoding UTF8
+            Get-Item -LiteralPath $Path
         }
     }
 }

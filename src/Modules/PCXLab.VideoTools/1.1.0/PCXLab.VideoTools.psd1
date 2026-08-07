@@ -1,38 +1,38 @@
 @{
 
-    RootModule = 'PCXLab.VideoTools.psm1'
+    RootModule        = 'PCXLab.VideoTools.psm1'
 
-    FormatsToProcess = @(
-    'PCXLab.VideoTools.Format.ps1xml'
+    FormatsToProcess  = @(
+        'Formats\PCXLab.VideoTools.Format.ps1xml'
     )
 
-    ModuleVersion = '1.1.0'
+    ModuleVersion     = '1.1.0'
 
-    GUID = '11111111-1111-1111-1111-111111111111'
+    GUID              = '11111111-1111-1111-1111-111111111111'
 
-    Author = 'PCXLab'
+    Author            = 'PCXLab'
 
-    CompanyName = 'PCXLab'
+    CompanyName       = 'PCXLab'
 
-    Copyright = '(c) PCXLab'
+    Copyright         = '(c) PCXLab'
 
-    Description = 'Professional PowerShell Video Automation Module'
+    Description       = 'Professional PowerShell Video Automation Module'
 
     PowerShellVersion = '7.2'
 
     FunctionsToExport = '*'
 
-    CmdletsToExport = @()
+    CmdletsToExport   = @()
 
     VariablesToExport = @()
 
-    AliasesToExport = @()
+    AliasesToExport   = @()
 
-    PrivateData = @{
+    PrivateData       = @{
 
         PSData = @{
 
-            Tags = @(
+            Tags       = @(
                 'Video'
                 'FFmpeg'
                 'Automation'

@@ -57,4 +57,22 @@ Describe 'Export-PCXPremiereMarkers' {
 
         (Get-Content -LiteralPath $outputPath -Raw) | Should -Match '"Start":25'
     }
+
+    It 'Generates default output path when -Path is omitted' {
+        $silence = [PSCustomObject]@{
+            PSTypeNames    = @('PCXLab.Silence')
+            SourcePath     = Join-Path $TestDrive 'Video.mp4'
+            Start          = [TimeSpan]::FromSeconds(10)
+            End            = [TimeSpan]::FromSeconds(16)
+            DurationSeconds= 6
+            Classification = 'EditCandidate'
+        }
+
+        $expectedPath = Join-Path $TestDrive 'Video-PremiereMarkers.jsx'
+        if (Test-Path $expectedPath) { Remove-Item $expectedPath -Force }
+
+        $result = $silence | Export-PCXPremiereMarkers
+        $result.FullName | Should -Be $expectedPath
+        $expectedPath | Should -Exist
+    }
 }

@@ -178,7 +178,7 @@ Describe 'Get-PCXVideoInformation' {
         $Video = Get-PCXVideoInformation C:\Videos\Test.mp4
 
         $Video.PSTypeNames[0] |
-            Should -Be 'PCXLab.VideoInformation'
+        Should -Be 'PCXLab.VideoInformation'
 
     }
 
@@ -228,8 +228,65 @@ $s | Format-List *
 Get-ChildItem `
     .\src\Modules\PCXLab.VideoTools\1.1.0\Private\Models
 
-    Get-Command New-PCXVideoInformationObject
+Get-Command New-PCXVideoInformationObject
 
-    Get-Command New-PCXSilenceObject
+Get-Command New-PCXSilenceObject
 
-    get-command -module PCXLab.VideoTools
+get-command -module PCXLab.VideoTools
+
+    
+
+Remove-Module PCXLab.VideoTools -Force -ErrorAction SilentlyContinue
+
+Import-Module .\src\Modules\PCXLab.VideoTools -Force
+
+Get-Command -Module PCXLab.VideoTools | Sort-Object Name
+
+
+
+Test-PCXVideoTools
+
+Get-PCXVideoInformation "C:\Videos\Test.mp4"
+
+Get-PCXAudioInformation "C:\Videos\Test.mp4"
+
+Get-PCXMediaInformation "C:\Videos\Test.mp4"
+
+Get-PCXMediaStreams "C:\Videos\Test.mp4"
+
+
+Find-PCXSilence "C:\Videos\Test.mp4"
+
+Find-PCXSilence "C:\Videos\Test.mp4" |
+Measure-PCXSilence
+
+Find-PCXSilence "C:\Videos\Test.mp4" |
+Get-PCXEditPoint
+
+Find-PCXSilence "C:\Videos\Test.mp4" |
+Export-PCXSilence
+
+Import-PCXSilence Test-Silence.json
+
+Import-PCXSilence "C:\Videos\Test-Silence.json"
+
+Find-PCXSilence "C:\Videos\Test.mp4" |
+Get-PCXEditPoint |
+Export-PCXEditPoint
+
+Import-PCXEditPoint "C:\Videos\Test-EditPoints.json"
+
+#8 
+Find-PCXSilence "C:\Videos\Test.mp4" |
+Export-PCXPremiereMarkers
+
+Find-PCXSilence "C:\Videos\Test.mp4" |
+Export-PCXPremiereEditPoints
+
+#9
+Get-ChildItem C:\Videos\Test.mp4 |
+Find-PCXSilence |
+Get-PCXEditPoint |
+Export-PCXEditPoint
+
+Invoke-Pester .\Tests

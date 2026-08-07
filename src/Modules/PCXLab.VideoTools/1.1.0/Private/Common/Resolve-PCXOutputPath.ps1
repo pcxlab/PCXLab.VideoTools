@@ -55,10 +55,9 @@ function Resolve-PCXOutputPath {
         return $OutputPath
     }
 
-    $directory = Split-Path -Path $SourcePath -Parent
-
-    $fileName = [System.IO.Path]::GetFileNameWithoutExtension($SourcePath)
-
-    Join-Path $directory "$fileName-$OutputName$Extension"
+    Get-PCXDefaultOutputPath `
+        -SourcePath $SourcePath `
+        -Suffix $OutputName `
+        -Extension $Extension
 
 }
