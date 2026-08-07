@@ -83,38 +83,10 @@ function Remove-PCXSilence {
         ConvertTo-PCXConcatFilter `
             -InputIndex 0
 
-        $Arguments = @(
-
-            '-y'
-
-            '-i'
-            $Path
-
-            '-filter_complex'
-            $Filter
-
-            '-map'
-            '[outv]'
-
-            '-map'
-            '[outa]'
-
-            '-c:v'
-            'libx264'
-
-            '-c:a'
-            'aac'
-
-            $OutputPath
-
-        )
-
-
-
-        Invoke-PCXFFmpeg `
-            -ArgumentList $Arguments | Out-Null
-
-        Get-Item $OutputPath
+        Invoke-PCXFFmpegEdit `
+            -SourcePath $Path `
+            -OutputPath $OutputPath `
+            -Filter $Filter
 
     }
 
