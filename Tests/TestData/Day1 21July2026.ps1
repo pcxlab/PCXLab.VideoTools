@@ -388,3 +388,19 @@ $Filter
 
 Remove-PCXSilence `
     -Path "C:\Videos\Test.mp4"
+
+
+Get-Item "C:\Videos\Test.mp4" |
+Remove-PCXSilence
+
+$result = Remove-PCXSilence `
+    -Path "C:\Videos\Test.mp4"
+
+$result.GetType().FullName
+
+Remove-Module PCXLab.VideoTools -Force
+cls
+Import-Module .\src\Modules\PCXLab.VideoTools
+
+Remove-PCXSilence `
+    -Path "C:\Videos\Test.mp4"
