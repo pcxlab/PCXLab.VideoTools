@@ -235,7 +235,7 @@ Get-Command New-PCXSilenceObject
 get-command -module PCXLab.VideoTools
 
     
-
+cls
 Remove-Module PCXLab.VideoTools -Force -ErrorAction SilentlyContinue
 
 Import-Module .\src\Modules\PCXLab.VideoTools -Force
@@ -266,7 +266,7 @@ Get-PCXEditPoint
 Find-PCXSilence "C:\Videos\Test.mp4" |
 Export-PCXSilence
 
-Import-PCXSilence Test-Silence.json
+#Import-PCXSilence Test-Silence.json
 
 Import-PCXSilence "C:\Videos\Test-Silence.json"
 
@@ -290,3 +290,101 @@ Get-PCXEditPoint |
 Export-PCXEditPoint
 
 Invoke-Pester .\Tests
+
+
+$Commnet = "feat(editpoints): implement edit point analysis and export pipeline
+
+- Added Get-PCXEditPoint
+- Added Export/Import-PCXEditPoint
+- Added edit point rules via Settings.json
+- Added New-PCXExportDocument helper
+- Added Get-PCXModuleInfo/Version helpers
+- Added default output path support
+- Refactored export pipeline
+- Added initial Pester coverage"
+
+Analyze-PCXVideo "C:\Videos\Test.mp4"
+
+#AI Impliemntation
+
+Get-ChildItem `
+    .\src\Modules\PCXLab.VideoTools\1.1.0 `
+    -Recurse `
+    -Filter *.ps1 |
+Sort-Object FullName |
+ForEach-Object {
+
+    [PSCustomObject]@{
+
+        Folder = $_.Directory.Name
+
+        Name   = $_.BaseName
+
+        Path   = $_.FullName.Replace(
+            (Resolve-Path '.\src\Modules\PCXLab.VideoTools\1.1.0').Path + '\',
+            ''
+        )
+
+    }
+
+}
+
+
+#
+
+
+Get-ChildItem `
+    .\src\Modules\PCXLab.VideoTools\1.1.0 `
+    -Recurse `
+    -Filter *.ps1 |
+Sort-Object FullName |
+Select-Object FullName
+
+
+Get-PCXVideoInformation -Path C:\Videos\Test.mp4
+
+Clear-Host
+
+Remove-Module PCXLab.VideoTools #-Force
+Import-Module .\src\Modules\PCXLab.VideoTools
+Get-Module -Name PCXLab.VideoTools
+Get-Command -Module PCXLab.VideoTools
+
+
+$Segments |
+Optimize-PCXVideoSegments -Path C:\Videos\Test.mp4
+
+Find-PCXSilence "C:\Videos\Test.mp4" |
+Get-PCXVideoSegments
+
+
+Find-PCXSilence "C:\Videos\Test.mp4" |
+Get-PCXVideoSegments |
+Measure-Object
+
+
+Find-PCXSilence "C:\Videos\Test.mp4" |
+Get-PCXVideoSegments |
+Group-Object Action
+
+
+Find-PCXSilence "C:\Videos\Test.mp4" |
+Get-PCXVideoSegments |
+Sort-Object Start |
+Format-Table Start, End, Action
+
+
+Find-PCXSilence "C:\Videos\Test.mp4" |
+Get-PCXVideoSegments |
+Format-Table Start, End, Duration, Action
+
+
+$Filter = Find-PCXSilence C:\Videos\Test.mp4 |
+Get-PCXVideoSegments |
+New-PCXFFmpegConcatFilter
+
+$Filter
+
+
+Remove-PCXSilence `
+    -Path "C:\Videos\Test.mp4"
