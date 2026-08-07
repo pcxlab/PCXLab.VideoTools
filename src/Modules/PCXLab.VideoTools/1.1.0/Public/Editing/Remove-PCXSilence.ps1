@@ -69,16 +69,19 @@ function Remove-PCXSilence {
 
         }
 
-        $Segments =
-        Find-PCXSilence `
+        $Segments = Find-PCXSilence `
             -Path $Path `
             -NoiseFloor $NoiseFloor `
             -MinimumDuration $MinimumDuration |
         Get-PCXVideoSegments
 
-        $Filter =
-        $Segments |
-        ConvertTo-PCXConcatFilter
+        if ($Segments.Count -eq 0) {
+            throw 'No video segments were generated.'
+        }
+
+        $Filter = $Segments |
+        ConvertTo-PCXConcatFilter `
+            -InputIndex 0
 
         $Arguments = @(
 
@@ -105,6 +108,8 @@ function Remove-PCXSilence {
             $OutputPath
 
         )
+
+
 
         Invoke-PCXFFmpeg `
             -ArgumentList $Arguments | Out-Null

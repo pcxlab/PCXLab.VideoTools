@@ -24,7 +24,11 @@ function ConvertTo-PCXConcatFilter {
             ValueFromPipeline
         )]
         [ValidateNotNull()]
-        [object]$Segment
+        [object]$Segment,
+
+        [Parameter()]
+        [ValidateRange(0, 100)]
+        [int]$InputIndex = 0
 
     )
 
@@ -48,17 +52,26 @@ function ConvertTo-PCXConcatFilter {
 
         $Builder = [System.Text.StringBuilder]::new()
 
+        if ($Segments.Count -eq 0) {
+            throw 'No video segments were supplied.'
+        }
+
         $Keep = $Segments |
-            Where-Object Action -eq 'Keep'
+        Where-Object Action -eq 'Keep'
+
+        if ($Keep.Count -eq 0) {
+            throw 'No Keep segments were found.'
+        }
 
         for ($i = 0; $i -lt $Keep.Count; $i++) {
 
             [void]$Builder.Append(
-                "[0:v]trim=start=$($Keep[$i].StartSeconds):end=$($Keep[$i].EndSeconds),setpts=PTS-STARTPTS[v$i];"
+                "[$InputIndex`:v]trim=start=$($Keep[$i].StartSeconds):end=$($Keep[$i].EndSeconds),setpts=PTS-STARTPTS[v$i];"
+
             )
 
             [void]$Builder.Append(
-                "[0:a]atrim=start=$($Keep[$i].StartSeconds):end=$($Keep[$i].EndSeconds),asetpts=PTS-STARTPTS[a$i];"
+                "[$InputIndex`:a]atrim=start=$($Keep[$i].StartSeconds):end=$($Keep[$i].EndSeconds),asetpts=PTS-STARTPTS[a$i];"
             )
 
         }
