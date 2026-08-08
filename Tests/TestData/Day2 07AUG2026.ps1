@@ -395,3 +395,156 @@ Measure-Object
 Expected:
 
 Count : 48
+
+$message = "feat(analysis): refactor silence analysis into unified video analysis object
+
+- Simplify Analyze-PCXVideo pipeline
+- Return PCXLab.VideoAnalysis object
+- Add Get-PCXSilence helper
+- Refactor silence detection workflow
+- Improve default export path handling
+- Clean up diagnostics and debugging code"
+
+git add .
+
+$Analysis = Analyze-PCXVideo `
+    -Path "C:\Videos\Test.mp4"
+
+$Analysis |
+    Export-PCXVideoAnalysis
+
+
+    #####################################
+
+    Export
+Analyze-PCXVideo `
+    -Path "C:\Videos\Test.mp4" |
+Export-PCXVideoAnalysis
+Import
+Import-PCXVideoAnalysis `
+    -Path "C:\Videos\Test-Analysis.json"
+
+Expected:
+
+SourcePath
+Created
+ModuleVersion
+Media
+Analysis
+Test the pipeline
+
+This is the important one.
+
+Import-PCXVideoAnalysis `
+    -Path "C:\Videos\Test-Analysis.json" |
+Get-PCXSilence |
+Measure-PCXSilence
+
+#$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
+
+$Analysis = Import-PCXVideoAnalysis `
+    -Path "C:\Videos\Test-Analysis.json"
+
+$Analysis.Analysis.Silence[0].PSTypeNames
+
+
+#$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
+
+You should get exactly the same statistics as when you analyzed the MP4 directly.
+
+Test EditPoints
+Import-PCXVideoAnalysis `
+    -Path "C:\Videos\Test-Analysis.json" |
+Get-PCXSilence |
+Get-PCXEditPoint
+
+Should produce the same 11 edit points.
+
+Test Premiere Markers
+Import-PCXVideoAnalysis `
+    -Path "C:\Videos\Test-Analysis.json" |
+Get-PCXSilence |
+Export-PCXPremiereMarkers
+
+No FFmpeg should run.
+
+Test Premiere Edit Points
+Import-PCXVideoAnalysis `
+    -Path "C:\Videos\Test-Analysis.json" |
+Get-PCXSilence |
+Export-PCXPremiereEditPoints
+
+Again, no FFmpeg should run.
+
+$Analysis = Import-PCXVideoAnalysis `
+    -Path "C:\Videos\Test-Analysis.json"
+
+$Analysis.Analysis.Silence[0].PSTypeNames
+
+#########################################
+
+Then run the important pipeline:
+
+Import-PCXVideoAnalysis `
+    -Path "C:\Videos\Test-Analysis.json" |
+Get-PCXSilence |
+Measure-PCXSilence
+
+If that works, then continue with:
+
+Import-PCXVideoAnalysis `
+    -Path "C:\Videos\Test-Analysis.json" |
+Get-PCXSilence |
+Get-PCXEditPoint
+
+and finally:
+
+Import-PCXVideoAnalysis `
+    -Path "C:\Videos\Test-Analysis.json" |
+Get-PCXSilence |
+Export-PCXPremiereMarkers
+
+Import-PCXVideoAnalysis `
+    -Path "C:\Videos\Test-Analysis.json" |
+Get-PCXSilence |
+Export-PCXPremiereEditPoints
+
+If these pass, your Analysis.json cache will be functionally equivalent to re-running Analyze-PCXVideo, which is exactly the behavior you want for the long-term cache architecture.
+
+
+
+
+
+Run:
+
+$Analysis = Import-PCXVideoAnalysis `
+    -Path "C:\Videos\Test-Analysis.json"
+
+$Analysis.Analysis.Silence[0].Start.GetType().FullName
+
+It should return:
+
+System.TimeSpan
+
+instead of:
+
+System.Management.Automation.PSCustomObject
+
+Then rerun:
+
+Import-PCXVideoAnalysis `
+    -Path "C:\Videos\Test-Analysis.json" |
+Get-PCXSilence |
+Get-PCXEditPoint
+
+I expect that test to pass.
+
+
+PowerShell -ExecutionPolicy Bypass -File "C:\Projects\PCXLab.VideoTools\Run-VideoAnalysis.ps1"
+
+
+
+
+
+
+

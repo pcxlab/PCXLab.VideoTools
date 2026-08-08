@@ -352,6 +352,7 @@ Optimize-PCXVideoSegments -Path C:\Videos\Test.mp4
 Find-PCXSilence "C:\Videos\Test.mp4" |
 Get-PCXVideoSegments
 
+Find-PCXSilence "C:\Videos\Test.mp4" 
 
 Find-PCXSilence "C:\Videos\Test.mp4" |
 Get-PCXVideoSegments |
