@@ -38,7 +38,11 @@ function New-PCXEditJobObject {
 
         [Parameter()]
         [ValidateRange(0, 100)]
-        [int]$InputIndex = 0
+        [int]$InputIndex = 0,
+
+        [Parameter()]
+        [ValidateRange(0, 192000)]
+        [int]$SampleRate = 0
 
     )
 
@@ -57,6 +61,8 @@ function New-PCXEditJobObject {
         AudioCodec  = $AudioCodec
 
         InputIndex  = $InputIndex
+
+        SampleRate  = $SampleRate
 
     }
 
