@@ -129,13 +129,26 @@ function Remove-PCXSilence {
         }
 
         #
+        # Read source audio sample rate
+        #
+
+        $AudioInfo = Get-PCXAudioInformation -Path $Path
+
+        $SampleRate = if ($AudioInfo -and $AudioInfo.SampleRate) {
+            $AudioInfo.SampleRate
+        } else {
+            0
+        }
+
+        #
         # Create editing job
         #
 
         $Job = New-PCXEditJobObject `
             -SourcePath $Path `
             -OutputPath $OutputPath `
-            -FilterGraph $FilterGraph
+            -FilterGraph $FilterGraph `
+            -SampleRate $SampleRate
 
         #
         # Execute job

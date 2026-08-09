@@ -121,6 +121,11 @@ function Invoke-PCXFFmpegEdit {
             '-c:a'
             $EditJob.AudioCodec
 
+            if ($EditJob.SampleRate -gt 0) {
+                '-ar'
+                $EditJob.SampleRate.ToString()
+            }
+
             $EditJob.OutputPath
 
         )
