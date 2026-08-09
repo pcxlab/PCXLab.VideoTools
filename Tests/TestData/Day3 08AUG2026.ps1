@@ -51,4 +51,5 @@ Remove-PCXSilence -Path "C:\Videos\Test.mp4"
 Step 4 - Tell me the result
 
 I want to know:
-
+git add .
+git commit -m "feat(editing): integrate configurable audio processing into editing pipeline"
