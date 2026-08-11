@@ -1,6 +1,6 @@
 Import-Module "C:\Projects\PCXLab.VideoTools\src\Modules\PCXLab.VideoTools" -Force
 
-$Videos = Get-ChildItem "C:\Recording" -Recurse -File |
+$Videos = Get-ChildItem "F:\Recordings" -Recurse -File |
 Where-Object {
     $_.Name -match '^bandicam \d{4}-\d{2}-\d{2} \d{2}-\d{2}-\d{2}-\d+\.mp4$'
 }

@@ -53,3 +53,50 @@ Step 4 - Tell me the result
 I want to know:
 git add .
 git commit -m "feat(editing): integrate configurable audio processing into editing pipeline"
+
+
+##########################
+
+Clear-Host
+
+Remove-Module PCXLab.VideoTools -Force -ErrorAction SilentlyContinue
+Import-Module .\src\Modules\PCXLab.VideoTools -Force
+
+Test-PCXVideoTools
+
+Get-PCXMediaInformation -Path "C:\Videos\Test.mp4"
+
+Find-PCXSilence -Path "C:\Videos\Test.mp4"
+
+Remove-PCXSilence -Path "C:\Videos\Test.mp4"
+
+Get-PCXMediaInformation -Path "C:\Videos\Test-Edited.mp4"
+
+Get-PCXAudioInformation -Path "C:\Videos\Test-Edited.mp4"
+
+Get-Item "C:\Videos\Test-Edited.mp4" |
+    Select-Object FullName, Length, LastWriteTime
+
+git status --short
+
+
+Get-PCXSetting -Name "Audio.Normalize"
+
+Get-PCXSetting -Name "Audio.Compression"
+
+Get-PCXSetting -Name "Audio.RepairChannels"
+
+Get-PCXSetting -Name "Audio"
+
+Get-Content ".\src\Modules\PCXLab.VideoTools\1.1.0\Settings.json"
+
+
+Get-PCXAudioInformation -Path "C:\Videos\Test.mp4"
+
+Get-PCXAudioInformation -Path "C:\Videos\Test-Edited.mp4"
+
+Get-Content ".\src\Modules\PCXLab.VideoTools\1.1.0\Private\Converters\ConvertTo-PCXAudioFilter.ps1"
+
+Get-Content ".\src\Modules\PCXLab.VideoTools\1.1.0\Private\Editing\Invoke-PCXFFmpegEdit.ps1"
+
+Get-Content ".\src\Modules\PCXLab.VideoTools\1.1.0\Public\Editing\Remove-PCXSilence.ps1"
