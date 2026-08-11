@@ -1,6 +1,6 @@
 Import-Module "C:\Projects\PCXLab.VideoTools\src\Modules\PCXLab.VideoTools" -Force
 
-$Videos = Get-ChildItem "F:\Recordings" -Recurse -File |
+$Videos = Get-ChildItem "C:\Recording" -Recurse -File |
 Where-Object {
 
     $_.DirectoryName -notmatch 'NOT WORKING' -and
