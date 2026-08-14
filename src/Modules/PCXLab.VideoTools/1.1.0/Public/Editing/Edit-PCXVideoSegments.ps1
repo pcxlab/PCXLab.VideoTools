@@ -58,7 +58,7 @@ function Edit-PCXVideoSegments {
             throw 'No video segments were supplied.'
         }
 
-        $uniqueSourcePaths = $Segments.SourcePath | Sort-Object -Unique
+        $uniqueSourcePaths = @($Segments.SourcePath | Sort-Object -Unique)
 
         if ($uniqueSourcePaths.Count -gt 1) {
             throw "All video segments must belong to the same source. Found: $($uniqueSourcePaths -join ', ')."
