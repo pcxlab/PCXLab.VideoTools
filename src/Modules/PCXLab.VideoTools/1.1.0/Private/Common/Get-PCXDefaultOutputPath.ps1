@@ -17,6 +17,11 @@ function Get-PCXDefaultOutputPath {
     .PARAMETER Extension
         Output file extension. May be specified with or without a leading '.'.
 
+    .PARAMETER FileName
+        Optional fixed filename. When specified, the source filename is not
+        used and the output is placed in the same folder as the source with
+        the given name.
+
     .EXAMPLE
         Get-PCXDefaultOutputPath `
             -SourcePath 'C:\Videos\Test.mp4' `
@@ -25,6 +30,14 @@ function Get-PCXDefaultOutputPath {
 
         Returns:
             C:\Videos\Test-EditPoints.json
+
+    .EXAMPLE
+        Get-PCXDefaultOutputPath `
+            -SourcePath 'C:\Videos\Test.mp4' `
+            -FileName 'RecordingSession.json'
+
+        Returns:
+            C:\Videos\RecordingSession.json
 
     .OUTPUTS
         System.String
@@ -38,23 +51,49 @@ function Get-PCXDefaultOutputPath {
         [ValidateNotNullOrEmpty()]
         [string]$SourcePath,
 
-        [Parameter(Mandatory)]
+        [Parameter(
+            Mandatory,
+            ParameterSetName = 'BySuffix'
+        )]
         [ValidateNotNullOrEmpty()]
         [string]$Suffix,
 
-        [Parameter(Mandatory)]
+        [Parameter(
+            Mandatory,
+            ParameterSetName = 'BySuffix'
+        )]
         [ValidateNotNullOrEmpty()]
-        [string]$Extension
+        [string]$Extension,
+
+        [Parameter(
+            Mandatory,
+            ParameterSetName = 'ByFileName'
+        )]
+        [ValidateNotNullOrEmpty()]
+        [string]$FileName
 
     )
 
-    if ($Extension[0] -ne '.') {
-        $Extension = ".$Extension"
+    if ([string]::IsNullOrWhiteSpace($FileName)) {
+
+        if ([string]::IsNullOrWhiteSpace($Extension)) {
+            throw 'Extension is required when FileName is not specified.'
+        }
+
+        if ([string]::IsNullOrWhiteSpace($Suffix)) {
+            throw 'Suffix is required when FileName is not specified.'
+        }
+
+        if ($Extension[0] -ne '.') {
+            $Extension = ".$Extension"
+        }
+
+        $FileName = "$([System.IO.Path]::GetFileNameWithoutExtension($SourcePath))-$Suffix$Extension"
+
     }
 
     $Directory = Split-Path $SourcePath -Parent
-    $FileName = [System.IO.Path]::GetFileNameWithoutExtension($SourcePath)
 
-    return (Join-Path $Directory "$FileName-$Suffix$Extension")
+    return (Join-Path $Directory $FileName)
 
 }
