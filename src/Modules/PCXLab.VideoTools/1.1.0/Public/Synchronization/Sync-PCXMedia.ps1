@@ -49,7 +49,7 @@ function Sync-PCXMedia {
 
         [Parameter()]
         [ValidateRange(0.0, 1.0)]
-        [double]$MinimumConfidence = 0.7,
+        [double]$MinimumConfidence = 0.30,
 
         [Parameter()]
         [ValidateRange(0, 300)]
