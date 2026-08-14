@@ -46,13 +46,22 @@ function Find-PCXSilence {
         [Parameter(
             Mandatory,
             ValueFromPipeline,
-            ValueFromPipelineByPropertyName
+            ValueFromPipelineByPropertyName,
+            ParameterSetName = 'ByPath'
         )]
         [Alias('FullName')]
         [ValidateNotNullOrEmpty()]
         [string[]]$Path,
 
-        [Parameter()]
+        [Parameter(
+            Mandatory,
+            ValueFromPipeline,
+            ParameterSetName = 'ByAnalysis'
+        )]
+        [ValidateNotNull()]
+        [object]$Analysis,
+
+        [Parameter(ParameterSetName = 'ByPath')]
         [ValidateRange(-120,0)]
         [double]$NoiseFloor = (
             Get-PCXSetting `
@@ -60,7 +69,7 @@ function Find-PCXSilence {
                 -DefaultValue -35
         ),
 
-        [Parameter()]
+        [Parameter(ParameterSetName = 'ByPath')]
         [ValidateRange(0.1,3600)]
         [double]$MinimumDuration = (
             Get-PCXSetting `
@@ -72,26 +81,43 @@ function Find-PCXSilence {
 
     process {
 
-        foreach ($MediaFile in $Path) {
+        if ($PSCmdlet.ParameterSetName -eq 'ByAnalysis') {
 
-            $RawOutput = Invoke-PCXSilenceDetection `
-                -Path $MediaFile `
-                -NoiseFloor $NoiseFloor `
-                -MinimumDuration $MinimumDuration
+            if ($Analysis.PSTypeNames -notcontains 'PCXLab.VideoAnalysis') {
+                throw 'Analysis must be a PCXLab.VideoAnalysis object.'
+            }
 
-            $Silence = @(
-                $RawOutput -split "`r?`n" |
-                ConvertTo-PCXSilence `
-                    -SourcePath $MediaFile
-            )
+            if ($null -eq $Analysis.Analysis.Silence) {
+                return
+            }
 
-            Write-Verbose (
-                "Detected {0} silence region(s) in '{1}'." -f
-                $Silence.Count,
-                $MediaFile
-            )
+            $Analysis.Analysis.Silence
 
-            $Silence
+        }
+        else {
+
+            foreach ($MediaFile in $Path) {
+
+                $RawOutput = Invoke-PCXSilenceDetection `
+                    -Path $MediaFile `
+                    -NoiseFloor $NoiseFloor `
+                    -MinimumDuration $MinimumDuration
+
+                $Silence = @(
+                    $RawOutput -split "`r?`n" |
+                    ConvertTo-PCXSilence `
+                        -SourcePath $MediaFile
+                )
+
+                Write-Verbose (
+                    "Detected {0} silence region(s) in '{1}'." -f
+                    $Silence.Count,
+                    $MediaFile
+                )
+
+                $Silence
+
+            }
 
         }
 
