@@ -37,8 +37,21 @@ function Get-PCXVideoSegments {
 
     process {
 
-        if ($InputObject.PSTypeNames -notcontains 'PCXLab.Silence') {
-            throw 'InputObject must be a PCXLab.Silence object.'
+        $supportedTypes = @(
+            'PCXLab.Silence'
+            'PCXLab.EditPoint'
+        )
+
+        $typeMatch = $false
+        foreach ($type in $supportedTypes) {
+            if ($InputObject.PSTypeNames -contains $type) {
+                $typeMatch = $true
+                break
+            }
+        }
+
+        if (-not $typeMatch) {
+            throw 'InputObject must be a PCXLab.Silence or PCXLab.EditPoint object.'
         }
 
         $Silence.Add($InputObject)
