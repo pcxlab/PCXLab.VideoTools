@@ -15,12 +15,12 @@ function Get-PCXPrimaryAudioStream {
     
         )
     
-        $AudioStreams = Get-PCXAudioStreams -InputObject $InputObject
-    
-        if ($AudioStreams.Count -eq 0) {
-            return $null
-        }
-    
-        return $AudioStreams[0]
+    $AudioStreams = @(Get-PCXAudioStreams -InputObject $InputObject)
+
+    if ($AudioStreams.Count -eq 0) {
+        return $null
+    }
+
+    return $AudioStreams[0]
     
     }

@@ -12,7 +12,7 @@ function New-PCXMediaInformationObject {
         [Parameter(Mandatory)]
         [psobject]$Video,
 
-        [Parameter(Mandatory)]
+        [Parameter()]
         [psobject]$Audio
 
     )
@@ -29,7 +29,7 @@ function New-PCXMediaInformationObject {
         Resolution     = $Video.Resolution
 
         VideoCodec     = $Video.VideoCodec
-        AudioCodec     = $Audio.AudioCodec
+        AudioCodec     = if ($Audio) { $Audio.AudioCodec } else { $null }
 
         FileSize       = $Video.FileSize
         FileSizeText   = $Video.FileSizeText
@@ -41,10 +41,10 @@ function New-PCXMediaInformationObject {
         FormatLong     = $Video.FormatLong
 
         VideoStreams   = $Video.VideoStreams
-        AudioStreams   = $Video.AudioStreams
+        AudioStreams   = if ($Audio) { $Audio.AudioStreams } else { 0 }
 
-        HasVideo       = $Video.HasVideo
-        HasAudio       = $Video.HasAudio
+        HasVideo       = ($null -ne $Video)
+        HasAudio       = ($null -ne $Audio)
 
         Video          = $Video
         Audio          = $Audio
