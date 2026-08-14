@@ -63,13 +63,21 @@ function Measure-PCXSourceOffsetAudioCorrelation {
         throw 'TargetSource must be a PCXLab.MediaSource object.'
     }
 
+    $maxOffset = 60.0
+    if ($null -ne $MaxOffsetSeconds) {
+        $maxOffset = [double]$MaxOffsetSeconds
+    }
+    $correlationDurationSeconds = [math]::Ceiling((3 * $maxOffset) + 10)
+
     $referenceWav = Export-PCXAudioCorrelationWav `
         -Source $ReferenceSource `
-        -OutputDirectory $TempPath
+        -OutputDirectory $TempPath `
+        -DurationSeconds $correlationDurationSeconds
 
     $targetWav = Export-PCXAudioCorrelationWav `
         -Source $TargetSource `
-        -OutputDirectory $TempPath
+        -OutputDirectory $TempPath `
+        -DurationSeconds $correlationDurationSeconds
 
     try {
 

@@ -36,34 +36,41 @@ function Get-PCXMediaSourceAudioStreamSelector {
         throw "MediaInformation is missing for source '$($Source.Path)'"
     }
 
+    $audioStreams = Get-PCXMediaStreams -Path $Source.Path |
+        Where-Object { $_.StreamType -eq 'audio' } |
+        Sort-Object Index
+
+    if ($audioStreams.Count -eq 0) {
+        throw "No audio stream found in '$($Source.Path)'"
+    }
+
     if ($Source.AudioStreamIndex -lt 0) {
 
-        if (-not $mediaInfo.HasAudio) {
-            throw "No audio stream found in '$($Source.Path)'"
-        }
-
         $audioInfo = $mediaInfo.Audio
-        $streamIndex = 0
+        $targetGlobalIndex = $audioStreams[0].Index
 
         if ($audioInfo -and ($audioInfo.PSTypeNames -contains 'PCXLab.AudioInformation') -and ($null -ne $audioInfo.StreamIndex)) {
-            $streamIndex = $audioInfo.StreamIndex
+            $targetGlobalIndex = $audioInfo.StreamIndex
         }
 
-        return "a:$streamIndex"
+        for ($i = 0; $i -lt $audioStreams.Count; $i++) {
+            if ($audioStreams[$i].Index -eq $targetGlobalIndex) {
+                return "a:$i"
+            }
+        }
+
+        throw "Selected audio stream index $targetGlobalIndex was not found in '$($Source.Path)'."
 
     }
 
     $requestedIndex = $Source.AudioStreamIndex
 
-    $streams = Get-PCXMediaStreams -Path $Source.Path |
-        Where-Object { $_.StreamType -eq 'audio' }
-
-    $matchingStream = $streams | Where-Object { $_.Index -eq $requestedIndex }
-
-    if (-not $matchingStream) {
-        throw "Audio stream index $requestedIndex does not exist in '$($Source.Path)'."
+    for ($i = 0; $i -lt $audioStreams.Count; $i++) {
+        if ($audioStreams[$i].Index -eq $requestedIndex) {
+            return "a:$i"
+        }
     }
 
-    return "a:$requestedIndex"
+    throw "Audio stream index $requestedIndex does not exist in '$($Source.Path)'."
 
 }

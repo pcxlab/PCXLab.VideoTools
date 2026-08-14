@@ -44,7 +44,7 @@ function Read-PCXMonoWavSampleBlock {
         [double]$StartSeconds = 0,
 
         [Parameter()]
-        [ValidateRange(1, 600)]
+        [ValidateRange(1, 3600)]
         [int]$DurationSeconds = 60
 
     )
