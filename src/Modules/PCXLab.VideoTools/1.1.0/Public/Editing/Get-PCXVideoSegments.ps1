@@ -66,7 +66,7 @@ function Get-PCXVideoSegments {
             return
         }
 
-        $uniqueSourcePaths = $Silence.SourcePath | Sort-Object -Unique
+        $uniqueSourcePaths = @($Silence.SourcePath | Sort-Object -Unique)
 
         if ($uniqueSourcePaths.Count -gt 1) {
             throw "All input objects must belong to the same source. Found: $($uniqueSourcePaths -join ', ')."
