@@ -103,6 +103,11 @@ function Sync-PCXMedia {
             throw "Synchronization strategy '$Strategy' is not supported."
         }
 
+        # Validate reference source audio capability
+        if (-not $referenceSource.MediaInformation.HasAudio) {
+            throw "Reference source '$($referenceSource.Id)' must contain audio for the AudioCorrelation strategy."
+        }
+
         $tempPath = Get-PCXSynchronizationTempPath
 
         try {
@@ -113,12 +118,39 @@ function Sync-PCXMedia {
 
                 if ($source.Id -eq $referenceSource.Id) { continue }
 
-                $offset = Measure-PCXSourceOffsetAudioCorrelation `
-                    -ReferenceSource $referenceSource `
-                    -TargetSource $source `
-                    -MinimumConfidence $MinimumConfidence `
-                    -MaxOffsetSeconds $MaxOffsetSeconds `
-                    -TempPath $tempPath
+                if ($source.MediaInformation.HasAudio) {
+
+                    $correlationArguments = @{
+                        ReferenceSource  = $referenceSource
+                        TargetSource     = $source
+                        MinimumConfidence = $MinimumConfidence
+                        TempPath         = $tempPath
+                    }
+
+                    if ($null -ne $MaxOffsetSeconds) {
+                        $correlationArguments['MaxOffsetSeconds'] = $MaxOffsetSeconds
+                    }
+
+                    $offset = Measure-PCXSourceOffsetAudioCorrelation @correlationArguments
+
+                }
+                elseif ($null -ne $source.OffsetHint) {
+
+                    $offset = New-PCXSourceOffsetObject `
+                        -SourceId $source.Id `
+                        -ReferenceId $referenceSource.Id `
+                        -SourcePath $source.Path `
+                        -ReferencePath $referenceSource.Path `
+                        -OffsetSeconds $source.OffsetHint `
+                        -Confidence 0 `
+                        -Method 'OffsetHint'
+
+                }
+                else {
+
+                    throw "Cannot synchronize source '$($source.Id)' because it has no audio and no OffsetHint was provided."
+
+                }
 
                 $sourceOffsets.Add($offset)
 
@@ -129,12 +161,18 @@ function Sync-PCXMedia {
                 -Sources $SourceList `
                 -SourceOffsets $sourceOffsets
 
-            New-PCXMediaSynchronizationObject `
-                -Sources $SourceList `
-                -Timeline $timeline `
-                -Strategy $Strategy `
-                -MinimumConfidence $MinimumConfidence `
-                -MaxOffsetSeconds $MaxOffsetSeconds
+            $synchronizationArguments = @{
+                Sources           = $SourceList
+                Timeline          = $timeline
+                Strategy          = $Strategy
+                MinimumConfidence = $MinimumConfidence
+            }
+
+            if ($null -ne $MaxOffsetSeconds) {
+                $synchronizationArguments['MaxOffsetSeconds'] = $MaxOffsetSeconds
+            }
+
+            New-PCXMediaSynchronizationObject @synchronizationArguments
 
         }
         finally {
