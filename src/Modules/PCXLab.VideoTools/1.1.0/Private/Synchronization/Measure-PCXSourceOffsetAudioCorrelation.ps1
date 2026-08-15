@@ -81,10 +81,16 @@ function Measure-PCXSourceOffsetAudioCorrelation {
 
     try {
 
-        $evidence = Measure-PCXAudioCorrelation `
-            -ReferencePath $referenceWav.FullName `
-            -TargetPath $targetWav.FullName `
-            -MaxOffsetSeconds $MaxOffsetSeconds
+        $correlationArguments = @{
+            ReferencePath = $referenceWav.FullName
+            TargetPath    = $targetWav.FullName
+        }
+
+        if ($null -ne $MaxOffsetSeconds) {
+            $correlationArguments['MaxOffsetSeconds'] = $MaxOffsetSeconds
+        }
+
+        $evidence = Measure-PCXAudioCorrelation @correlationArguments
 
         if ($evidence.Correlation -lt $MinimumConfidence) {
             throw (
