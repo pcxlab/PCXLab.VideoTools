@@ -24,3 +24,26 @@ $EditPoint.PSTypeNames
 
 "========== Members =========="
 $EditPoint | Get-Member
+
+Edit-PCXRecordingSession `
+    -ReferencePath "C:\Recording seg TestONLOY\RG_20260127_025337_001\bandicam.mp4" `
+    -SourcePaths @(
+    "C:\Recording seg TestONLOY\RG_20260127_025337_001\VID_20260127_025337.mp4",
+    "C:\Recording seg TestONLOY\RG_20260127_025337_001\bandicam.webcam.mp4"
+) `
+    -OutputDirectory "C:\Recording seg TestONLOY"
+
+git add .
+git commit -m "Restore complete Edit-PCXRecordingSession pipeline and fix edit point generation"
+git push
+
+# Abovec functio nworked tested
+
+
+Edit-PCXRecordingSession `
+    -ReferencePath "C:\Recording seg TestONLOY\RG_20260127_025337_001\bandicamOriginal.mp4" `
+    -SourcePaths @(
+    "C:\Recording seg TestONLOY\RG_20260127_025337_001\VID_20260127_025337Original.mp4",
+    "C:\Recording seg TestONLOY\RG_20260127_025337_001\bandicam.webcamOriginal.mp4"
+) `
+    -OutputDirectory "C:\Recording seg TestONLOY"
