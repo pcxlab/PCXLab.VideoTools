@@ -74,6 +74,18 @@ function Restore-PCXRecordingSessionTypes {
 
             }
 
+            if (-not $Source.PSObject.Properties['SynchronizationMethod']) {
+                $Source | Add-Member -NotePropertyName 'SynchronizationMethod' -NotePropertyValue 'Auto'
+            }
+
+            if (-not $Source.PSObject.Properties['AnalysisMode']) {
+                $Source | Add-Member -NotePropertyName 'AnalysisMode' -NotePropertyValue 'Auto'
+            }
+
+            if (-not $Source.PSObject.Properties['RenderingMode']) {
+                $Source | Add-Member -NotePropertyName 'RenderingMode' -NotePropertyValue 'Auto'
+            }
+
         }
 
     }

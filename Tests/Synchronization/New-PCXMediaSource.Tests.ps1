@@ -72,4 +72,42 @@ Describe 'New-PCXMediaSource' {
 
     }
 
+    It 'Defaults SynchronizationMethod to Auto' {
+
+        $source = New-PCXMediaSource -Path $script:TestVideo
+
+        $source.SynchronizationMethod | Should -Be 'Auto'
+
+    }
+
+    It 'Defaults AnalysisMode to Auto' {
+
+        $source = New-PCXMediaSource -Path $script:TestVideo
+
+        $source.AnalysisMode | Should -Be 'Auto'
+
+    }
+
+    It 'Defaults RenderingMode to Auto' {
+
+        $source = New-PCXMediaSource -Path $script:TestVideo
+
+        $source.RenderingMode | Should -Be 'Auto'
+
+    }
+
+    It 'Honours explicit SynchronizationMethod, AnalysisMode, and RenderingMode' {
+
+        $source = New-PCXMediaSource `
+            -Path $script:TestVideo `
+            -SynchronizationMethod 'OffsetHint' `
+            -AnalysisMode 'Disabled' `
+            -RenderingMode 'Enabled'
+
+        $source.SynchronizationMethod | Should -Be 'OffsetHint'
+        $source.AnalysisMode | Should -Be 'Disabled'
+        $source.RenderingMode | Should -Be 'Enabled'
+
+    }
+
 }

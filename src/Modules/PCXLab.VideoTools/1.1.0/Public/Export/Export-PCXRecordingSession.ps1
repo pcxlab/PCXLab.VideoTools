@@ -144,7 +144,33 @@ function Export-PCXRecordingSession {
                 Created           = $Item.Created
                 ModuleVersion     = $Item.ModuleVersion
 
-                Sources           = $Item.Sources
+                Sources           = @(
+                    foreach ($Source in $Item.Sources) {
+
+                        $sanitizedSource = [PSCustomObject]@{
+
+                            PSTypeName            = 'PCXLab.MediaSource'
+
+                            Path                  = $Source.Path
+                            Id                    = $Source.Id
+                            Label                 = $Source.Label
+                            Role                  = $Source.Role
+                            SourceType            = $Source.SourceType
+                            AudioStreamIndex      = $Source.AudioStreamIndex
+                            OffsetHint            = $Source.OffsetHint
+
+                            SynchronizationMethod = if ($Source.PSObject.Properties['SynchronizationMethod']) { $Source.SynchronizationMethod } else { 'Auto' }
+                            AnalysisMode          = if ($Source.PSObject.Properties['AnalysisMode']) { $Source.AnalysisMode } else { 'Auto' }
+                            RenderingMode         = if ($Source.PSObject.Properties['RenderingMode']) { $Source.RenderingMode } else { 'Auto' }
+
+                            MediaInformation      = $Source.MediaInformation
+
+                        }
+
+                        $sanitizedSource
+
+                    }
+                )
                 Timeline          = [PSCustomObject]@{
 
                     PSTypeName           = 'PCXLab.SynchronizationTimeline'
