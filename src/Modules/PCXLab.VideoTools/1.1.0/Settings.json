@@ -25,7 +25,7 @@
                 "Confidence": 85
             },
             "ShortPause": {
-                "Enabled": true,
+                "Enabled": false,
                 "Reason": "Short Pause",
                 "Confidence": 0
             }
