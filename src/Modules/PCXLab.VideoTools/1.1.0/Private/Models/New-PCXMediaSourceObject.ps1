@@ -48,6 +48,34 @@ function New-PCXMediaSourceObject {
         [Nullable[double]]$OffsetHint,
 
         [Parameter()]
+        [ValidateSet(
+            'Auto',
+            'None',
+            'AudioCorrelation',
+            'OffsetHint',
+            'Timecode',
+            'Manual',
+            'PreSynchronized'
+        )]
+        [string]$SynchronizationMethod = 'Auto',
+
+        [Parameter()]
+        [ValidateSet(
+            'Auto',
+            'Enabled',
+            'Disabled'
+        )]
+        [string]$AnalysisMode = 'Auto',
+
+        [Parameter()]
+        [ValidateSet(
+            'Auto',
+            'Enabled',
+            'Disabled'
+        )]
+        [string]$RenderingMode = 'Auto',
+
+        [Parameter()]
         [object]$MediaInformation
 
     )
@@ -104,6 +132,10 @@ function New-PCXMediaSourceObject {
         AudioStreamIndex = $AudioStreamIndex
 
         OffsetHint = $OffsetHint
+
+        SynchronizationMethod = $SynchronizationMethod
+        AnalysisMode          = $AnalysisMode
+        RenderingMode         = $RenderingMode
 
         MediaInformation = $MediaInformation
 

@@ -42,19 +42,37 @@ function Edit-PCXRecordingSession {
     .OUTPUTS
         System.IO.FileInfo
     #>
-    [CmdletBinding()]
+    [CmdletBinding(DefaultParameterSetName = 'Path')]
     [OutputType([System.IO.FileInfo])]
     param(
 
-        [Parameter(Mandatory)]
+        [Parameter(
+            Mandatory,
+            ParameterSetName = 'Path'
+        )]
         [ValidateScript({
                 Test-Path -LiteralPath $_ -PathType Leaf
             })]
         [string]$ReferencePath,
 
-        [Parameter(Mandatory)]
+        [Parameter(
+            Mandatory,
+            ParameterSetName = 'Path'
+        )]
         [ValidateNotNullOrEmpty()]
         [string[]]$SourcePaths,
+
+        [Parameter(
+            Mandatory,
+            ValueFromPipeline,
+            ParameterSetName = 'MediaSource'
+        )]
+        [ValidateNotNull()]
+        [object]$MediaSource,
+
+        [Parameter(ParameterSetName = 'MediaSource')]
+        [ValidateNotNullOrEmpty()]
+        [string]$ReferenceSourceId,
 
         [Parameter()]
         [ValidateNotNullOrEmpty()]
@@ -84,151 +102,179 @@ function Edit-PCXRecordingSession {
 
     )
 
-    #
-    # Build media sources
-    #
+    begin {
 
-    $AllPaths = @($ReferencePath) + @($SourcePaths)
+        $MediaSourceList = [System.Collections.Generic.List[object]]::new()
 
-    $MediaSources = foreach ($MediaPath in $AllPaths) {
+    }
 
-        $FileName = [System.IO.Path]::GetFileName($MediaPath)
+    process {
 
-        if ($FileName -eq 'bandicam.webcam.mp4') {
+        if ($PSCmdlet.ParameterSetName -eq 'MediaSource') {
 
-            New-PCXMediaSource `
-                -Path $MediaPath `
-                -OffsetHint 0
+            if ($MediaSource.PSTypeNames -notcontains 'PCXLab.MediaSource') {
+                throw 'MediaSource must be a PCXLab.MediaSource object.'
+            }
 
-        }
-        else {
-
-            New-PCXMediaSource `
-                -Path $MediaPath
+            $MediaSourceList.Add($MediaSource)
 
         }
 
     }
 
-    $ReferenceSource = $MediaSources |
-    Where-Object { $_.Path -eq $ReferencePath } |
-    Select-Object -First 1
+    end {
+
+        #
+        # Build or collect media sources
+        #
+
+        if ($PSCmdlet.ParameterSetName -eq 'Path') {
+
+            $MediaSourceList = Build-PCXMediaSourcesFromPaths `
+                -ReferencePath $ReferencePath `
+                -SourcePaths $SourcePaths
+
+        }
+
+        if ($MediaSourceList.Count -lt 2) {
+            throw 'At least two media sources are required for synchronization.'
+        }
+
+        $ReferenceSource = $MediaSourceList[0]
+
+        if (-not [string]::IsNullOrWhiteSpace($ReferenceSourceId)) {
+
+            $resolved = @($MediaSourceList | Where-Object { $_.Id -eq $ReferenceSourceId })
+
+            if ($resolved.Count -eq 0) {
+                throw "Reference source '$ReferenceSourceId' was not found."
+            }
+
+            if ($resolved.Count -gt 1) {
+                throw "Multiple sources were found with Id '$ReferenceSourceId'."
+            }
+
+            $ReferenceSource = $resolved[0]
+
+        }
 
     #
     # Resolve or create recording session
     #
 
-    $RecordingSessionArguments = @{
-        ReferenceSourceId = $ReferenceSource.Id
-    }
+        $RecordingSessionArguments = @{
+            ReferenceSourceId = $ReferenceSource.Id
+        }
 
-    if (-not [string]::IsNullOrWhiteSpace($RecordingSessionCachePath)) {
-        $RecordingSessionArguments.CachePath = $RecordingSessionCachePath
-    }
+        if (-not [string]::IsNullOrWhiteSpace($RecordingSessionCachePath)) {
+            $RecordingSessionArguments.CachePath = $RecordingSessionCachePath
+        }
 
-    $Session = $MediaSources |
-    Get-PCXRecordingSession @RecordingSessionArguments
+        $Session = $MediaSourceList |
+        Get-PCXRecordingSession @RecordingSessionArguments
 
     #
     # Resolve or create reference analysis
     #
 
-    $AnalysisArguments = @{
-        Path            = $ReferencePath
-        NoiseFloor      = $NoiseFloor
-        MinimumDuration = $MinimumDuration
-    }
+        $AnalysisArguments = @{
+            Path            = $ReferenceSource.Path
+            NoiseFloor      = $NoiseFloor
+            MinimumDuration = $MinimumDuration
+        }
 
-    if (-not [string]::IsNullOrWhiteSpace($ReferenceCachePath)) {
-        $AnalysisArguments.CachePath = $ReferenceCachePath
-    }
+        if (-not [string]::IsNullOrWhiteSpace($ReferenceCachePath)) {
+            $AnalysisArguments.CachePath = $ReferenceCachePath
+        }
 
-    $ReferenceAnalysis = Get-PCXVideoAnalysis @AnalysisArguments
+        $ReferenceAnalysis = Get-PCXVideoAnalysis @AnalysisArguments
 
     #
     # Generate reference edit points
     #
 
-    $ReferenceEditPoints = $ReferenceAnalysis |
-    Find-PCXSilence |
-    Get-PCXEditPoint
+        $ReferenceEditPoints = $ReferenceAnalysis |
+        Find-PCXSilence |
+        Get-PCXEditPoint
 
-    Write-Host ""
-    Write-Host "===================================" -ForegroundColor Cyan
-    Write-Host "Reference Edit Points : $(@($ReferenceEditPoints).Count)" -ForegroundColor Cyan
+        Write-Host ""
+        Write-Host "===================================" -ForegroundColor Cyan
+        Write-Host "Reference Edit Points : $(@($ReferenceEditPoints).Count)" -ForegroundColor Cyan
 
     #
     # Translate edit points to synchronized sources
     #
 
-    $TranslatedEditPoints = $ReferenceEditPoints |
-    Sync-PCXEditPoint `
-        -RecordingSession $Session
+        $TranslatedEditPoints = $ReferenceEditPoints |
+        Sync-PCXEditPoint `
+            -RecordingSession $Session
 
-    Write-Host "Translated Edit Points: $(@($TranslatedEditPoints).Count)" -ForegroundColor Cyan
+        Write-Host "Translated Edit Points: $(@($TranslatedEditPoints).Count)" -ForegroundColor Cyan
 
     #
     # Combine reference and translated edit points
     #
 
-    $AllEditPoints = @($ReferenceEditPoints) + @($TranslatedEditPoints)
+        $AllEditPoints = @($ReferenceEditPoints) + @($TranslatedEditPoints)
 
-    Write-Host "Total Edit Points     : $(@($AllEditPoints).Count)" -ForegroundColor Cyan
+        Write-Host "Total Edit Points     : $(@($AllEditPoints).Count)" -ForegroundColor Cyan
 
     #
     # Group by source
     #
 
-    $Groups = $AllEditPoints |
-    Group-Object -Property SourcePath
+        $Groups = $AllEditPoints |
+        Group-Object -Property SourcePath
 
-    Write-Host "Source Groups         : $(@($Groups).Count)" -ForegroundColor Cyan
-    Write-Host "===================================" -ForegroundColor Cyan
+        Write-Host "Source Groups         : $(@($Groups).Count)" -ForegroundColor Cyan
+        Write-Host "===================================" -ForegroundColor Cyan
 
     #
     # Render one output per source
     #
 
-    foreach ($Group in $Groups) {
+        foreach ($Group in $Groups) {
 
-        $SourcePath = $Group.Name
+            $SourcePath = $Group.Name
 
-        Write-Host ""
-        Write-Host "-----------------------------------" -ForegroundColor Yellow
-        Write-Host "Processing Source :" -ForegroundColor Yellow
-        Write-Host "    $SourcePath"
-        Write-Host "Edit Points       : $(@($Group.Group).Count)" -ForegroundColor Yellow
+            Write-Host ""
+            Write-Host "-----------------------------------" -ForegroundColor Yellow
+            Write-Host "Processing Source :" -ForegroundColor Yellow
+            Write-Host "    $SourcePath"
+            Write-Host "Edit Points       : $(@($Group.Group).Count)" -ForegroundColor Yellow
 
-        $Segments = $Group.Group |
-        Get-PCXVideoSegments
+            $Segments = $Group.Group |
+            Get-PCXVideoSegments
 
-        Write-Host "Video Segments    : $(@($Segments).Count)" -ForegroundColor Green
+            Write-Host "Video Segments    : $(@($Segments).Count)" -ForegroundColor Green
 
-        if ($Segments.Count -eq 0) {
+            if ($Segments.Count -eq 0) {
 
-            Write-Host "Skipping source because no segments were generated." -ForegroundColor Red
+                Write-Host "Skipping source because no segments were generated." -ForegroundColor Red
 
-            continue
+                continue
 
-        }
+            }
 
-        if ([string]::IsNullOrWhiteSpace($OutputDirectory)) {
+            if ([string]::IsNullOrWhiteSpace($OutputDirectory)) {
 
-            Write-Host "Rendering using default output path..." -ForegroundColor Green
+                Write-Host "Rendering using default output path..." -ForegroundColor Green
 
-            $Segments |
-            Edit-PCXVideoSegments
+                $Segments |
+                Edit-PCXVideoSegments
 
-        }
-        else {
+            }
+            else {
 
-            $OutputPath = Get-PCXOutputPath `
-                -SourcePath $SourcePath `
-                -OutputDirectory $OutputDirectory
+                $OutputPath = Get-PCXOutputPath `
+                    -SourcePath $SourcePath `
+                    -OutputDirectory $OutputDirectory
 
-            $Segments |
-            Edit-PCXVideoSegments `
-                -OutputPath $OutputPath
+                $Segments |
+                Edit-PCXVideoSegments `
+                    -OutputPath $OutputPath
+
+            }
 
         }
 

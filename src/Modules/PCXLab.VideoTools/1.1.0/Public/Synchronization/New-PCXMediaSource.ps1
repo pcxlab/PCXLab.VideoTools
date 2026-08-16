@@ -29,6 +29,15 @@ function New-PCXMediaSource {
     .PARAMETER OffsetHint
         Optional hint about the expected offset in seconds.
 
+    .PARAMETER SynchronizationMethod
+        Method used to align this source with the reference timeline.
+
+    .PARAMETER AnalysisMode
+        Whether this source's audio should be used for silence analysis.
+
+    .PARAMETER RenderingMode
+        Whether this source should be rendered as an edited output.
+
     .OUTPUTS
         PCXLab.MediaSource
     #>
@@ -77,7 +86,35 @@ function New-PCXMediaSource {
         [int]$AudioStreamIndex = -1,
 
         [Parameter()]
-        [Nullable[double]]$OffsetHint
+        [Nullable[double]]$OffsetHint,
+
+        [Parameter()]
+        [ValidateSet(
+            'Auto',
+            'None',
+            'AudioCorrelation',
+            'OffsetHint',
+            'Timecode',
+            'Manual',
+            'PreSynchronized'
+        )]
+        [string]$SynchronizationMethod = 'Auto',
+
+        [Parameter()]
+        [ValidateSet(
+            'Auto',
+            'Enabled',
+            'Disabled'
+        )]
+        [string]$AnalysisMode = 'Auto',
+
+        [Parameter()]
+        [ValidateSet(
+            'Auto',
+            'Enabled',
+            'Disabled'
+        )]
+        [string]$RenderingMode = 'Auto'
 
     )
 
@@ -109,6 +146,9 @@ function New-PCXMediaSource {
             -SourceType $SourceType `
             -AudioStreamIndex $AudioStreamIndex `
             -OffsetHint $OffsetHint `
+            -SynchronizationMethod $SynchronizationMethod `
+            -AnalysisMode $AnalysisMode `
+            -RenderingMode $RenderingMode `
             -MediaInformation $mediaInfo
 
     }

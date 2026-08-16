@@ -69,7 +69,23 @@ function Sync-PCXEditPoint {
             return
         }
 
+        $sourceById = @{}
+        if ($null -ne $Session.Sources) {
+            foreach ($source in $Session.Sources) {
+                $sourceById[$source.Id] = $source
+            }
+        }
+
         foreach ($SourceOffset in $Session.Timeline.SourceOffsets) {
+
+            $source = $sourceById[$SourceOffset.SourceId]
+
+            if ($source) {
+                $renderingMode = Resolve-PCXSourceRenderingMode -Source $source
+                if ($renderingMode -eq 'Disabled') {
+                    continue
+                }
+            }
 
             Convert-PCXEditPointToSource `
                 -EditPoint $InputObject `

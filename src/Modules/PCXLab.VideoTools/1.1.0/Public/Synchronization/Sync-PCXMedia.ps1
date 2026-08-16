@@ -118,7 +118,9 @@ function Sync-PCXMedia {
 
                 if ($source.Id -eq $referenceSource.Id) { continue }
 
-                if ($source.MediaInformation.HasAudio) {
+                $synchronizationMethod = Resolve-PCXSourceSynchronizationMethod -Source $source
+
+                if ($synchronizationMethod -eq 'AudioCorrelation') {
 
                     $correlationArguments = @{
                         ReferenceSource  = $referenceSource
@@ -134,7 +136,7 @@ function Sync-PCXMedia {
                     $offset = Measure-PCXSourceOffsetAudioCorrelation @correlationArguments
 
                 }
-                elseif ($null -ne $source.OffsetHint) {
+                elseif ($synchronizationMethod -eq 'OffsetHint') {
 
                     $offset = New-PCXSourceOffsetObject `
                         -SourceId $source.Id `
@@ -146,9 +148,14 @@ function Sync-PCXMedia {
                         -Method 'OffsetHint'
 
                 }
+                elseif ($synchronizationMethod -eq 'None') {
+
+                    continue
+
+                }
                 else {
 
-                    throw "Cannot synchronize source '$($source.Id)' because it has no audio and no OffsetHint was provided."
+                    throw "Synchronization method '$synchronizationMethod' is not supported for source '$($source.Id)'."
 
                 }
 
