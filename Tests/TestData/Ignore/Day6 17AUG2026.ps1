@@ -1,5 +1,6 @@
 
 Clear-Host
+
 Remove-Module PCXLab.VideoTools -Force
 Import-Module .\src\Modules\PCXLab.VideoTools -Force
 
@@ -45,5 +46,29 @@ Edit-PCXRecordingSession `
     -SourcePaths @(
     "C:\Recording seg TestONLOY\RG_20260127_025337_001\VID_20260127_025337Original.mp4",
     "C:\Recording seg TestONLOY\RG_20260127_025337_001\bandicam.webcamOriginal.mp4"
+) `
+    -OutputDirectory "C:\Recording seg TestONLOY"
+
+# C:\Recording seg TestONLOY\RG_20260127_025337_001 C ShortPauseTRUE this file i think erlier processed bedacuse frm 24min to 18min
+Edit-PCXRecordingSession `
+    -ReferencePath "C:\Recording seg TestONLOY\RG_20260127_025337_001 C ShortPauseTRUE\bandicam.mp4" `
+    -SourcePaths @(
+    "C:\Recording seg TestONLOY\RG_20260127_025337_001 C ShortPauseTRUE\VID_20260127_025337.mp4",
+    "C:\Recording seg TestONLOY\RG_20260127_025337_001 C ShortPauseTRUE\bandicam.webcam.mp4"
+) `
+    -OutputDirectory "C:\Recording seg TestONLOY"
+
+#rerunning once again same command
+# chanigng json true to false
+
+
+#C:\Recording seg TestONLOY\RG_20260127_025337_001 A OriginalFiles
+
+
+Edit-PCXRecordingSession `
+    -ReferencePath "C:\Recording seg TestONLOY\RG_20260127_025337_001 A OriginalFiles\bandicam.mp4" `
+    -SourcePaths @(
+    "C:\Recording seg TestONLOY\RG_20260127_025337_001 A OriginalFiles\VID_20260127_025337.mp4",
+    "C:\Recording seg TestONLOY\RG_20260127_025337_001 A OriginalFiles\bandicam.webcam.mp4"
 ) `
     -OutputDirectory "C:\Recording seg TestONLOY"

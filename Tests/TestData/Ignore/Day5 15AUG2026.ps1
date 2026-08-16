@@ -1079,3 +1079,16 @@ $MediaSources |
 Group-Object Id |
 Where-Object Count -gt 1 |
 Format-Table Name, Count
+
+Get-PCXMediaInformation -Path "C:\Recording seg TestONLOY\RG_20260127_025337_001\bandicam.webcamOriginal.mp4"
+Get-PCXMediaInformation -Path "C:\Recording seg TestONLOY\RG_20260127_025337_001\bandicamOriginal.mp4" 
+Get-PCXMediaInformation -Path "C:\Recording seg TestONLOY\RG_20260127_025337_001\VID_20260127_025337Original.mp4"
+Get-PCXMediaInformation -Path "C:\Recording seg TestONLOY\RG_20260127_025337_001 C ShortPauseTRUE\bandicam.mp4"
+Get-PCXMediaInformation -Path "C:\Recording seg TestONLOY\RG_20260127_025337_001 C ShortPauseTRUE\bandicam.webcam.mp4"
+Get-PCXMediaInformation -Path "C:\Recording seg TestONLOY\RG_20260127_025337_001 C ShortPauseTRUE\VID_20260127_025337.mp4"
+Get-PCXMediaInformation -Path "C:\Recording seg TestONLOY\bandicam.mp4"
+Get-PCXMediaInformation -Path "C:\Recording seg TestONLOY\bandicam.webcam.mp4"
+Get-PCXMediaInformation -Path "C:\Recording seg TestONLOY\VID_20260127_025337.mp4"
+Get-PCXMediaInformation -Path 
+
+write-h

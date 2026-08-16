@@ -70,21 +70,16 @@ function Edit-PCXVideoSegments {
         # Resolve output path
         #
 
-        if ([string]::IsNullOrWhiteSpace($OutputPath)) {
-
-            $OutputPath = Get-PCXDefaultOutputPath `
-                -SourcePath $SourcePath `
-                -Suffix 'Edited' `
-                -Extension '.mp4'
-
-        }
+        $OutputPath = Get-PCXOutputPath `
+            -SourcePath $SourcePath `
+            -OutputPath $OutputPath
 
         #
         # Read source audio information & presence
         #
 
         $AudioInfo = Get-PCXAudioInformation -Path $SourcePath
-        $HasAudio  = ($null -ne $AudioInfo -and $AudioInfo.HasAudio)
+        $HasAudio = ($null -ne $AudioInfo -and $AudioInfo.HasAudio)
 
         #
         # Build timeline filter graph
@@ -102,11 +97,11 @@ function Edit-PCXVideoSegments {
         if ($HasAudio) {
 
             $AudioSettings = [PSCustomObject]@{
-                Normalize = Get-PCXSetting `
+                Normalize      = Get-PCXSetting `
                     -Name 'Audio.Normalize' `
                     -DefaultValue $false
 
-                Compression = Get-PCXSetting `
+                Compression    = Get-PCXSetting `
                     -Name 'Audio.Compression' `
                     -DefaultValue $false
 
@@ -138,7 +133,8 @@ function Edit-PCXVideoSegments {
 
         $SampleRate = if ($HasAudio -and $AudioInfo.SampleRate) {
             $AudioInfo.SampleRate
-        } else {
+        }
+        else {
             0
         }
 

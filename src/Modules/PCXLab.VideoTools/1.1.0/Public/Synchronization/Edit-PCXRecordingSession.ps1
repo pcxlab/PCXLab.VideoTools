@@ -222,11 +222,9 @@ function Edit-PCXRecordingSession {
         }
         else {
 
-            $OutputFileName = [System.IO.Path]::GetFileName($SourcePath)
-            $OutputPath = Join-Path $OutputDirectory $OutputFileName
-
-            Write-Host "Rendering to:" -ForegroundColor Green
-            Write-Host "    $OutputPath"
+            $OutputPath = Get-PCXOutputPath `
+                -SourcePath $SourcePath `
+                -OutputDirectory $OutputDirectory
 
             $Segments |
             Edit-PCXVideoSegments `

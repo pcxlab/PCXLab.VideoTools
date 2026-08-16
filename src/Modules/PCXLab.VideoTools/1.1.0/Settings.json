@@ -35,5 +35,8 @@
         "Normalize": true,
         "Compression": true,
         "RepairChannels": true
+    },
+    "Output": {
+        "Suffix": "-Edited"
     }
 }
