@@ -44,8 +44,8 @@ function New-PCXMediaSource {
         )]
         [Alias('FullName')]
         [ValidateScript({
-            Test-Path -LiteralPath $_ -PathType Leaf
-        })]
+                Test-Path -LiteralPath $_ -PathType Leaf
+            })]
         [string]$Path,
 
         [Parameter()]
@@ -91,18 +91,20 @@ function New-PCXMediaSource {
             throw "Unable to retrieve media information for '$resolvedPath'."
         }
 
-        if ([string]::IsNullOrWhiteSpace($Id)) {
-            $Id = [System.IO.Path]::GetFileNameWithoutExtension($resolvedPath)
+        $sourceId = $Id
+        if ([string]::IsNullOrWhiteSpace($sourceId)) {
+            $sourceId = [System.IO.Path]::GetFileNameWithoutExtension($resolvedPath)
         }
 
-        if ([string]::IsNullOrWhiteSpace($Label)) {
-            $Label = [System.IO.Path]::GetFileName($resolvedPath)
+        $sourceLabel = $Label
+        if ([string]::IsNullOrWhiteSpace($sourceLabel)) {
+            $sourceLabel = [System.IO.Path]::GetFileName($resolvedPath)
         }
 
         New-PCXMediaSourceObject `
             -Path $resolvedPath `
-            -Id $Id `
-            -Label $Label `
+            -Id $sourceId `
+            -Label $sourceLabel `
             -Role $Role `
             -SourceType $SourceType `
             -AudioStreamIndex $AudioStreamIndex `

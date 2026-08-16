@@ -123,16 +123,25 @@ function Get-PCXRecordingSession {
 
         Write-Verbose "No cache found at '$CachePath'. Running synchronization."
 
+        $syncArguments = @{
+            Strategy          = $Strategy
+            MinimumConfidence = $MinimumConfidence
+        }
+
+        if (-not [string]::IsNullOrWhiteSpace($ReferenceSourceId)) {
+            $syncArguments['ReferenceSourceId'] = $ReferenceSourceId
+        }
+
+        if ($null -ne $MaxOffsetSeconds) {
+            $syncArguments['MaxOffsetSeconds'] = $MaxOffsetSeconds
+        }
+
         $Synchronization = $SourceList |
-            Sync-PCXMedia `
-                -Strategy $Strategy `
-                -ReferenceSourceId:$ReferenceSourceId `
-                -MinimumConfidence $MinimumConfidence `
-                -MaxOffsetSeconds $MaxOffsetSeconds
+        Sync-PCXMedia @syncArguments
 
         $null = $Synchronization |
-            Export-PCXRecordingSession `
-                -Path $CachePath
+        Export-PCXRecordingSession `
+            -Path $CachePath
 
         return $Synchronization
 

@@ -18,7 +18,7 @@ function Test-PCXVideoTools {
     param()
 
     $Context = Get-PCXContext
-    $Module  = Get-Module -Name PCXLab.VideoTools
+    $Module = Get-Module -Name PCXLab.VideoTools
 
     #$FFprobe = Get-PCXToolPath -Name "FFprobe"
     $FFprobe = Get-PCXToolPath -Tool FFprobe

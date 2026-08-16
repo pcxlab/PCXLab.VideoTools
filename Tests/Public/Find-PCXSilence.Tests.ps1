@@ -1,13 +1,11 @@
-BeforeAll {
-
-    . "$PSScriptRoot\..\TestHelper.ps1"
-
-    $script:Silences = @(Find-PCXSilence -Path $script:TestVideo -MinimumDuration 2 -NoiseFloor -35)
-}
-
 Describe 'Find-PCXSilence' {
 
-    It 'Returns one or more silence regions for the test media' {
+    BeforeAll {
+        . "$PSScriptRoot\..\TestHelper.ps1"
+        $script:Silences = @(Find-PCXSilence -Path $script:TestVideo -MinimumDuration 2 -NoiseFloor -35)
+    }
+
+    It 'Returns one or more silence regions for the test media with silence' {
         $script:Silences.Count | Should -BeGreaterThan 0
     }
 
@@ -17,7 +15,6 @@ Describe 'Find-PCXSilence' {
 
     It 'Honours the requested minimum duration' {
         $shortSilences = @($script:Silences | Where-Object DurationSeconds -lt 2)
-
         $shortSilences.Count | Should -Be 0
     }
 
@@ -30,7 +27,13 @@ Describe 'Find-PCXSilence' {
 
     It 'Classifies long silence regions as recording breaks' {
         $recordingBreaks = @($script:Silences | Where-Object Classification -eq 'RecordingBreak')
-
         $recordingBreaks.Count | Should -BeGreaterThan 0
     }
+
+    It 'Returns empty collection when no silence matches the threshold' {
+        # High minimum duration that no silence section satisfies
+        $noSilence = @(Find-PCXSilence -Path $script:TestVideo -MinimumDuration 3600 -NoiseFloor -120)
+        $noSilence.Count | Should -Be 0
+    }
+
 }
