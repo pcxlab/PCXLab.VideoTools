@@ -58,10 +58,20 @@ function Analyze-PCXVideo {
                     -MinimumDuration $MinimumDuration
             )
 
-            $Segments = @(
-                $Silence |
-                Get-PCXVideoSegments
-            )
+            $Segments = if ($Silence.Count -gt 0) {
+                @(
+                    $Silence |
+                    Get-PCXVideoSegments
+                )
+            }
+            else {
+                @(
+                    Add-PCXKeepSegment `
+                        -SourcePath $MediaFile `
+                        -Start ([TimeSpan]::Zero) `
+                        -End $Media.Duration
+                )
+            }
 
             $Statistics = $Silence |
             Measure-PCXSilence

@@ -7,5 +7,5 @@ Tools/FFmpeg/bin/ffprobe.exe
 Tests/TestData/Test.mp4
 
 # Ignore folder
-Tests/TestData/Ignore/
+# Tests/TestData/Ignore/
 

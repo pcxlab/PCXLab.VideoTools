@@ -26,9 +26,17 @@ function Get-PCXEditPoint {
     
         $Rule = Get-PCXEditPointRule `
             -Classification $InputObject.Classification
-    
+
         if ($null -eq $Rule) {
             return
+        }
+
+        if (-not $Rule.Enabled) {
+
+            Write-Verbose "Skipping '$($InputObject.Classification)' edit point: rule is disabled."
+
+            return
+
         }
     
         New-PCXEditPointObject `

@@ -99,6 +99,12 @@ function Invoke-PCXFFmpegEdit {
 
     try {
 
+        $hasAudio = if ($null -ne $EditJob.PSObject.Properties['HasAudio']) {
+            [bool]$EditJob.HasAudio
+        } else {
+            $true
+        }
+
         $Arguments = @(
 
             '-y'
@@ -112,16 +118,20 @@ function Invoke-PCXFFmpegEdit {
             '-map'
             '[outv]'
 
-            '-map'
-            '[outa]'
+            if ($hasAudio) {
+                '-map'
+                '[outa]'
+            }
 
             '-c:v'
             $EditJob.VideoCodec
 
-            '-c:a'
-            $EditJob.AudioCodec
+            if ($hasAudio) {
+                '-c:a'
+                $EditJob.AudioCodec
+            }
 
-            if ($EditJob.SampleRate -gt 0) {
+            if ($hasAudio -and $EditJob.SampleRate -gt 0) {
                 '-ar'
                 $EditJob.SampleRate.ToString()
             }

@@ -18,18 +18,20 @@ function Get-PCXEditPointRule {
         -Name 'Analysis.EditPoints' `
         -DefaultValue @{}
 
-        $Property = $Rules.PSObject.Properties[$Classification]
+    $Property = $Rules.PSObject.Properties[$Classification]
 
-        if ($null -eq $Property) {
-            return $null
-        }
-        
-        $Rule = $Property.Value
-        
-        if (-not $Rule.Enabled) {
-            return $null
-        }
-        
-        return $Rule
+    if ($null -eq $Property) {
+
+        Write-Verbose "No edit point rule found for classification '$Classification'."
+
+        return $null
+
+    }
+
+    $Rule = $Property.Value
+
+    Write-Verbose "Edit point rule for '$Classification': Enabled=$($Rule.Enabled), Reason='$($Rule.Reason)', Confidence=$($Rule.Confidence)."
+
+    return $Rule
 
 }

@@ -42,7 +42,10 @@ function New-PCXEditJobObject {
 
         [Parameter()]
         [ValidateRange(0, 192000)]
-        [int]$SampleRate = 0
+        [int]$SampleRate = 0,
+
+        [Parameter()]
+        [bool]$HasAudio = $true
 
     )
 
@@ -63,6 +66,8 @@ function New-PCXEditJobObject {
         InputIndex  = $InputIndex
 
         SampleRate  = $SampleRate
+
+        HasAudio    = $HasAudio
 
     }
 

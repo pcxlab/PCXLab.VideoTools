@@ -80,43 +80,55 @@ function Edit-PCXVideoSegments {
         }
 
         #
+        # Read source audio information & presence
+        #
+
+        $AudioInfo = Get-PCXAudioInformation -Path $SourcePath
+        $HasAudio  = ($null -ne $AudioInfo -and $AudioInfo.HasAudio)
+
+        #
         # Build timeline filter graph
         #
 
         $FilterGraph = $Segments |
         ConvertTo-PCXConcatFilter `
-            -InputIndex 0
+            -InputIndex 0 `
+            -HasAudio:$HasAudio
 
         #
         # Read audio filter settings
         #
 
-        $AudioSettings = [PSCustomObject]@{
-            Normalize = Get-PCXSetting `
-                -Name 'Audio.Normalize' `
-                -DefaultValue $false
+        if ($HasAudio) {
 
-            Compression = Get-PCXSetting `
-                -Name 'Audio.Compression' `
-                -DefaultValue $false
+            $AudioSettings = [PSCustomObject]@{
+                Normalize = Get-PCXSetting `
+                    -Name 'Audio.Normalize' `
+                    -DefaultValue $false
 
-            RepairChannels = Get-PCXSetting `
-                -Name 'Audio.RepairChannels' `
-                -DefaultValue $false
-        }
+                Compression = Get-PCXSetting `
+                    -Name 'Audio.Compression' `
+                    -DefaultValue $false
 
-        $AudioFilter = ConvertTo-PCXAudioFilter `
-            -Settings $AudioSettings
+                RepairChannels = Get-PCXSetting `
+                    -Name 'Audio.RepairChannels' `
+                    -DefaultValue $false
+            }
 
-        #
-        # Merge audio filter into the filter graph
-        #
+            $AudioFilter = ConvertTo-PCXAudioFilter `
+                -Settings $AudioSettings
 
-        if (-not [string]::IsNullOrWhiteSpace($AudioFilter)) {
+            #
+            # Merge audio filter into the filter graph
+            #
 
-            $FilterGraph = $FilterGraph -replace '\[outa\]$', '[outa_pre]'
+            if (-not [string]::IsNullOrWhiteSpace($AudioFilter)) {
 
-            $FilterGraph += ";[outa_pre]$AudioFilter[outa]"
+                $FilterGraph = $FilterGraph -replace '\[outa\]$', '[outa_pre]'
+
+                $FilterGraph += ";[outa_pre]$AudioFilter[outa]"
+
+            }
 
         }
 
@@ -124,9 +136,7 @@ function Edit-PCXVideoSegments {
         # Read source audio sample rate
         #
 
-        $AudioInfo = Get-PCXAudioInformation -Path $SourcePath
-
-        $SampleRate = if ($AudioInfo -and $AudioInfo.SampleRate) {
+        $SampleRate = if ($HasAudio -and $AudioInfo.SampleRate) {
             $AudioInfo.SampleRate
         } else {
             0
@@ -140,7 +150,8 @@ function Edit-PCXVideoSegments {
             -SourcePath $SourcePath `
             -OutputPath $OutputPath `
             -FilterGraph $FilterGraph `
-            -SampleRate $SampleRate
+            -SampleRate $SampleRate `
+            -HasAudio:$HasAudio
 
         #
         # Execute job

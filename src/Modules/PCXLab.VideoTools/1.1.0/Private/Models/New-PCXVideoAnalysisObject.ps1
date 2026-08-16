@@ -24,15 +24,14 @@ param(
     [object]$Media,
 
     [Parameter(Mandatory)]
-    [ValidateNotNull()]
+    [AllowEmptyCollection()]
     [object[]]$Silence,
 
     [Parameter(Mandatory)]
-    [ValidateNotNull()]
+    [AllowEmptyCollection()]
     [object[]]$Segments,
 
-    [Parameter(Mandatory)]
-    [ValidateNotNull()]
+    [Parameter()]
     [object]$SilenceStatistics
 
 )

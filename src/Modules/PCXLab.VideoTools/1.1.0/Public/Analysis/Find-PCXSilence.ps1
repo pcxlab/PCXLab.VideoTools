@@ -98,6 +98,13 @@ function Find-PCXSilence {
 
             foreach ($MediaFile in $Path) {
 
+                $AudioInfo = Get-PCXAudioInformation -Path $MediaFile
+
+                if ($null -eq $AudioInfo -or -not $AudioInfo.HasAudio) {
+                    Write-Verbose "Skipping silence detection for '$MediaFile': Media contains no audio stream."
+                    continue
+                }
+
                 $RawOutput = Invoke-PCXSilenceDetection `
                     -Path $MediaFile `
                     -NoiseFloor $NoiseFloor `
