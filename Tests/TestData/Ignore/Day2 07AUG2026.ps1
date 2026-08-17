@@ -474,6 +474,22 @@ Import-PCXVideoAnalysis `
 Get-PCXSilence |
 Export-PCXPremiereEditPoints
 
+
+"C:\Recording seg TestONLOY\20260127 TEST Recording once\RG_20260127_025337_004\bandicam 2026-01-27 02-53-49-253-Analysis.json"
+
+Import-PCXVideoAnalysis `
+    -Path "C:\Recording seg TestONLOY\20260127 TEST Recording once\RG_20260127_025337_004\bandicam 2026-01-27 02-53-49-253-Analysis.json" |
+Get-PCXSilence |
+Export-PCXPremiereMarkers
+
+
+Import-PCXVideoAnalysis `
+    -Path "C:\Recording seg TestONLOY\20260127 TEST Recording once\RG_20260127_025337_004\bandicam 2026-01-27 02-53-49-253-Analysis.json" |
+Get-PCXSilence |
+Export-PCXPremiereEditPoints
+
+
+
 Again, no FFmpeg should run.
 
 $Analysis = Import-PCXVideoAnalysis `
