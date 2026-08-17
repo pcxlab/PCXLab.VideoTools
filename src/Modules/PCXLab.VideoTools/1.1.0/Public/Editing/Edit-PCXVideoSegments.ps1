@@ -70,9 +70,21 @@ function Edit-PCXVideoSegments {
         # Resolve output path
         #
 
-        $OutputPath = Get-PCXOutputPath `
-            -SourcePath $SourcePath `
-            -OutputPath $OutputPath
+        if (-not [string]::IsNullOrWhiteSpace($OutputPath)) {
+
+            $OutputPath = Get-PCXArtifactPath `
+                -SourcePath $SourcePath `
+                -ArtifactType EditedVideo `
+                -OutputPath $OutputPath
+
+        }
+        else {
+
+            $OutputPath = Get-PCXArtifactPath `
+                -SourcePath $SourcePath `
+                -ArtifactType EditedVideo
+
+        }
 
         #
         # Read source audio information & presence

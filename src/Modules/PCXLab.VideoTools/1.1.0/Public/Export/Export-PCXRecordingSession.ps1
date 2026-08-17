@@ -84,9 +84,9 @@ function Export-PCXRecordingSession {
 
         if ([string]::IsNullOrWhiteSpace($Path)) {
 
-            $Path = Get-PCXDefaultOutputPath `
+            $Path = Get-PCXArtifactPath `
                 -SourcePath $Session.Sources[0].Path `
-                -FileName 'RecordingSession.json'
+                -ArtifactType RecordingSession
 
         }
 

@@ -1,0 +1,50 @@
+Describe 'Export-PCXPremiereEditPoints' {
+
+    BeforeAll {
+        . "$PSScriptRoot\..\TestHelper.ps1"
+        $script:Module = Get-Module PCXLab.VideoTools
+    }
+
+    It 'Exports VideoSegment objects to a Premiere edit-point script' {
+
+        $segments = & $script:Module {
+            param($TestVideo)
+            @(
+                New-PCXVideoSegmentObject -SourcePath $TestVideo -Start ([TimeSpan]::Zero) -End ([TimeSpan]::FromSeconds(5)) -Action 'Keep'
+                New-PCXVideoSegmentObject -SourcePath $TestVideo -Start ([TimeSpan]::FromSeconds(5)) -End ([TimeSpan]::FromSeconds(10)) -Action 'Remove'
+            )
+        } $script:TestVideo
+
+        $result = $segments | Export-PCXPremiereEditPoints -Path "$TestDrive\Test-EditPoints.jsx"
+
+        $result | Should -Not -BeNullOrEmpty
+        $result.FullName | Should -Be "$TestDrive\Test-EditPoints.jsx"
+        $result.FullName | Should -Exist
+
+        $scriptContent = Get-Content -LiteralPath $result.FullName -Raw
+        $scriptContent | Should -Match 'editPoints'
+
+    }
+
+    It 'Rejects mixed input types' {
+
+        $segment = & $script:Module {
+            param($TestVideo)
+            New-PCXVideoSegmentObject -SourcePath $TestVideo -Start ([TimeSpan]::Zero) -End ([TimeSpan]::FromSeconds(5)) -Action 'Keep'
+        } $script:TestVideo
+
+        $silence = New-Object PSObject -Property @{
+            SourcePath = $script:TestVideo
+            Start      = [TimeSpan]::Zero
+            End        = [TimeSpan]::FromSeconds(5)
+            Duration   = [TimeSpan]::FromSeconds(5)
+        }
+        $silence.PSTypeNames.Insert(0, 'PCXLab.Silence')
+
+        $mixed = @($segment, $silence)
+
+        { $mixed | Export-PCXPremiereEditPoints -Path "$TestDrive\Test-Mixed.jsx" } | Should -Throw '*same type*'
+
+    }
+
+}

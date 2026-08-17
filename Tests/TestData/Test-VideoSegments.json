@@ -1,0 +1,66 @@
+{
+  "SchemaVersion": "1.0",
+  "ModuleVersion": "1.1.0",
+  "GeneratedOn": "2026-08-17T15:02:52.0708114+05:30",
+  "VideoSegments": [
+    {
+      "SourcePath": "C:\\Projects\\PCXLab.VideoTools\\Tests\\TestData\\Test.mp4",
+      "Source": "Test.mp4",
+      "Start": {
+        "Ticks": 0,
+        "Days": 0,
+        "Hours": 0,
+        "Milliseconds": 0,
+        "Microseconds": 0,
+        "Nanoseconds": 0,
+        "Minutes": 0,
+        "Seconds": 0,
+        "TotalDays": 0.0,
+        "TotalHours": 0.0,
+        "TotalMilliseconds": 0.0,
+        "TotalMicroseconds": 0.0,
+        "TotalNanoseconds": 0.0,
+        "TotalMinutes": 0.0,
+        "TotalSeconds": 0.0
+      },
+      "End": {
+        "Ticks": 50000000,
+        "Days": 0,
+        "Hours": 0,
+        "Milliseconds": 0,
+        "Microseconds": 0,
+        "Nanoseconds": 0,
+        "Minutes": 0,
+        "Seconds": 5,
+        "TotalDays": 5.787037037037037E-05,
+        "TotalHours": 0.001388888888888889,
+        "TotalMilliseconds": 5000.0,
+        "TotalMicroseconds": 5000000.0,
+        "TotalNanoseconds": 5000000000.0,
+        "TotalMinutes": 0.08333333333333333,
+        "TotalSeconds": 5.0
+      },
+      "Duration": {
+        "Ticks": 50000000,
+        "Days": 0,
+        "Hours": 0,
+        "Milliseconds": 0,
+        "Microseconds": 0,
+        "Nanoseconds": 0,
+        "Minutes": 0,
+        "Seconds": 5,
+        "TotalDays": 5.787037037037037E-05,
+        "TotalHours": 0.001388888888888889,
+        "TotalMilliseconds": 5000.0,
+        "TotalMicroseconds": 5000000.0,
+        "TotalNanoseconds": 5000000000.0,
+        "TotalMinutes": 0.08333333333333333,
+        "TotalSeconds": 5.0
+      },
+      "StartSeconds": 0.0,
+      "EndSeconds": 5.0,
+      "DurationSeconds": 5.0,
+      "Action": "Keep"
+    }
+  ]
+}

@@ -79,14 +79,13 @@ end {
     # Default output path
     #
 
-    if ([string]::IsNullOrWhiteSpace($Path)) {
+        if ([string]::IsNullOrWhiteSpace($Path)) {
 
-        $Path = Get-PCXDefaultOutputPath `
-            -SourcePath $Analysis[0].SourcePath `
-            -Suffix 'Analysis' `
-            -Extension '.json'
+            $Path = Get-PCXArtifactPath `
+                -SourcePath $Analysis[0].SourcePath `
+                -ArtifactType Analysis
 
-    }
+        }
 
     #
     # Ensure output folder exists

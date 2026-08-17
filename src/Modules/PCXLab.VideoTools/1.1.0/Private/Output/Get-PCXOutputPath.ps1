@@ -5,11 +5,8 @@ function Get-PCXOutputPath {
         Resolves the output path for generated media.
 
     .DESCRIPTION
-        Returns the final output path using the following priority:
-
-        1. OutputPath
-        2. OutputDirectory + configured suffix
-        3. Source directory + configured suffix
+        This function is retained for backward compatibility. It now
+        delegates to Get-PCXArtifactPath for the EditedVideo artifact type.
 
     .PARAMETER SourcePath
         Source media file.
@@ -42,46 +39,13 @@ function Get-PCXOutputPath {
 
     )
 
-    #
-    # Explicit output path always wins
-    #
-
     if (-not [string]::IsNullOrWhiteSpace($OutputPath)) {
         return $OutputPath
     }
 
-    #
-    # Read configured suffix
-    #
-
-    $Suffix = Get-PCXSetting `
-        -Name 'Output.Suffix' `
-        -DefaultValue '-Edited'
-
-    #
-    # Build filename
-    #
-
-    $FileNameWithoutExtension =
-    [System.IO.Path]::GetFileNameWithoutExtension($SourcePath)
-
-    $Extension =
-    [System.IO.Path]::GetExtension($SourcePath)
-
-    $OutputFileName =
-    "$FileNameWithoutExtension$Suffix$Extension"
-
-    #
-    # Resolve destination folder
-    #
-
-    if ([string]::IsNullOrWhiteSpace($OutputDirectory)) {
-
-        $OutputDirectory =
-        Split-Path $SourcePath -Parent
-
-    }
-
-    return (Join-Path $OutputDirectory $OutputFileName)
+    return Get-PCXArtifactPath `
+        -SourcePath $SourcePath `
+        -ArtifactType EditedVideo `
+        -OutputDirectory $OutputDirectory
 
 }

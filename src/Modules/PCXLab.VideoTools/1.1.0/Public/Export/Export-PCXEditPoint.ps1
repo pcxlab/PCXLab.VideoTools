@@ -65,10 +65,9 @@ function Export-PCXEditPoint {
 
         if ([string]::IsNullOrWhiteSpace($Path)) {
 
-            $Path = Get-PCXDefaultOutputPath `
+            $Path = Get-PCXArtifactPath `
                 -SourcePath $EditPoints[0].SourcePath `
-                -Suffix 'EditPoints' `
-                -Extension '.json'
+                -ArtifactType EditPoint
 
         }
 
