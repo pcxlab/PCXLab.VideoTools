@@ -67,10 +67,10 @@ function Export-PCXSilence {
 
         if ([string]::IsNullOrWhiteSpace($Path)) {
 
-            $Path = Get-PCXDefaultOutputPath `
+            $Path = Get-PCXArtifactPath `
                 -SourcePath $Silence[0].SourcePath `
-                -Suffix 'Silence' `
-                -Extension '.json'
+                -ArtifactType Silence
+
         }
 
         $Parent = [System.IO.Path]::GetDirectoryName($Path)

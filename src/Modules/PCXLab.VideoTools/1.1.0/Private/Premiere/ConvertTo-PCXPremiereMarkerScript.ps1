@@ -2,14 +2,15 @@ function ConvertTo-PCXPremiereMarkerScript {
 
     <#
     .SYNOPSIS
-        Converts PCXLab silence objects into a Premiere Pro ExtendScript.
+        Converts PCXLab.VideoSegment objects into a Premiere Pro ExtendScript.
 
     .DESCRIPTION
         Produces an ExtendScript payload that creates range comment markers on
-        the active Adobe Premiere Pro sequence.
+        the active Adobe Premiere Pro sequence. Markers are created for every
+        segment, labelled by action.
 
     .PARAMETER Marker
-        Silence objects to represent as Premiere Pro markers.
+        PCXLab.VideoSegment objects to represent as Premiere Pro markers.
 
     .PARAMETER TimeOffsetSeconds
         Offset added to every marker position. Use this when the source clip
@@ -38,6 +39,11 @@ function ConvertTo-PCXPremiereMarkerScript {
     $invariantCulture = [System.Globalization.CultureInfo]::InvariantCulture
 
     $markerData = foreach ($item in $Marker) {
+
+        if ($item.PSTypeNames -notcontains 'PCXLab.VideoSegment') {
+            throw 'InputObject must be a PCXLab.VideoSegment object.'
+        }
+
         $start = [Math]::Round(([double]$item.StartSeconds + $TimeOffsetSeconds), 3)
         $end = [Math]::Round(([double]$item.EndSeconds + $TimeOffsetSeconds), 3)
         $duration = ([double]$item.DurationSeconds).ToString('0.###', $invariantCulture)
@@ -45,8 +51,8 @@ function ConvertTo-PCXPremiereMarkerScript {
         [PSCustomObject]@{
             Start    = $start
             End      = $end
-            Name     = "Silence - $($item.Classification)"
-            Comments = "Detected silence: $duration seconds. Classification: $($item.Classification)."
+            Name     = "VideoSegment - $($item.Action)"
+            Comments = "Detected segment: $duration seconds. Action: $($item.Action)."
         }
     }
 
@@ -79,7 +85,7 @@ function ConvertTo-PCXPremiereMarkerScript {
         added++;
     }
 
-    alert('PCXLab.VideoTools added ' + added + ' silence marker(s) to the active sequence.');
+    alert('PCXLab.VideoTools added ' + added + ' marker(s) to the active sequence.');
 }());
 "@
 }

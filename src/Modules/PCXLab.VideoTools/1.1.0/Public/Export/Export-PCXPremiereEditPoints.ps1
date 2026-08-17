@@ -2,27 +2,21 @@ function Export-PCXPremiereEditPoints {
 
     <#
     .SYNOPSIS
-        Exports silence-analysis results as Premiere Pro edit points.
+        Exports video segments as Premiere Pro edit points.
 
     .DESCRIPTION
         Creates an ExtendScript (.jsx) file that adds edits at the beginning
-        and end of actionable silence regions in the active Premiere Pro
-        sequence. It creates cuts only; it never removes or ripple-deletes
-        media. If -Path is not specified, a default output path is generated
-        based on the source media file.
+        and end of supplied segments in the active Premiere Pro sequence.
+        It creates cuts only; it never removes or ripple-deletes media.
 
-        The generated script uses Premiere Pro's QE razor interface because
-        Premiere's supported scripting API does not currently provide a split
-        operation at an arbitrary time. Test on a copy of a sequence first.
+        This command accepts PCXLab.VideoSegment objects directly, or
+        PCXLab.Silence objects for backward compatibility.
 
     .PARAMETER InputObject
-        PCXLab.Silence objects, normally from Find-PCXSilence.
+        PCXLab.VideoSegment or PCXLab.Silence objects.
 
     .PARAMETER Path
         Destination path for the generated .jsx file. If omitted, a default path is generated.
-
-    .PARAMETER IncludeShortPause
-        Includes silence regions classified as ShortPause.
 
     .PARAMETER TimeOffsetSeconds
         Offset added to every edit point. Use this when the source clip begins
@@ -44,13 +38,7 @@ function Export-PCXPremiereEditPoints {
             Creates edit points on every video and audio track in the active sequence.
 
     .EXAMPLE
-        Find-PCXSilence -Path 'C:\Videos\Tutorial.mp4' |
-            Export-PCXPremiereEditPoints -Path '.\Tutorial-EditPoints.jsx'
-
-        Find-PCXSilence -Path 'C:\Videos\Tutorial.mp4' |
-            Export-PCXPremiereEditPoints `
-                -Path '.\Tutorial-TrackMode-All.jsx' `
-                -TrackMode All
+        $segments | Export-PCXPremiereEditPoints -Path '.\Tutorial-EditPoints.jsx'
 
     .OUTPUTS
         System.IO.FileInfo
@@ -68,9 +56,6 @@ function Export-PCXPremiereEditPoints {
         [Alias('OutputPath')]
         [ValidateNotNullOrEmpty()]
         [string]$Path,
-
-        [Parameter()]
-        [switch]$IncludeShortPause,
 
         [Parameter()]
         [double]$TimeOffsetSeconds = 0,
@@ -91,30 +76,53 @@ function Export-PCXPremiereEditPoints {
 
     begin {
         $Silences = [System.Collections.Generic.List[object]]::new()
+        $InputType = $null
     }
 
     process {
-        if ($InputObject.PSTypeNames -notcontains 'PCXLab.Silence') {
-            throw 'InputObject must be a PCXLab.Silence object.'
+
+        $objectType = if ($InputObject.PSTypeNames -contains 'PCXLab.VideoSegment') {
+            'VideoSegment'
+        }
+        elseif ($InputObject.PSTypeNames -contains 'PCXLab.Silence') {
+            'Silence'
+        }
+        else {
+            'Unknown'
         }
 
-        if ($IncludeShortPause -or $InputObject.Classification -ne 'ShortPause') {
-            [void]$Silences.Add($InputObject)
+        if ($null -eq $InputType) {
+
+            if ($objectType -eq 'Unknown') {
+                throw 'InputObject must be a PCXLab.VideoSegment or PCXLab.Silence object.'
+            }
+
+            $InputType = $objectType
+
         }
+        elseif ($objectType -ne $InputType) {
+            throw "All input objects must be of the same type. Expected '$InputType', found '$objectType'."
+        }
+
+        $Silences.Add($InputObject)
+
     }
 
     end {
+
         if ($Silences.Count -eq 0) {
-            Write-Warning 'No silence regions matched the export criteria.'
+            Write-Warning 'No edit points were supplied.'
             return
         }
 
+        $SourcePath = $Silences[0].SourcePath
+
         if ([string]::IsNullOrWhiteSpace($Path)) {
-            $Suffix = if ($TrackMode -eq 'All') { 'PremiereEditPoints-AllTracks' } else { 'PremiereEditPoints' }
-            $Path = Get-PCXDefaultOutputPath `
-                -SourcePath $Silences[0].SourcePath `
-                -Suffix $Suffix `
-                -Extension '.jsx'
+
+            $Path = Get-PCXArtifactPath `
+                -SourcePath $SourcePath `
+                -ArtifactType PremiereEditPoint
+
         }
 
         $Parent = Split-Path -Path $Path -Parent
@@ -130,9 +138,17 @@ function Export-PCXPremiereEditPoints {
             throw 'Path must use the .jsx extension.'
         }
 
+        $Segments = if ($InputType -eq 'Silence') {
+            $Silences | Get-PCXVideoSegments
+        }
+        else {
+            $Silences
+        }
+
         if ($PSCmdlet.ShouldProcess($Path, 'Create Premiere Pro edit-point script')) {
+
             $ScriptContent = ConvertTo-PCXPremiereEditPointScript `
-                -Silence $Silences.ToArray() `
+                -Segment @($Segments) `
                 -TimeOffsetSeconds $TimeOffsetSeconds `
                 -VideoTrackIndex $VideoTrackIndex `
                 -AudioTrackIndex $AudioTrackIndex `
@@ -140,6 +156,7 @@ function Export-PCXPremiereEditPoints {
 
             Set-Content -LiteralPath $Path -Value $ScriptContent -Encoding UTF8
             Get-Item -LiteralPath $Path
+
         }
     }
 }

@@ -5,8 +5,10 @@ function Get-PCXDefaultOutputPath {
         Generates a default output path for exported files.
 
     .DESCRIPTION
-        Builds a default output filename based on the source media file,
-        a suffix and a file extension.
+        This function is retained for backward compatibility. Where the
+        requested suffix maps to a known artifact type, it delegates to
+        Get-PCXArtifactPath. For all other suffixes and filenames, the
+        original filename generation logic is preserved.
 
     .PARAMETER SourcePath
         Source media file.
@@ -21,23 +23,6 @@ function Get-PCXDefaultOutputPath {
         Optional fixed filename. When specified, the source filename is not
         used and the output is placed in the same folder as the source with
         the given name.
-
-    .EXAMPLE
-        Get-PCXDefaultOutputPath `
-            -SourcePath 'C:\Videos\Test.mp4' `
-            -Suffix 'EditPoints' `
-            -Extension '.json'
-
-        Returns:
-            C:\Videos\Test-EditPoints.json
-
-    .EXAMPLE
-        Get-PCXDefaultOutputPath `
-            -SourcePath 'C:\Videos\Test.mp4' `
-            -FileName 'RecordingSession.json'
-
-        Returns:
-            C:\Videos\RecordingSession.json
 
     .OUTPUTS
         System.String
@@ -74,23 +59,45 @@ function Get-PCXDefaultOutputPath {
 
     )
 
-    if ([string]::IsNullOrWhiteSpace($FileName)) {
+    if ($PSCmdlet.ParameterSetName -eq 'ByFileName') {
 
-        if ([string]::IsNullOrWhiteSpace($Extension)) {
-            throw 'Extension is required when FileName is not specified.'
+        $mappedArtifactType = switch ($FileName) {
+            'RecordingSession.json' { 'RecordingSession' }
+            default                 { $null }
         }
 
-        if ([string]::IsNullOrWhiteSpace($Suffix)) {
-            throw 'Suffix is required when FileName is not specified.'
+        if ($null -ne $mappedArtifactType) {
+            return Get-PCXArtifactPath `
+                -SourcePath $SourcePath `
+                -ArtifactType $mappedArtifactType
         }
 
-        if ($Extension[0] -ne '.') {
-            $Extension = ".$Extension"
-        }
-
-        $FileName = "$([System.IO.Path]::GetFileNameWithoutExtension($SourcePath))-$Suffix$Extension"
+        $Directory = Split-Path $SourcePath -Parent
+        return (Join-Path $Directory $FileName)
 
     }
+
+    $mappedArtifactType = switch ($Suffix) {
+        'Analysis'           { 'Analysis' }
+        'Silence'            { 'Silence' }
+        'EditPoints'         { 'EditPoint' }
+        'VideoSegments'      { 'VideoSegment' }
+        'PremiereMarkers'    { 'PremiereMarker' }
+        'PremiereEditPoints' { 'PremiereEditPoint' }
+        default              { $null }
+    }
+
+    if ($null -ne $mappedArtifactType) {
+        return Get-PCXArtifactPath `
+            -SourcePath $SourcePath `
+            -ArtifactType $mappedArtifactType
+    }
+
+    if ($Extension[0] -ne '.') {
+        $Extension = ".$Extension"
+    }
+
+    $FileName = "$([System.IO.Path]::GetFileNameWithoutExtension($SourcePath))-$Suffix$Extension"
 
     $Directory = Split-Path $SourcePath -Parent
 

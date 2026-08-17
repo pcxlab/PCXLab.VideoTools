@@ -2,18 +2,21 @@ function ConvertTo-PCXPremiereEditPointScript {
 
     <#
     .SYNOPSIS
-        Converts silence objects into a Premiere Pro edit-point script.
+        Converts PCXLab.VideoSegment objects into a Premiere Pro edit-point script.
 
     .DESCRIPTION
         Produces an ExtendScript file that uses Premiere Pro's QE razor
         operation to create edits at the start and end of each supplied
-        silence region. The generated script never removes media.
+        segment. The generated script never removes media.
 
-    .PARAMETER Silence
-        Silence objects to convert into edit points.
+    .PARAMETER Segment
+        PCXLab.VideoSegment objects to convert into edit points.
 
     .PARAMETER TimeOffsetSeconds
         Offset added to every generated edit point.
+
+    .PARAMETER FrameRate
+        Frame rate used for timecode conversion.
 
     .PARAMETER VideoTrackIndex
         Zero-based target video-track index.
@@ -45,7 +48,7 @@ function ConvertTo-PCXPremiereEditPointScript {
 
         [Parameter(Mandatory)]
         [ValidateNotNullOrEmpty()]
-        [object[]]$Silence,
+        [object[]]$Segment,
 
         [Parameter()]
         [double]$TimeOffsetSeconds = 0,
@@ -66,7 +69,13 @@ function ConvertTo-PCXPremiereEditPointScript {
         [string]$TrackMode = 'Selected'
     )
 
-    $editPoints = foreach ($item in $Silence) {
+    foreach ($item in $Segment) {
+        if ($item.PSTypeNames -notcontains 'PCXLab.VideoSegment') {
+            throw 'InputObject must be a PCXLab.VideoSegment object.'
+        }
+    }
+
+    $editPoints = foreach ($item in $Segment) {
 
         ConvertTo-PCXPremiereTimecode `
             -Seconds ($item.StartSeconds + $TimeOffsetSeconds) `
@@ -80,11 +89,6 @@ function ConvertTo-PCXPremiereEditPointScript {
     $editPoints = @($editPoints | Sort-Object -Unique)
     $json = ConvertTo-Json -InputObject $editPoints -Compress
     $trackModeLiteral = "'$TrackMode'"
-
-    # NOTE:
-    # Premiere's supported scripting API does not expose a split operation.
-    # This script uses the QE razor API to create edit points on the selected
-    # video/audio tracks or across all tracks.
 
     @"
 #target premierepro

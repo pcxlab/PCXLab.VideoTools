@@ -2,35 +2,32 @@ function Export-PCXPremiereMarkers {
 
     <#
     .SYNOPSIS
-        Exports silence-analysis results as Adobe Premiere Pro markers.
+        Exports video segments as Adobe Premiere Pro markers.
 
     .DESCRIPTION
         Creates an ExtendScript (.jsx) file that adds range comment markers to
-        the active Adobe Premiere Pro sequence. By default, only actionable
-        silence regions are exported; use IncludeShortPause to include every
-        detected silence region. If -Path is not specified, a default output
-        path is generated based on the source media file.
+        the active Adobe Premiere Pro sequence. By default, all supplied
+        segments are exported.
+
+        This command accepts PCXLab.VideoSegment objects directly, or
+        PCXLab.Silence objects for backward compatibility.
 
     .PARAMETER InputObject
-        PCXLab.Silence objects, normally from Find-PCXSilence.
+        PCXLab.VideoSegment or PCXLab.Silence objects.
 
     .PARAMETER Path
         Destination path for the generated .jsx file. If omitted, a default path is generated.
-
-    .PARAMETER IncludeShortPause
-        Includes silence regions classified as ShortPause.
 
     .PARAMETER TimeOffsetSeconds
         Offset added to every marker position. Use this when the source clip
         begins later than zero on the target sequence.
 
     .EXAMPLE
-        Find-PCXSilence -Path 'C:\Videos\Tutorial.mp4' |
-            Export-PCXPremiereMarkers -Path '.\Tutorial-SilenceMarkers.jsx'
+        Get-PCXVideoSegments -InputObject (Find-PCXSilence -Path 'C:\Videos\Tutorial.mp4') |
+            Export-PCXPremiereMarkers -Path '.\Tutorial-Markers.jsx'
 
     .EXAMPLE
-        Find-PCXSilence -Path 'C:\Videos\Tutorial.mp4' |
-            Export-PCXPremiereMarkers -Path '.\Markers.jsx' -TimeOffsetSeconds 15
+        $segments | Export-PCXPremiereMarkers -Path '.\Markers.jsx' -TimeOffsetSeconds 15
 
     .OUTPUTS
         System.IO.FileInfo
@@ -50,39 +47,59 @@ function Export-PCXPremiereMarkers {
         [string]$Path,
 
         [Parameter()]
-        [switch]$IncludeShortPause,
-
-        [Parameter()]
         [double]$TimeOffsetSeconds = 0
 
     )
 
     begin {
         $Markers = [System.Collections.Generic.List[object]]::new()
+        $InputType = $null
     }
 
     process {
-        if ($InputObject.PSTypeNames -notcontains 'PCXLab.Silence') {
-            throw 'InputObject must be a PCXLab.Silence object.'
+
+        $objectType = if ($InputObject.PSTypeNames -contains 'PCXLab.VideoSegment') {
+            'VideoSegment'
+        }
+        elseif ($InputObject.PSTypeNames -contains 'PCXLab.Silence') {
+            'Silence'
+        }
+        else {
+            'Unknown'
         }
 
-        if ($IncludeShortPause -or $InputObject.Classification -ne 'ShortPause') {
-            [void]$Markers.Add($InputObject)
+        if ($null -eq $InputType) {
+
+            if ($objectType -eq 'Unknown') {
+                throw 'InputObject must be a PCXLab.VideoSegment or PCXLab.Silence object.'
+            }
+
+            $InputType = $objectType
+
         }
+        elseif ($objectType -ne $InputType) {
+            throw "All input objects must be of the same type. Expected '$InputType', found '$objectType'."
+        }
+
+        $Markers.Add($InputObject)
+
     }
 
     end {
+
         if ($Markers.Count -eq 0) {
-            Write-Warning 'No silence markers matched the export criteria.'
+            Write-Warning 'No markers were supplied.'
             return
         }
 
+        $SourcePath = $Markers[0].SourcePath
+
         if ([string]::IsNullOrWhiteSpace($Path)) {
-            $Suffix = if ($IncludeShortPause) { 'PremiereMarkers-ShortPause' } else { 'PremiereMarkers' }
-            $Path = Get-PCXDefaultOutputPath `
-                -SourcePath $Markers[0].SourcePath `
-                -Suffix $Suffix `
-                -Extension '.jsx'
+
+            $Path = Get-PCXArtifactPath `
+                -SourcePath $SourcePath `
+                -ArtifactType PremiereMarker
+
         }
 
         $Parent = Split-Path -Path $Path -Parent
@@ -98,13 +115,22 @@ function Export-PCXPremiereMarkers {
             throw 'Path must use the .jsx extension.'
         }
 
+        $Segments = if ($InputType -eq 'Silence') {
+            $Markers | Get-PCXVideoSegments
+        }
+        else {
+            $Markers
+        }
+
         if ($PSCmdlet.ShouldProcess($Path, 'Create Premiere Pro marker script')) {
+
             $ScriptContent = ConvertTo-PCXPremiereMarkerScript `
-                -Marker $Markers.ToArray() `
+                -Marker @($Segments) `
                 -TimeOffsetSeconds $TimeOffsetSeconds
 
             Set-Content -LiteralPath $Path -Value $ScriptContent -Encoding UTF8
             Get-Item -LiteralPath $Path
+
         }
     }
 }

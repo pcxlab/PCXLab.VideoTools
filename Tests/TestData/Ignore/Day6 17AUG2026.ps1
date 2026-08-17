@@ -72,3 +72,26 @@ Edit-PCXRecordingSession `
     "C:\Recording seg TestONLOY\RG_20260127_025337_001 A OriginalFiles\bandicam.webcam.mp4"
 ) `
     -OutputDirectory "C:\Recording seg TestONLOY"
+
+
+
+git add .
+
+git status  
+
+git commit -m "Refactor synchronization architecture to use behavior-driven MediaSource model
+
+- Extend PCXLab.MediaSource with SynchronizationMethod, AnalysisMode, and RenderingMode
+- Add capability-check and resolver functions for synchronization, analysis, and rendering
+- Refactor Sync-PCXMedia and Sync-PCXEditPoint to use resolvers while preserving existing algorithms
+- Redesign Edit-PCXRecordingSession with legacy Path and new MediaSource parameter sets
+- Isolate Bandicam compatibility shim in Build-PCXMediaSourcesFromPaths
+- Preserve backward compatibility for existing RecordingSession.json caches
+- Update recording session import/export for behavior property round-tripping
+- Add unit and integration tests for resolvers, capability checks, and recording session round-trip"
+
+git push
+
+git tag -a synchronization-architecture-refactor -m "Behavior-driven synchronization architecture"
+git push origin synchronization-architecture-refactor
+
