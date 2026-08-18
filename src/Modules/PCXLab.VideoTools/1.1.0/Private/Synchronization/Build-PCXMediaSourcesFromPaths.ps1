@@ -52,25 +52,12 @@ function Build-PCXMediaSourcesFromPaths {
 
     foreach ($MediaPath in $SourcePaths) {
 
-        $FileName = [System.IO.Path]::GetFileName($MediaPath)
-
-        if ($FileName -eq 'bandicam.webcam.mp4') {
-
-            $source = New-PCXMediaSource `
-                -Path $MediaPath `
-                -SynchronizationMethod 'OffsetHint' `
-                -OffsetHint 0
-
-        }
-        else {
-
-            $source = New-PCXMediaSource -Path $MediaPath
-
-        }
-
+        $source = New-PCXMediaSource -Path $MediaPath
         $MediaSources.Add($source)
 
     }
+
+    Resolve-PCXLinkedMediaSources -MediaSources $MediaSources
 
     return $MediaSources.ToArray()
 

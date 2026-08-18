@@ -86,6 +86,10 @@ function Restore-PCXRecordingSessionTypes {
                 $Source | Add-Member -NotePropertyName 'RenderingMode' -NotePropertyValue 'Auto'
             }
 
+            if (-not $Source.PSObject.Properties['LinkedSourceId']) {
+                $Source | Add-Member -NotePropertyName 'LinkedSourceId' -NotePropertyValue $null
+            }
+
         }
 
     }

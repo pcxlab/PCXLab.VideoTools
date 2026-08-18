@@ -114,7 +114,11 @@ function New-PCXMediaSource {
             'Enabled',
             'Disabled'
         )]
-        [string]$RenderingMode = 'Auto'
+        [string]$RenderingMode = 'Auto',
+
+        [Parameter()]
+        [AllowEmptyString()]
+        [string]$LinkedSourceId
 
     )
 
@@ -149,7 +153,8 @@ function New-PCXMediaSource {
             -SynchronizationMethod $SynchronizationMethod `
             -AnalysisMode $AnalysisMode `
             -RenderingMode $RenderingMode `
-            -MediaInformation $mediaInfo
+            -MediaInformation $mediaInfo `
+            -LinkedSourceId $LinkedSourceId
 
     }
 
