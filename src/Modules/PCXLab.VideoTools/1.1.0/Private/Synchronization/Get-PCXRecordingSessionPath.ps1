@@ -36,8 +36,8 @@ function Get-PCXRecordingSessionPath {
         throw 'Sources must be PCXLab.MediaSource objects.'
     }
 
-    return Get-PCXDefaultOutputPath `
+    return Get-PCXArtifactPath `
         -SourcePath $FirstSource.Path `
-        -FileName 'RecordingSession.json'
+        -ArtifactType RecordingSession
 
 }

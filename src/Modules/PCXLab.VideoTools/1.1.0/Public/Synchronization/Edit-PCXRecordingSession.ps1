@@ -256,6 +256,16 @@ function Edit-PCXRecordingSession {
 
             }
 
+            #
+            # Export reusable timeline artifacts before rendering.
+            # VideoSegments.json is the canonical editing checkpoint.
+            # Editor-specific artifacts are derived from it.
+            #
+
+            $null = $Segments | Export-PCXVideoSegment
+            $null = $Segments | Export-PCXPremiereMarkers
+            $null = $Segments | Export-PCXPremiereEditPoints
+
             if ([string]::IsNullOrWhiteSpace($OutputDirectory)) {
 
                 Write-Host "Rendering using default output path..." -ForegroundColor Green

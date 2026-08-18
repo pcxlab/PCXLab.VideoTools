@@ -25,9 +25,9 @@ Describe 'Get-PCXArtifactPath' {
         $result | Should -Be 'C:\Temp\Test-VideoSegments.json'
     }
 
-    It 'Resolves RecordingSession artifact path' {
-        $result = & $script:Module { Get-PCXArtifactPath -SourcePath 'C:\Temp\Test.mp4' -ArtifactType RecordingSession }
-        $result | Should -Be 'C:\Temp\RecordingSession.json'
+    It 'Resolves RecordingSession artifact path using recording group folder' {
+        $result = & $script:Module { Get-PCXArtifactPath -SourcePath 'C:\Temp\RG_20260127_025337_004\Test.mp4' -ArtifactType RecordingSession }
+        $result | Should -Be 'C:\Temp\RG_20260127_025337_004\RG_20260127_025337_004-RecordingSession.json'
     }
 
     It 'Resolves PremiereMarker artifact path' {
