@@ -163,6 +163,11 @@ function Sync-PCXMedia {
 
             }
 
+            Resolve-PCXLinkedSourceOffsets `
+                -ReferenceSource $referenceSource `
+                -Sources $SourceList `
+                -SourceOffsets $sourceOffsets
+
             $timeline = Build-PCXSynchronizationTimeline `
                 -ReferenceSource $referenceSource `
                 -Sources $SourceList `

@@ -76,7 +76,11 @@ function New-PCXMediaSourceObject {
         [string]$RenderingMode = 'Auto',
 
         [Parameter()]
-        [object]$MediaInformation
+        [object]$MediaInformation,
+
+        [Parameter()]
+        [AllowEmptyString()]
+        [string]$LinkedSourceId
 
     )
 
@@ -136,6 +140,8 @@ function New-PCXMediaSourceObject {
         SynchronizationMethod = $SynchronizationMethod
         AnalysisMode          = $AnalysisMode
         RenderingMode         = $RenderingMode
+
+        LinkedSourceId = $LinkedSourceId
 
         MediaInformation = $MediaInformation
 
