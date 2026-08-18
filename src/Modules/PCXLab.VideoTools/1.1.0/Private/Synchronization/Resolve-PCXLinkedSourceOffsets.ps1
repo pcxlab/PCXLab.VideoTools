@@ -74,13 +74,30 @@ function Resolve-PCXLinkedSourceOffsets {
             continue
         }
 
-        if (-not $offsetBySourceId.ContainsKey($source.LinkedSourceId)) {
-            continue
+        if ($source.LinkedSourceId -eq $ReferenceSource.Id) {
+
+            # Linked directly to the reference source.
+            # The reference defines time zero, so the inherited offset is exact.
+            
+            $inheritedOffset = 0.0
+            $confidence = 1.0
+
         }
+        elseif ($offsetBySourceId.ContainsKey($source.LinkedSourceId)) {
 
-        $linkedOffset = $offsetBySourceId[$source.LinkedSourceId]
+            # Linked to another synchronized source.
 
-        $inheritedOffset = [double]$linkedOffset.OffsetSeconds
+            $linkedOffset = $offsetBySourceId[$source.LinkedSourceId]
+
+            $inheritedOffset = [double]$linkedOffset.OffsetSeconds
+            $confidence = $linkedOffset.Confidence
+
+        }
+        else {
+
+            continue
+
+        }
 
         if ($null -ne $source.OffsetHint) {
             $inheritedOffset += [double]$source.OffsetHint
@@ -92,7 +109,7 @@ function Resolve-PCXLinkedSourceOffsets {
             -SourcePath $source.Path `
             -ReferencePath $ReferenceSource.Path `
             -OffsetSeconds $inheritedOffset `
-            -Confidence $linkedOffset.Confidence `
+            -Confidence $confidence `
             -Method 'Linked'
 
         $SourceOffsets.Add($newOffset)
