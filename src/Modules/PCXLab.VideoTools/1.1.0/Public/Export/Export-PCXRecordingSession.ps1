@@ -89,6 +89,10 @@ function Export-PCXRecordingSession {
 
         }
 
+        if (-not (Test-PCXShouldGenerateArtifact -Path $Path -Force:$Force)) {
+            return (Get-Item -LiteralPath $Path)
+        }
+
         #
         # Ensure output folder exists
         #
@@ -212,8 +216,7 @@ function Export-PCXRecordingSession {
                 ConvertTo-Json -Depth 10 |
                 Set-Content `
                     -LiteralPath $Path `
-                    -Encoding UTF8 `
-                    -Force:$Force
+                    -Encoding UTF8
 
             Get-Item -LiteralPath $Path
 

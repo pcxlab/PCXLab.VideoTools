@@ -73,6 +73,10 @@ function Export-PCXSilence {
 
         }
 
+        if (-not (Test-PCXShouldGenerateArtifact -Path $Path -Force:$Force)) {
+            return (Get-Item -LiteralPath $Path)
+        }
+
         $Parent = [System.IO.Path]::GetDirectoryName($Path)
 
         if ([string]::IsNullOrWhiteSpace($Parent)) {
@@ -98,8 +102,7 @@ function Export-PCXSilence {
             ConvertTo-Json -Depth 10 |
             Set-Content `
                 -Path $Path `
-                -Encoding UTF8 `
-                -Force:$Force
+                -Encoding UTF8
 
             Get-Item -LiteralPath $Path
 

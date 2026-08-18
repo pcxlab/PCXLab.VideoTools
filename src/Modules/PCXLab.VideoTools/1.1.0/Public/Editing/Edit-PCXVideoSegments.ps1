@@ -20,7 +20,7 @@ function Edit-PCXVideoSegments {
         System.IO.FileInfo
     #>
 
-    [CmdletBinding()]
+    [CmdletBinding(SupportsShouldProcess)]
     [OutputType([System.IO.FileInfo])]
     param(
 
@@ -32,7 +32,10 @@ function Edit-PCXVideoSegments {
         [object]$Segment,
 
         [Parameter()]
-        [string]$OutputPath
+        [string]$OutputPath,
+
+        [Parameter()]
+        [switch]$Force
 
     )
 
@@ -84,6 +87,10 @@ function Edit-PCXVideoSegments {
                 -SourcePath $SourcePath `
                 -ArtifactType EditedVideo
 
+        }
+
+        if (-not (Test-PCXShouldGenerateArtifact -Path $OutputPath -Force:$Force)) {
+            return (Get-Item -LiteralPath $OutputPath)
         }
 
         #
@@ -165,8 +172,12 @@ function Edit-PCXVideoSegments {
         # Execute job
         #
 
-        Invoke-PCXFFmpegEdit `
-            -EditJob $Job
+        if ($PSCmdlet.ShouldProcess($OutputPath, 'Render edited video')) {
+
+            Invoke-PCXFFmpegEdit `
+                -EditJob $Job
+
+        }
 
     }
 
