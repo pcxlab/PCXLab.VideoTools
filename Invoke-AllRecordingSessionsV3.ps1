@@ -1,7 +1,7 @@
 ﻿Import-Module "C:\Projects\PCXLab.VideoTools\src\Modules\PCXLab.VideoTools" -Force
 
- # $Root = "F:\Recordings"
- $Root = "C:\Recording seg TestONLOY"
+  $Root = "F:\Recordings"
+ # $Root = "C:\Recording seg TestONLOY"
 
 $Success = 0
 $Failed = 0

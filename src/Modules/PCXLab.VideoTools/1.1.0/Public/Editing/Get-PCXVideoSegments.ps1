@@ -40,6 +40,7 @@ function Get-PCXVideoSegments {
         $supportedTypes = @(
             'PCXLab.Silence'
             'PCXLab.EditPoint'
+            'PCXLab.BlackFrame'
         )
 
         $typeMatch = $false
