@@ -70,7 +70,10 @@ function Export-PCXPremiereEditPoints {
 
         [Parameter()]
         [ValidateSet('Selected', 'All')]
-        [string]$TrackMode = 'Selected'
+        [string]$TrackMode = 'Selected',
+
+        [Parameter()]
+        [switch]$Force
 
     )
 
@@ -123,6 +126,10 @@ function Export-PCXPremiereEditPoints {
                 -SourcePath $SourcePath `
                 -ArtifactType PremiereEditPoint
 
+        }
+
+        if (-not (Test-PCXShouldGenerateArtifact -Path $Path -Force:$Force)) {
+            return (Get-Item -LiteralPath $Path)
         }
 
         $Parent = Split-Path -Path $Path -Parent

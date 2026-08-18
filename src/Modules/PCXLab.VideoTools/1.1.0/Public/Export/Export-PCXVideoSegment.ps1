@@ -91,6 +91,10 @@ function Export-PCXVideoSegment {
 
         }
 
+        if (-not (Test-PCXShouldGenerateArtifact -Path $Path -Force:$Force)) {
+            return (Get-Item -LiteralPath $Path)
+        }
+
         $Parent = [System.IO.Path]::GetDirectoryName($Path)
 
         if ([string]::IsNullOrWhiteSpace($Parent)) {
@@ -116,8 +120,7 @@ function Export-PCXVideoSegment {
                 ConvertTo-Json -Depth 10 |
                 Set-Content `
                     -LiteralPath $Path `
-                    -Encoding UTF8 `
-                    -Force:$Force
+                    -Encoding UTF8
 
             Get-Item -LiteralPath $Path
 

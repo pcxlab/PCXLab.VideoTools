@@ -71,6 +71,10 @@ function Export-PCXEditPoint {
 
         }
 
+        if (-not (Test-PCXShouldGenerateArtifact -Path $Path -Force:$Force)) {
+            return (Get-Item -LiteralPath $Path)
+        }
+
         $Parent = Split-Path -Path $Path -Parent
 
         if (-not (Test-Path -LiteralPath $Parent)) {
@@ -90,8 +94,7 @@ function Export-PCXEditPoint {
             ConvertTo-Json -Depth 10 |
             Set-Content `
                 -Path $Path `
-                -Encoding UTF8 `
-                -Force:$Force
+                -Encoding UTF8
 
         Get-Item -LiteralPath $Path
 

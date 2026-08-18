@@ -47,7 +47,10 @@ function Export-PCXPremiereMarkers {
         [string]$Path,
 
         [Parameter()]
-        [double]$TimeOffsetSeconds = 0
+        [double]$TimeOffsetSeconds = 0,
+
+        [Parameter()]
+        [switch]$Force
 
     )
 
@@ -100,6 +103,10 @@ function Export-PCXPremiereMarkers {
                 -SourcePath $SourcePath `
                 -ArtifactType PremiereMarker
 
+        }
+
+        if (-not (Test-PCXShouldGenerateArtifact -Path $Path -Force:$Force)) {
+            return (Get-Item -LiteralPath $Path)
         }
 
         $Parent = Split-Path -Path $Path -Parent
