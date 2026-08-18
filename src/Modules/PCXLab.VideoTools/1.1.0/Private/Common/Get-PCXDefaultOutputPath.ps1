@@ -61,17 +61,6 @@ function Get-PCXDefaultOutputPath {
 
     if ($PSCmdlet.ParameterSetName -eq 'ByFileName') {
 
-        $mappedArtifactType = switch ($FileName) {
-            'RecordingSession.json' { 'RecordingSession' }
-            default                 { $null }
-        }
-
-        if ($null -ne $mappedArtifactType) {
-            return Get-PCXArtifactPath `
-                -SourcePath $SourcePath `
-                -ArtifactType $mappedArtifactType
-        }
-
         $Directory = Split-Path $SourcePath -Parent
         return (Join-Path $Directory $FileName)
 

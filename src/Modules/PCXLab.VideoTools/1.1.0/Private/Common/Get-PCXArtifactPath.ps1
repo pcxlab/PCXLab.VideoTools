@@ -95,24 +95,35 @@ function Get-PCXArtifactPath {
     else {
 
         if ($null -eq $definition.Suffix) {
+            throw "Artifact type '$ArtifactType' has no suffix and no explicit filename rule."
+        }
 
-            switch ($ArtifactType) {
-                'RecordingSession' { $fileName = "RecordingSession$($definition.Extension)" }
-                default { throw "Artifact type '$ArtifactType' has no suffix and no explicit filename rule." }
+        $extension = if ($null -eq $definition.Extension) {
+            [System.IO.Path]::GetExtension($SourcePath)
+        }
+        else {
+            $definition.Extension
+        }
+
+        $prefix = ''
+
+        if ($definition.ContainsKey('PrefixSource')) {
+
+            switch ($definition.PrefixSource) {
+
+                'DirectoryName' {
+                    $prefix = [System.IO.Path]::GetFileName($OutputDirectory)
+                }
+
             }
 
         }
-        else {
 
-            $extension = if ($null -eq $definition.Extension) {
-                [System.IO.Path]::GetExtension($SourcePath)
-            }
-            else {
-                $definition.Extension
-            }
-
+        if ([string]::IsNullOrWhiteSpace($prefix)) {
             $fileName = "$baseName$($definition.Separator)$($definition.Suffix)$extension"
-
+        }
+        else {
+            $fileName = "$prefix$($definition.Separator)$($definition.Suffix)$extension"
         }
 
     }
