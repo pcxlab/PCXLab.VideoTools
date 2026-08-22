@@ -132,27 +132,6 @@ if ($null -ne $InputObject.Analysis.BlackFrames) {
 }
 
 #
-# Video Segments
-#
-
-if ($null -ne $InputObject.Analysis.Segments) {
-
-    foreach ($Item in $InputObject.Analysis.Segments) {
-
-        if ($Item.PSTypeNames -notcontains 'PCXLab.VideoSegment') {
-
-            $Item.PSObject.TypeNames.Insert(
-                0,
-                'PCXLab.VideoSegment'
-            )
-
-        }
-
-    }
-
-}
-
-#
 # Silence Statistics
 #
 

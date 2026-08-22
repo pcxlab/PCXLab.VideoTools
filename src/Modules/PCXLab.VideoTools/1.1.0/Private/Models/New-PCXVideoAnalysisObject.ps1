@@ -32,10 +32,6 @@ param(
     [object[]]$BlackFrames = @(),
 
     [Parameter()]
-    [AllowEmptyCollection()]
-    [object[]]$Segments = @(),
-
-    [Parameter()]
     [object]$SilenceStatistics
 
 )
@@ -57,8 +53,6 @@ param(
         Silence = $Silence
 
         BlackFrames = $BlackFrames
-
-        Segments = $Segments
 
         SilenceStatistics = $SilenceStatistics
 

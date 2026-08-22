@@ -5,7 +5,7 @@ function Analyze-PCXVideo {
     Performs a complete analysis of one or more media files.
 
 .DESCRIPTION
-    Analyzes media information, silence, edit segments and
+    Analyzes media information, silence, black frames and
     silence statistics and returns a single analysis object.
 
 .PARAMETER Path
@@ -58,20 +58,10 @@ function Analyze-PCXVideo {
                     -MinimumDuration $MinimumDuration
             )
 
-            $Segments = if ($Silence.Count -gt 0) {
-                @(
-                    $Silence |
-                    Get-PCXVideoSegments
-                )
-            }
-            else {
-                @(
-                    Add-PCXKeepSegment `
-                        -SourcePath $MediaFile `
-                        -Start ([TimeSpan]::Zero) `
-                        -End $Media.Duration
-                )
-            }
+            $BlackFrames = @(
+                Find-PCXBlackFrames `
+                    -Path $MediaFile
+            )
 
             $Statistics = $Silence |
             Measure-PCXSilence
@@ -80,7 +70,7 @@ function Analyze-PCXVideo {
                 -SourcePath $MediaFile `
                 -Media $Media `
                 -Silence $Silence `
-                -Segments $Segments `
+                -BlackFrames $BlackFrames `
                 -SilenceStatistics $Statistics
 
             $Analysis
