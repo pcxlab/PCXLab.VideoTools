@@ -69,7 +69,6 @@ function Get-PCXDefaultOutputPath {
     $mappedArtifactType = switch ($Suffix) {
         'Analysis'           { 'Analysis' }
         'Silence'            { 'Silence' }
-        'EditPoints'         { 'EditPoint' }
         'VideoSegments'      { 'VideoSegment' }
         'PremiereMarkers'    { 'PremiereMarker' }
         'PremiereEditPoints' { 'PremiereEditPoint' }

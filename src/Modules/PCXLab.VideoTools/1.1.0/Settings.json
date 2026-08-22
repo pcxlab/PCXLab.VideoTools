@@ -12,24 +12,7 @@
     },
     "Analysis": {
         "SilenceThreshold": -35,
-        "MinimumSilenceDuration": 1.0,
-        "EditPoints": {
-            "RecordingBreak": {
-                "Enabled": true,
-                "Reason": "Recording Break",
-                "Confidence": 100
-            },
-            "EditCandidate": {
-                "Enabled": true,
-                "Reason": "Long Pause",
-                "Confidence": 85
-            },
-            "ShortPause": {
-                "Enabled": false,
-                "Reason": "Short Pause",
-                "Confidence": 0
-            }
-        }
+        "MinimumSilenceDuration": 1.0
     },
     "Audio": {
         "Normalize": true,
