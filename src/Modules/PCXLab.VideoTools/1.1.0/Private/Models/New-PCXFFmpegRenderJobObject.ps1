@@ -1,15 +1,16 @@
-function New-PCXEditJobObject {
+function New-PCXFFmpegRenderJobObject {
 
     <#
 .SYNOPSIS
-    Creates a PCXLab.EditJob object.
+    Creates a PCXLab.FFmpegRenderJob object.
 
 .DESCRIPTION
-    Represents a complete editing job that can be executed
-    by one of the editing providers.
+    Represents an FFmpeg rendering execution specification containing
+    the input source, output destination, compiled filter graph, and
+    encoding parameters.
 
 .OUTPUTS
-    PCXLab.EditJob
+    PCXLab.FFmpegRenderJob
 #>
 
     [CmdletBinding()]
@@ -51,7 +52,7 @@ function New-PCXEditJobObject {
 
     [PSCustomObject]@{
 
-        PSTypeName  = 'PCXLab.EditJob'
+        PSTypeName  = 'PCXLab.FFmpegRenderJob'
 
         SourcePath  = $SourcePath
 

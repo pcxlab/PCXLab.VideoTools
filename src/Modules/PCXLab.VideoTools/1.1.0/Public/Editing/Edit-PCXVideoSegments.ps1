@@ -158,10 +158,10 @@ function Edit-PCXVideoSegments {
         }
 
         #
-        # Create editing job
+        # Create FFmpeg render job
         #
 
-        $Job = New-PCXEditJobObject `
+        $Job = New-PCXFFmpegRenderJobObject `
             -SourcePath $SourcePath `
             -OutputPath $OutputPath `
             -FilterGraph $FilterGraph `
@@ -175,10 +175,11 @@ function Edit-PCXVideoSegments {
         if ($PSCmdlet.ShouldProcess($OutputPath, 'Render edited video')) {
 
             Invoke-PCXFFmpegEdit `
-                -EditJob $Job
+                -RenderJob $Job
 
         }
 
     }
 
 }
+

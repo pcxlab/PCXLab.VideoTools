@@ -2,10 +2,10 @@ function Invoke-PCXFFmpegEdit {
 
     <#
 .SYNOPSIS
-    Executes an FFmpeg editing job.
+    Executes an FFmpeg rendering job.
 
 .DESCRIPTION
-    Executes a PCXLab.EditJob by building the FFmpeg command
+    Executes a PCXLab.FFmpegRenderJob by building the FFmpeg command
     and invoking FFmpeg.
 
     The filter graph is written to a named script file and
@@ -29,8 +29,8 @@ function Invoke-PCXFFmpegEdit {
       Failure  — filter-script file is preserved for diagnostics.
                  Its path is appended to the exception message.
 
-.PARAMETER EditJob
-    PCXLab.EditJob object.
+.PARAMETER RenderJob
+    PCXLab.FFmpegRenderJob object.
 
 .OUTPUTS
     System.IO.FileInfo
@@ -42,12 +42,12 @@ function Invoke-PCXFFmpegEdit {
 
         [Parameter(Mandatory)]
         [ValidateNotNull()]
-        [object]$EditJob
+        [object]$RenderJob
 
     )
 
-    if ($EditJob.PSTypeNames -notcontains 'PCXLab.EditJob') {
-        throw 'InputObject must be a PCXLab.EditJob object.'
+    if ($RenderJob.PSTypeNames -notcontains 'PCXLab.FFmpegRenderJob') {
+        throw 'InputObject must be a PCXLab.FFmpegRenderJob object.'
     }
 
     #----------------------------------------------------------
@@ -69,7 +69,7 @@ function Invoke-PCXFFmpegEdit {
     $InvalidChars = [System.IO.Path]::GetInvalidFileNameChars() -join ''
     $InvalidPattern = "[{0}]" -f [System.Text.RegularExpressions.Regex]::Escape($InvalidChars)
 
-    $SourceBaseName = [System.IO.Path]::GetFileNameWithoutExtension($EditJob.SourcePath)
+    $SourceBaseName = [System.IO.Path]::GetFileNameWithoutExtension($RenderJob.SourcePath)
     $SafeBaseName   = $SourceBaseName -replace $InvalidPattern, '_'
     $Timestamp      = (Get-Date -Format 'yyyyMMdd-HHmmss')
     $ScriptFileName = '{0}-PCXFilterGraph-{1}.txt' -f $SafeBaseName, $Timestamp
@@ -83,7 +83,7 @@ function Invoke-PCXFFmpegEdit {
 
     [System.IO.File]::WriteAllText(
         $FilterScriptPath,
-        $EditJob.FilterGraph,
+        $RenderJob.FilterGraph,
         [System.Text.UTF8Encoding]::new($false)
     )
 
@@ -99,8 +99,8 @@ function Invoke-PCXFFmpegEdit {
 
     try {
 
-        $hasAudio = if ($null -ne $EditJob.PSObject.Properties['HasAudio']) {
-            [bool]$EditJob.HasAudio
+        $hasAudio = if ($null -ne $RenderJob.PSObject.Properties['HasAudio']) {
+            [bool]$RenderJob.HasAudio
         } else {
             $true
         }
@@ -110,7 +110,7 @@ function Invoke-PCXFFmpegEdit {
             '-y'
 
             '-i'
-            $EditJob.SourcePath
+            $RenderJob.SourcePath
 
             '-filter_complex_script'
             $FilterScriptPath
@@ -124,19 +124,19 @@ function Invoke-PCXFFmpegEdit {
             }
 
             '-c:v'
-            $EditJob.VideoCodec
+            $RenderJob.VideoCodec
 
             if ($hasAudio) {
                 '-c:a'
-                $EditJob.AudioCodec
+                $RenderJob.AudioCodec
             }
 
-            if ($hasAudio -and $EditJob.SampleRate -gt 0) {
+            if ($hasAudio -and $RenderJob.SampleRate -gt 0) {
                 '-ar'
-                $EditJob.SampleRate.ToString()
+                $RenderJob.SampleRate.ToString()
             }
 
-            $EditJob.OutputPath
+            $RenderJob.OutputPath
 
         )
 
@@ -171,6 +171,6 @@ function Invoke-PCXFFmpegEdit {
 
     }
 
-    Get-Item $EditJob.OutputPath
+    Get-Item $RenderJob.OutputPath
 
-}
+}
