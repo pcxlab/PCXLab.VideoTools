@@ -42,7 +42,6 @@ function Get-PCXArtifactPath {
         [ValidateSet(
             'Analysis',
             'Silence',
-            'EditPoint',
             'VideoSegment',
             'RecordingSession',
             'PremiereMarker',

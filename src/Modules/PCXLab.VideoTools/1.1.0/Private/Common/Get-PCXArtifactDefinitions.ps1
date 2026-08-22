@@ -29,7 +29,6 @@ $script:PCXArtifactDefinitions = @{
 
     Analysis          = @{ Suffix = 'Analysis'; Extension = '.json'; Separator = '-' }
     Silence           = @{ Suffix = 'Silence'; Extension = '.json'; Separator = '-' }
-    EditPoint         = @{ Suffix = 'EditPoints'; Extension = '.json'; Separator = '-' }
     VideoSegment      = @{ Suffix = 'VideoSegments'; Extension = '.json'; Separator = '-' }
     RecordingSession  = @{ Suffix = 'RecordingSession'; Extension = '.json'; Separator = '-'; PrefixSource = 'DirectoryName' }
     PremiereMarker    = @{ Suffix = 'PremiereMarkers'; Extension = '.jsx'; Separator = '-' }

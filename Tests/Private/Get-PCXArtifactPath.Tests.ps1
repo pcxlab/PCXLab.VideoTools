@@ -15,11 +15,6 @@ Describe 'Get-PCXArtifactPath' {
         $result | Should -Be 'C:\Temp\Test-Silence.json'
     }
 
-    It 'Resolves EditPoint artifact path' {
-        $result = & $script:Module { Get-PCXArtifactPath -SourcePath 'C:\Temp\Test.mp4' -ArtifactType EditPoint }
-        $result | Should -Be 'C:\Temp\Test-EditPoints.json'
-    }
-
     It 'Resolves VideoSegment artifact path' {
         $result = & $script:Module { Get-PCXArtifactPath -SourcePath 'C:\Temp\Test.mp4' -ArtifactType VideoSegment }
         $result | Should -Be 'C:\Temp\Test-VideoSegments.json'

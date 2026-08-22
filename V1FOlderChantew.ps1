@@ -6,7 +6,6 @@ $Files = Get-ChildItem $SourceRoot -Recurse -File | Where-Object {
     $_.Name -match '-Edited\.mp4$' -or
     $_.Name -match '-Analysis\.json$' -or
     $_.Name -match '-Silence\.json$' -or
-    $_.Name -match '-EditPoints\.json$' -or
     $_.Name -match '-PremiereMarkers\.jsx$' -or
     $_.Name -match '-PremiereEditPoints\.jsx$'
 
