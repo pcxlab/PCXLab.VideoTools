@@ -32,8 +32,11 @@ function New-PCXBlackFrameObject {
 
         PSTypeName      = 'PCXLab.BlackFrame'
 
+        EventType       = 'BlackFrame'
+
         # Source
         SourcePath      = $SourcePath
+        Source          = [System.IO.Path]::GetFileName($SourcePath)
 
         # Time
         Start           = $Start
