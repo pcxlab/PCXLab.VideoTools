@@ -15,7 +15,6 @@ Describe 'New-PCXVideoAnalysisObject and Type Restoration' {
         $analysis.SourcePath | Should -Be 'C:\Videos\Test.mp4'
         $analysis.Analysis.Silence | Should -BeNullOrEmpty
         $analysis.Analysis.BlackFrames | Should -BeNullOrEmpty
-        $analysis.Analysis.Segments | Should -BeNullOrEmpty
         $null -eq $analysis.Analysis.SilenceStatistics | Should -Be $true
     }
 
@@ -28,21 +27,16 @@ Describe 'New-PCXVideoAnalysisObject and Type Restoration' {
             $blackFrames = @(
                 New-PCXBlackFrameObject -SourcePath 'C:\Videos\Test.mp4' -Start ([TimeSpan]::FromSeconds(20)) -End ([TimeSpan]::FromSeconds(22)) -DurationSeconds 2
             )
-            $segments = @(
-                New-PCXVideoSegmentObject -SourcePath 'C:\Videos\Test.mp4' -Start ([TimeSpan]::Zero) -End ([TimeSpan]::FromSeconds(10)) -Action 'Keep'
-            )
 
             New-PCXVideoAnalysisObject `
                 -SourcePath 'C:\Videos\Test.mp4' `
                 -Media $media `
                 -Silence $silence `
-                -BlackFrames $blackFrames `
-                -Segments $segments
+                -BlackFrames $blackFrames
         }
 
         $analysis.Analysis.Silence.Count | Should -Be 1
         $analysis.Analysis.BlackFrames.Count | Should -Be 1
-        $analysis.Analysis.Segments.Count | Should -Be 1
         $analysis.Analysis.BlackFrames[0].PSTypeNames[0] | Should -Be 'PCXLab.BlackFrame'
     }
 
