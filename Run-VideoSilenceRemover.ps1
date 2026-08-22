@@ -70,14 +70,6 @@ foreach ($Video in $Videos) {
         Export-PCXSilence -Force |
         Out-Null
 
-        #
-        # Edit Points
-        #
-
-        $Silence |
-        Get-PCXEditPoint |
-        Export-PCXEditPoint -Force |
-        Out-Null
 
         #
         # Video Segments
