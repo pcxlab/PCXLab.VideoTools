@@ -13,9 +13,9 @@ BeforeAll {
 
     $script:ParsedSilences = @(
         & $module {
-            param($sample)
-            $sample | ConvertTo-PCXSilence
-        } $script:SilenceSample
+            param($sample, $TestVideo)
+            $sample | ConvertTo-PCXSilence -SourcePath $TestVideo
+        } $script:SilenceSample $script:TestVideo
     )
 }
 

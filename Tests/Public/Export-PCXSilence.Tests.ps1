@@ -4,8 +4,9 @@ BeforeAll {
 
     $module = Get-Module PCXLab.VideoTools
     $script:Silence1 = & $module {
-        New-PCXSilenceObject -Start ([TimeSpan]::FromSeconds(1)) -End ([TimeSpan]::FromSeconds(4)) -DurationSeconds 3
-    }
+        param($TestVideo)
+        New-PCXSilenceObject -Start ([TimeSpan]::FromSeconds(1)) -End ([TimeSpan]::FromSeconds(4)) -DurationSeconds 3 -SourcePath $TestVideo
+    } $script:TestVideo
 }
 
 Describe 'Export-PCXSilence' {
@@ -30,7 +31,7 @@ Describe 'Export-PCXSilence' {
 
     It 'Generates default output path when -Path is omitted' {
         $silence = [PSCustomObject]@{
-            PSTypeNames     = @('PCXLab.Silence')
+            PSTypeName      = 'PCXLab.Silence'
             SourcePath      = Join-Path $TestDrive 'TestMedia.mp4'
             Start           = [TimeSpan]::FromSeconds(1)
             End             = [TimeSpan]::FromSeconds(4)
