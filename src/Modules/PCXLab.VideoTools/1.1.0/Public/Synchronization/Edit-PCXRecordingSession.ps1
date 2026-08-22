@@ -190,40 +190,94 @@ function Edit-PCXRecordingSession {
         $ReferenceAnalysis = Get-PCXVideoAnalysis @AnalysisArguments
 
     #
-    # Generate reference edit points
+    # Resolve reference analysis events
     #
 
-        $ReferenceEditPoints = $ReferenceAnalysis |
-        Find-PCXSilence |
-        Get-PCXEditPoint
+        $ReferenceEvents = @($ReferenceAnalysis | Find-PCXSilence)
 
         Write-Host ""
         Write-Host "===================================" -ForegroundColor Cyan
-        Write-Host "Reference Edit Points : $(@($ReferenceEditPoints).Count)" -ForegroundColor Cyan
+        Write-Host "Reference Events      : $(@($ReferenceEvents).Count)" -ForegroundColor Cyan
 
     #
-    # Translate edit points to synchronized sources
+    # Translate analysis events to synchronized sources
     #
 
-        $TranslatedEditPoints = $ReferenceEditPoints |
-        Sync-PCXEditPoint `
-            -RecordingSession $Session
+        $TranslatedEvents = [System.Collections.Generic.List[object]]::new()
 
-        Write-Host "Translated Edit Points: $(@($TranslatedEditPoints).Count)" -ForegroundColor Cyan
+        if ($null -ne $Session.Timeline.SourceOffsets) {
+
+            $sourceById = @{}
+            if ($null -ne $Session.Sources) {
+                foreach ($source in $Session.Sources) {
+                    $sourceById[$source.Id] = $source
+                }
+            }
+
+            foreach ($SourceOffset in $Session.Timeline.SourceOffsets) {
+
+                $source = $sourceById[$SourceOffset.SourceId]
+
+                if ($source) {
+                    $renderingMode = Resolve-PCXSourceRenderingMode -Source $source
+                    if ($renderingMode -eq 'Disabled') {
+                        continue
+                    }
+                }
+
+                $offset = $SourceOffset.OffsetSeconds
+
+                foreach ($Event in $ReferenceEvents) {
+
+                    $startSeconds = $Event.StartSeconds - $offset
+                    $endSeconds   = $Event.EndSeconds - $offset
+
+                    if ($endSeconds -le 0) {
+                        continue
+                    }
+
+                    if ($startSeconds -lt 0) {
+                        $startSeconds = 0
+                    }
+
+                    $durationSeconds = $endSeconds - $startSeconds
+
+                    if ($durationSeconds -le 0) {
+                        continue
+                    }
+
+                    $start = [TimeSpan]::FromSeconds($startSeconds)
+                    $end   = [TimeSpan]::FromSeconds($endSeconds)
+
+                    $translatedEvent = New-PCXSilenceObject `
+                        -SourcePath $SourceOffset.SourcePath `
+                        -Start $start `
+                        -End $end `
+                        -DurationSeconds $durationSeconds
+
+                    $TranslatedEvents.Add($translatedEvent)
+
+                }
+
+            }
+
+        }
+
+        Write-Host "Translated Events     : $(@($TranslatedEvents).Count)" -ForegroundColor Cyan
 
     #
-    # Combine reference and translated edit points
+    # Combine reference and translated events
     #
 
-        $AllEditPoints = @($ReferenceEditPoints) + @($TranslatedEditPoints)
+        $AllEvents = @($ReferenceEvents) + @($TranslatedEvents)
 
-        Write-Host "Total Edit Points     : $(@($AllEditPoints).Count)" -ForegroundColor Cyan
+        Write-Host "Total Events          : $(@($AllEvents).Count)" -ForegroundColor Cyan
 
     #
     # Group by source
     #
 
-        $Groups = $AllEditPoints |
+        $Groups = $AllEvents |
         Group-Object -Property SourcePath
 
         Write-Host "Source Groups         : $(@($Groups).Count)" -ForegroundColor Cyan
@@ -241,7 +295,7 @@ function Edit-PCXRecordingSession {
             Write-Host "-----------------------------------" -ForegroundColor Yellow
             Write-Host "Processing Source :" -ForegroundColor Yellow
             Write-Host "    $SourcePath"
-            Write-Host "Edit Points       : $(@($Group.Group).Count)" -ForegroundColor Yellow
+            Write-Host "Analysis Events   : $(@($Group.Group).Count)" -ForegroundColor Yellow
 
             $Segments = $Group.Group |
             Get-PCXVideoSegments

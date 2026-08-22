@@ -38,13 +38,6 @@ foreach ($Video in $Videos) {
         $Silence |
             Export-PCXSilence | Out-Null
 
-        #
-        # Edit Points
-        #
-
-        $Silence |
-            Get-PCXEditPoint |
-            Export-PCXEditPoint  | Out-Null
 
         #
         # Video Segments
