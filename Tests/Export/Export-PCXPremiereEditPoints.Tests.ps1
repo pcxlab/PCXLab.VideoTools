@@ -26,12 +26,7 @@ Describe 'Export-PCXPremiereEditPoints' {
 
     }
 
-    It 'Rejects mixed input types' {
-
-        $segment = & $script:Module {
-            param($TestVideo)
-            New-PCXVideoSegmentObject -SourcePath $TestVideo -Start ([TimeSpan]::Zero) -End ([TimeSpan]::FromSeconds(5)) -Action 'Keep'
-        } $script:TestVideo
+    It 'Rejects non-VideoSegment input' {
 
         $silence = New-Object PSObject -Property @{
             SourcePath = $script:TestVideo
@@ -41,10 +36,9 @@ Describe 'Export-PCXPremiereEditPoints' {
         }
         $silence.PSTypeNames.Insert(0, 'PCXLab.Silence')
 
-        $mixed = @($segment, $silence)
-
-        { $mixed | Export-PCXPremiereEditPoints -Path "$TestDrive\Test-Mixed.jsx" } | Should -Throw '*same type*'
+        { $silence | Export-PCXPremiereEditPoints -Path "$TestDrive\Test-Rejected.jsx" } | Should -Throw '*PCXLab.VideoSegment*'
 
     }
 
 }
+

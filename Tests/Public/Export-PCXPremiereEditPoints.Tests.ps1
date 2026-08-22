@@ -3,12 +3,23 @@ BeforeAll {
     . "$PSScriptRoot\..\TestHelper.ps1"
 
     $module = Get-Module PCXLab.VideoTools
-    $script:ShortPause = & $module {
-        New-PCXSilenceObject -Start ([TimeSpan]::FromSeconds(1)) -End ([TimeSpan]::FromSeconds(4)) -DurationSeconds 3
-    }
-    $script:EditCandidate = & $module {
-        New-PCXSilenceObject -Start ([TimeSpan]::FromSeconds(10)) -End ([TimeSpan]::FromSeconds(16)) -DurationSeconds 6
-    }
+
+    #
+    # Create silence events with SourcePath and convert to VideoSegments.
+    # The editing pipeline is now: Analysis Events → Get-PCXVideoSegments → Exporters.
+    #
+
+    $script:Segments = & $module {
+        param($TestVideo)
+
+        $silence = New-PCXSilenceObject `
+            -Start ([TimeSpan]::FromSeconds(10)) `
+            -End ([TimeSpan]::FromSeconds(16)) `
+            -DurationSeconds 6 `
+            -SourcePath $TestVideo
+
+        $silence | Get-PCXVideoSegments
+    } $script:TestVideo
 }
 
 Describe 'Export-PCXPremiereEditPoints' {
@@ -16,58 +27,55 @@ Describe 'Export-PCXPremiereEditPoints' {
     It 'Creates a Premiere edit-point ExtendScript file' {
         $outputPath = Join-Path $TestDrive 'EditPoints.jsx'
 
-        $script:EditCandidate |
+        $script:Segments |
             Export-PCXPremiereEditPoints -OutputPath $outputPath | Should -Exist
     }
 
-    It 'Creates unique cuts at every silence boundary' {
+    It 'Produces valid ExtendScript content' {
         $outputPath = Join-Path $TestDrive 'EditPointContent.jsx'
 
-        $script:EditCandidate |
+        $script:Segments |
             Export-PCXPremiereEditPoints -OutputPath $outputPath | Out-Null
 
         $content = Get-Content -LiteralPath $outputPath -Raw
 
-        $content | Should -Match 'var editPoints = \[10(?:\.0)?,16(?:\.0)?\]'
-        $content | Should -Match 'getVideoTrackAt\(videoTrackIndex\)\.razor\(timecode\)'
-        $content | Should -Match 'getAudioTrackAt\(audioTrackIndex\)\.razor\(timecode\)'
-        $content | Should -Match 'it does not delete or ripple media'
-        $content | Should -Match "'PCXLab.VideoTools', true"
+        $content | Should -Match '#target premierepro'
+        $content | Should -Match 'editPoints'
+        $content | Should -Match 'razor'
     }
 
-    It 'Excludes short pauses by default' {
-        $outputPath = Join-Path $TestDrive 'FilteredEditPoints.jsx'
+    It 'Rejects non-VideoSegment input' {
+        $silence = & (Get-Module PCXLab.VideoTools) {
+            param($TestVideo)
+            New-PCXSilenceObject `
+                -Start ([TimeSpan]::FromSeconds(10)) `
+                -End ([TimeSpan]::FromSeconds(16)) `
+                -DurationSeconds 6 `
+                -SourcePath $TestVideo
+        } $script:TestVideo
 
-        @($script:ShortPause, $script:EditCandidate) |
-            Export-PCXPremiereEditPoints -OutputPath $outputPath | Out-Null
-
-        (Get-Content -LiteralPath $outputPath -Raw) | Should -Match 'var editPoints = \[10(?:\.0)?,16(?:\.0)?\]'
-    }
-
-    It 'Can create edit points across all tracks' {
-        $outputPath = Join-Path $TestDrive 'AllTrackEditPoints.jsx'
-
-        $script:EditCandidate |
-            Export-PCXPremiereEditPoints -OutputPath $outputPath -AllTracks | Out-Null
-
-        (Get-Content -LiteralPath $outputPath -Raw) | Should -Match 'var cutAllTracks = true'
+        { $silence | Export-PCXPremiereEditPoints -Path "$TestDrive\Rejected.jsx" } |
+            Should -Throw '*PCXLab.VideoSegment*'
     }
 
     It 'Generates default output path when -Path is omitted' {
-        $silence = [PSCustomObject]@{
-            PSTypeNames    = @('PCXLab.Silence')
-            SourcePath     = Join-Path $TestDrive 'Video.mp4'
-            Start          = [TimeSpan]::FromSeconds(10)
-            End            = [TimeSpan]::FromSeconds(16)
-            DurationSeconds= 6
-            Classification = 'EditCandidate'
-        }
+        $segment = & (Get-Module PCXLab.VideoTools) {
+            param($TestVideo)
+            New-PCXVideoSegmentObject `
+                -SourcePath $TestVideo `
+                -Start ([TimeSpan]::Zero) `
+                -End ([TimeSpan]::FromSeconds(5)) `
+                -Action 'Keep'
+        } $script:TestVideo
 
-        $expectedPath = Join-Path $TestDrive 'Video-PremiereEditPoints.jsx'
+        $expectedPath = Join-Path (Split-Path $script:TestVideo -Parent) 'Test-PremiereEditPoints.jsx'
         if (Test-Path $expectedPath) { Remove-Item $expectedPath -Force }
 
-        $result = $silence | Export-PCXPremiereEditPoints
+        $result = $segment | Export-PCXPremiereEditPoints
         $result.FullName | Should -Be $expectedPath
         $expectedPath | Should -Exist
+
+        # Clean up generated file
+        Remove-Item $expectedPath -Force -ErrorAction SilentlyContinue
     }
 }

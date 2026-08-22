@@ -9,11 +9,11 @@ function Export-PCXPremiereEditPoints {
         and end of supplied segments in the active Premiere Pro sequence.
         It creates cuts only; it never removes or ripple-deletes media.
 
-        This command accepts PCXLab.VideoSegment objects directly, or
-        PCXLab.Silence objects for backward compatibility.
+        This command accepts PCXLab.VideoSegment objects produced by
+        Get-PCXVideoSegments.
 
     .PARAMETER InputObject
-        PCXLab.VideoSegment or PCXLab.Silence objects.
+        PCXLab.VideoSegment objects from the pipeline.
 
     .PARAMETER Path
         Destination path for the generated .jsx file. If omitted, a default path is generated.
@@ -36,6 +36,10 @@ function Export-PCXPremiereEditPoints {
 
         All
             Creates edit points on every video and audio track in the active sequence.
+
+    .EXAMPLE
+        Get-PCXVideoSegments -InputObject (Find-PCXSilence -Path '.\Tutorial.mp4') |
+            Export-PCXPremiereEditPoints -Path '.\Tutorial-EditPoints.jsx'
 
     .EXAMPLE
         $segments | Export-PCXPremiereEditPoints -Path '.\Tutorial-EditPoints.jsx'
@@ -78,47 +82,27 @@ function Export-PCXPremiereEditPoints {
     )
 
     begin {
-        $Silences = [System.Collections.Generic.List[object]]::new()
-        $InputType = $null
+        $Segments = [System.Collections.Generic.List[object]]::new()
     }
 
     process {
 
-        $objectType = if ($InputObject.PSTypeNames -contains 'PCXLab.VideoSegment') {
-            'VideoSegment'
-        }
-        elseif ($InputObject.PSTypeNames -contains 'PCXLab.Silence') {
-            'Silence'
-        }
-        else {
-            'Unknown'
+        if ($InputObject.PSTypeNames -notcontains 'PCXLab.VideoSegment') {
+            throw 'InputObject must be a PCXLab.VideoSegment object. Pipe analysis events through Get-PCXVideoSegments first.'
         }
 
-        if ($null -eq $InputType) {
-
-            if ($objectType -eq 'Unknown') {
-                throw 'InputObject must be a PCXLab.VideoSegment or PCXLab.Silence object.'
-            }
-
-            $InputType = $objectType
-
-        }
-        elseif ($objectType -ne $InputType) {
-            throw "All input objects must be of the same type. Expected '$InputType', found '$objectType'."
-        }
-
-        $Silences.Add($InputObject)
+        $Segments.Add($InputObject)
 
     }
 
     end {
 
-        if ($Silences.Count -eq 0) {
+        if ($Segments.Count -eq 0) {
             Write-Warning 'No edit points were supplied.'
             return
         }
 
-        $SourcePath = $Silences[0].SourcePath
+        $SourcePath = $Segments[0].SourcePath
 
         if ([string]::IsNullOrWhiteSpace($Path)) {
 
@@ -145,13 +129,6 @@ function Export-PCXPremiereEditPoints {
             throw 'Path must use the .jsx extension.'
         }
 
-        $Segments = if ($InputType -eq 'Silence') {
-            $Silences | Get-PCXVideoSegments
-        }
-        else {
-            $Silences
-        }
-
         if ($PSCmdlet.ShouldProcess($Path, 'Create Premiere Pro edit-point script')) {
 
             $ScriptContent = ConvertTo-PCXPremiereEditPointScript `
@@ -167,3 +144,4 @@ function Export-PCXPremiereEditPoints {
         }
     }
 }
+

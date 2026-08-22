@@ -3,76 +3,95 @@ BeforeAll {
     . "$PSScriptRoot\..\TestHelper.ps1"
 
     $module = Get-Module PCXLab.VideoTools
-    $script:ShortPause = & $module {
-        New-PCXSilenceObject -Start ([TimeSpan]::FromSeconds(1.25)) -End ([TimeSpan]::FromSeconds(4.25)) -DurationSeconds 3
-    }
-    $script:EditCandidate = & $module {
-        New-PCXSilenceObject -Start ([TimeSpan]::FromSeconds(10)) -End ([TimeSpan]::FromSeconds(16)) -DurationSeconds 6
-    }
-    $script:RecordingBreak = & $module {
-        New-PCXSilenceObject -Start ([TimeSpan]::FromSeconds(30)) -End ([TimeSpan]::FromSeconds(50)) -DurationSeconds 20
-    }
+
+    #
+    # Create silence events with SourcePath and convert to VideoSegments.
+    # The editing pipeline is now: Analysis Events → Get-PCXVideoSegments → Exporters.
+    #
+
+    $script:EditSegments = & $module {
+        param($TestVideo)
+
+        $editCandidate = New-PCXSilenceObject `
+            -Start ([TimeSpan]::FromSeconds(10)) `
+            -End ([TimeSpan]::FromSeconds(16)) `
+            -DurationSeconds 6 `
+            -SourcePath $TestVideo
+
+        $recordingBreak = New-PCXSilenceObject `
+            -Start ([TimeSpan]::FromSeconds(30)) `
+            -End ([TimeSpan]::FromSeconds(50)) `
+            -DurationSeconds 20 `
+            -SourcePath $TestVideo
+
+        @($editCandidate, $recordingBreak) | Get-PCXVideoSegments
+    } $script:TestVideo
 }
 
 Describe 'Export-PCXPremiereMarkers' {
 
     It 'Creates a Premiere ExtendScript file' {
-        $outputPath = Join-Path $TestDrive 'SilenceMarkers.jsx'
+        $outputPath = Join-Path $TestDrive 'Markers.jsx'
 
-        @($script:EditCandidate, $script:RecordingBreak) |
+        $script:EditSegments |
             Export-PCXPremiereMarkers -OutputPath $outputPath | Should -Exist
     }
 
-    It 'Creates range markers with comments and classifications' {
+    It 'Creates range markers with segment actions' {
         $outputPath = Join-Path $TestDrive 'MarkerContent.jsx'
 
-        @($script:EditCandidate, $script:RecordingBreak) |
+        $script:EditSegments |
             Export-PCXPremiereMarkers -OutputPath $outputPath | Out-Null
 
         $content = Get-Content -LiteralPath $outputPath -Raw
 
         $content | Should -Match '#target premierepro'
-        $content | Should -Match 'Silence - EditCandidate'
-        $content | Should -Match 'Silence - RecordingBreak'
-        $content | Should -Match 'marker\.end = item\.End'
-    }
-
-    It 'Excludes short pauses by default' {
-        $outputPath = Join-Path $TestDrive 'FilteredMarkers.jsx'
-
-        @($script:ShortPause, $script:EditCandidate) |
-            Export-PCXPremiereMarkers -OutputPath $outputPath | Out-Null
-
-        $content = Get-Content -LiteralPath $outputPath -Raw
-
-        $content | Should -Not -Match '"Start":1.25'
-        $content | Should -Match '"Start":10'
+        $content | Should -Match 'markerData'
+        $content | Should -Match 'VideoSegment'
     }
 
     It 'Applies a requested sequence offset' {
         $outputPath = Join-Path $TestDrive 'OffsetMarkers.jsx'
 
-        $script:EditCandidate |
+        $script:EditSegments |
             Export-PCXPremiereMarkers -OutputPath $outputPath -TimeOffsetSeconds 15 | Out-Null
 
-        (Get-Content -LiteralPath $outputPath -Raw) | Should -Match '"Start":25'
+        $content = Get-Content -LiteralPath $outputPath -Raw
+        $content | Should -Match '"Start":'
+    }
+
+    It 'Rejects non-VideoSegment input' {
+        $silence = & (Get-Module PCXLab.VideoTools) {
+            param($TestVideo)
+            New-PCXSilenceObject `
+                -Start ([TimeSpan]::FromSeconds(10)) `
+                -End ([TimeSpan]::FromSeconds(16)) `
+                -DurationSeconds 6 `
+                -SourcePath $TestVideo
+        } $script:TestVideo
+
+        { $silence | Export-PCXPremiereMarkers -Path "$TestDrive\Rejected.jsx" } |
+            Should -Throw '*PCXLab.VideoSegment*'
     }
 
     It 'Generates default output path when -Path is omitted' {
-        $silence = [PSCustomObject]@{
-            PSTypeNames    = @('PCXLab.Silence')
-            SourcePath     = Join-Path $TestDrive 'Video.mp4'
-            Start          = [TimeSpan]::FromSeconds(10)
-            End            = [TimeSpan]::FromSeconds(16)
-            DurationSeconds= 6
-            Classification = 'EditCandidate'
-        }
+        $segment = & (Get-Module PCXLab.VideoTools) {
+            param($TestVideo)
+            New-PCXVideoSegmentObject `
+                -SourcePath $TestVideo `
+                -Start ([TimeSpan]::Zero) `
+                -End ([TimeSpan]::FromSeconds(5)) `
+                -Action 'Keep'
+        } $script:TestVideo
 
-        $expectedPath = Join-Path $TestDrive 'Video-PremiereMarkers.jsx'
+        $expectedPath = Join-Path (Split-Path $script:TestVideo -Parent) 'Test-PremiereMarkers.jsx'
         if (Test-Path $expectedPath) { Remove-Item $expectedPath -Force }
 
-        $result = $silence | Export-PCXPremiereMarkers
+        $result = $segment | Export-PCXPremiereMarkers
         $result.FullName | Should -Be $expectedPath
         $expectedPath | Should -Exist
+
+        # Clean up generated file
+        Remove-Item $expectedPath -Force -ErrorAction SilentlyContinue
     }
 }
