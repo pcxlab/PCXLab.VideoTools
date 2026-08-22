@@ -2,15 +2,16 @@ function Get-PCXVideoSegments {
 
     <#
     .SYNOPSIS
-        Builds a complete video timeline from silence analysis.
+        Builds video editing segments from analysis events.
 
     .DESCRIPTION
-        Converts PCXLab.Silence objects into PCXLab.VideoSegment
-        objects representing both sections to keep and sections
-        to remove.
+        Converts temporal analysis events (such as silence, black frames, or
+        future analysis detections) into PCXLab.VideoSegment objects representing
+        both sections to keep and sections to remove.
 
     .PARAMETER InputObject
-        PCXLab.Silence object from the pipeline.
+        One or more analysis event objects received from the pipeline.
+        Each event must conform to the PCXLab analysis event contract.
 
     .OUTPUTS
         PCXLab.VideoSegment
@@ -31,31 +32,17 @@ function Get-PCXVideoSegments {
 
     begin {
 
-        $Silence = [System.Collections.Generic.List[object]]::new()
+        $Events = [System.Collections.Generic.List[object]]::new()
 
     }
 
     process {
 
-        $supportedTypes = @(
-            'PCXLab.Silence'
-            'PCXLab.EditPoint'
-            'PCXLab.BlackFrame'
-        )
-
-        $typeMatch = $false
-        foreach ($type in $supportedTypes) {
-            if ($InputObject.PSTypeNames -contains $type) {
-                $typeMatch = $true
-                break
-            }
+        if (-not (Test-PCXAnalysisEvent -InputObject $InputObject)) {
+            throw "InputObject must be a valid analysis event conforming to the PCXLab analysis event contract."
         }
 
-        if (-not $typeMatch) {
-            throw 'InputObject must be a PCXLab.Silence or PCXLab.EditPoint object.'
-        }
-
-        $Silence.Add($InputObject)
+        $Events.Add($InputObject)
 
     }
 
@@ -63,24 +50,24 @@ function Get-PCXVideoSegments {
 
         $Segments = [System.Collections.Generic.List[object]]::new()
 
-        if ($Silence.Count -eq 0) {
+        if ($Events.Count -eq 0) {
             return
         }
 
-        $uniqueSourcePaths = @($Silence.SourcePath | Sort-Object -Unique)
+        $uniqueSourcePaths = @($Events.SourcePath | Sort-Object -Unique)
 
         if ($uniqueSourcePaths.Count -gt 1) {
             throw "All input objects must belong to the same source. Found: $($uniqueSourcePaths -join ', ')."
         }
 
-        $SourcePath = $Silence[0].SourcePath
+        $SourcePath = $Events[0].SourcePath
 
         $VideoDuration = Get-PCXVideoDuration `
             -Path $SourcePath
 
         $CurrentPosition = [TimeSpan]::Zero
 
-        foreach ($Item in ($Silence | Sort-Object Start)) {
+        foreach ($Item in ($Events | Sort-Object Start)) {
 
             #
             # KEEP
@@ -138,4 +125,4 @@ function Get-PCXVideoSegments {
 
     }
 
-}
+}
