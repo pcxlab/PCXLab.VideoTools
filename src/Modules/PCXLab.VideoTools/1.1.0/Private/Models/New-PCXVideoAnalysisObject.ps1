@@ -23,13 +23,17 @@ param(
     [ValidateNotNull()]
     [object]$Media,
 
-    [Parameter(Mandatory)]
+    [Parameter()]
     [AllowEmptyCollection()]
-    [object[]]$Silence,
+    [object[]]$Silence = @(),
 
-    [Parameter(Mandatory)]
+    [Parameter()]
     [AllowEmptyCollection()]
-    [object[]]$Segments,
+    [object[]]$BlackFrames = @(),
+
+    [Parameter()]
+    [AllowEmptyCollection()]
+    [object[]]$Segments = @(),
 
     [Parameter()]
     [object]$SilenceStatistics
@@ -51,6 +55,8 @@ param(
     Analysis = [PSCustomObject]@{
 
         Silence = $Silence
+
+        BlackFrames = $BlackFrames
 
         Segments = $Segments
 
