@@ -80,10 +80,17 @@ foreach ($Video in $Videos) {
         Out-Null
 
         #
+        # Video Segments
+        #
+
+        $Segments = $Silence |
+        Get-PCXVideoSegments
+
+        #
         # Premiere Markers
         #
 
-        $Silence |
+        $Segments |
         Export-PCXPremiereMarkers |
         Out-Null
 
@@ -91,7 +98,7 @@ foreach ($Video in $Videos) {
         # Premiere Razor Script
         #
 
-        $Silence |
+        $Segments |
         Export-PCXPremiereEditPoints |
         Out-Null
 

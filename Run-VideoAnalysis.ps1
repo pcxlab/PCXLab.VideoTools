@@ -47,17 +47,24 @@ foreach ($Video in $Videos) {
             Export-PCXEditPoint  | Out-Null
 
         #
+        # Video Segments
+        #
+
+        $Segments = $Silence |
+            Get-PCXVideoSegments
+
+        #
         # Premiere Markers
         #
 
-        $Silence |
+        $Segments |
             Export-PCXPremiereMarkers | Out-Null
 
         #
         # Premiere Razor Script
         #
 
-        $Silence |
+        $Segments |
             Export-PCXPremiereEditPoints | Out-Null
 
         Write-Host "[SUCCESS] $($Video.Name)" -ForegroundColor Green
