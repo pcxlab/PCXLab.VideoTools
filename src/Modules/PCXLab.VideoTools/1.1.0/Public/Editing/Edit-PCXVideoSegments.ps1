@@ -101,21 +101,11 @@ function Edit-PCXVideoSegments {
         $HasAudio = ($null -ne $AudioInfo -and $AudioInfo.HasAudio)
 
         #
-        # Build timeline filter graph
+        # Resolve audio filter settings
         #
 
-        $FilterGraph = $Segments |
-        ConvertTo-PCXConcatFilter `
-            -InputIndex 0 `
-            -HasAudio:$HasAudio
-
-        #
-        # Read audio filter settings
-        #
-
-        if ($HasAudio) {
-
-            $AudioSettings = [PSCustomObject]@{
+        $AudioSettings = if ($HasAudio) {
+            [PSCustomObject]@{
                 Normalize      = Get-PCXSetting `
                     -Name 'Audio.Normalize' `
                     -DefaultValue $false
@@ -128,23 +118,20 @@ function Edit-PCXVideoSegments {
                     -Name 'Audio.RepairChannels' `
                     -DefaultValue $false
             }
-
-            $AudioFilter = ConvertTo-PCXAudioFilter `
-                -Settings $AudioSettings
-
-            #
-            # Merge audio filter into the filter graph
-            #
-
-            if (-not [string]::IsNullOrWhiteSpace($AudioFilter)) {
-
-                $FilterGraph = $FilterGraph -replace '\[outa\]$', '[outa_pre]'
-
-                $FilterGraph += ";[outa_pre]$AudioFilter[outa]"
-
-            }
-
         }
+        else {
+            $null
+        }
+
+        #
+        # Build timeline filter graph
+        #
+
+        $FilterGraph = $Segments |
+        ConvertTo-PCXFFmpegFilterGraph `
+            -InputIndex 0 `
+            -HasAudio:$HasAudio `
+            -AudioSettings $AudioSettings
 
         #
         # Read source audio sample rate
