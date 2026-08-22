@@ -225,38 +225,13 @@ function Edit-PCXRecordingSession {
                     }
                 }
 
-                $offset = $SourceOffset.OffsetSeconds
+                $eventsForSource = $ReferenceEvents |
+                    Convert-PCXAnalysisEventToSource -SourceOffset $SourceOffset
 
-                foreach ($Event in $ReferenceEvents) {
-
-                    $startSeconds = $Event.StartSeconds - $offset
-                    $endSeconds   = $Event.EndSeconds - $offset
-
-                    if ($endSeconds -le 0) {
-                        continue
+                if ($null -ne $eventsForSource) {
+                    foreach ($evt in $eventsForSource) {
+                        $TranslatedEvents.Add($evt)
                     }
-
-                    if ($startSeconds -lt 0) {
-                        $startSeconds = 0
-                    }
-
-                    $durationSeconds = $endSeconds - $startSeconds
-
-                    if ($durationSeconds -le 0) {
-                        continue
-                    }
-
-                    $start = [TimeSpan]::FromSeconds($startSeconds)
-                    $end   = [TimeSpan]::FromSeconds($endSeconds)
-
-                    $translatedEvent = New-PCXSilenceObject `
-                        -SourcePath $SourceOffset.SourcePath `
-                        -Start $start `
-                        -End $end `
-                        -DurationSeconds $durationSeconds
-
-                    $TranslatedEvents.Add($translatedEvent)
-
                 }
 
             }
