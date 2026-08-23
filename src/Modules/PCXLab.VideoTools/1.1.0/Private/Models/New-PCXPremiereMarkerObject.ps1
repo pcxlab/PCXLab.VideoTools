@@ -23,8 +23,37 @@ function New-PCXPremiereMarkerObject {
     .PARAMETER MarkerType
         Premiere marker type (default: 'Comment').
 
+    .PARAMETER MarkerKind
+        Top-level semantic category of the marker.
+
+        Known values (free string — not validated to allow future extensibility):
+
+            Analysis  — factual observation produced by an analysis provider
+                        (e.g. Silence, BlackFrame, Speech, SceneChange)
+            Editing   — policy decision produced by an editing policy
+                        (e.g. Keep, Remove)
+            System    — diagnostic information
+                        (e.g. Warning, Error, Information)
+
+        Defaults to 'Analysis'.
+
+    .PARAMETER MarkerSubKind
+        Second-level semantic type within the MarkerKind category.
+
+        Known values by MarkerKind:
+
+            Analysis  → Silence | BlackFrame | Speech | SceneChange | Chapter | AISuggestion
+            Editing   → Keep | Remove
+            System    → Warning | Error | Information
+
+        Defaults to '' (empty string — resolver falls back to legacy name-based
+        dispatch when MarkerSubKind is absent).
+
     .PARAMETER ColorIndex
         Optional Premiere marker color index.
+
+        When specified, this value is used directly by Resolve-PCXPremiereMarkerColor
+        and overrides all semantic color resolution.
 
     .OUTPUTS
         PCXLab.PremiereMarker
@@ -51,6 +80,12 @@ function New-PCXPremiereMarkerObject {
         [string]$MarkerType = 'Comment',
 
         [Parameter()]
+        [string]$MarkerKind = 'Analysis',
+
+        [Parameter()]
+        [string]$MarkerSubKind = '',
+
+        [Parameter()]
         [Nullable[int]]
         $ColorIndex = $null
 
@@ -68,6 +103,8 @@ function New-PCXPremiereMarkerObject {
         Name            = $Name
         Comments        = $Comments
         MarkerType      = $MarkerType
+        MarkerKind      = $MarkerKind
+        MarkerSubKind   = $MarkerSubKind
         ColorIndex      = $ColorIndex
     }
 
