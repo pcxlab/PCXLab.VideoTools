@@ -2,16 +2,17 @@ function Get-PCXVideoSegments {
 
     <#
     .SYNOPSIS
-        Builds video editing segments from analysis events.
+        Builds video editing segments from analysis events or analysis containers.
 
     .DESCRIPTION
         Converts temporal analysis events (such as silence, black frames, or
-        future analysis detections) into PCXLab.VideoSegment objects representing
-        both sections to keep and sections to remove.
+        future analysis detections) or complete PCXLab.VideoAnalysis objects
+        into PCXLab.VideoSegment objects representing both sections to keep
+        and sections to remove.
 
     .PARAMETER InputObject
-        One or more analysis event objects received from the pipeline.
-        Each event must conform to the PCXLab analysis event contract.
+        One or more analysis event objects or a PCXLab.VideoAnalysis container
+        received from the pipeline.
 
     .OUTPUTS
         PCXLab.VideoSegment
@@ -38,11 +39,35 @@ function Get-PCXVideoSegments {
 
     process {
 
-        if (-not (Test-PCXAnalysisEvent -InputObject $InputObject)) {
-            throw "InputObject must be a valid analysis event conforming to the PCXLab analysis event contract."
-        }
+        if ($InputObject.PSTypeNames -contains 'PCXLab.VideoAnalysis') {
 
-        $Events.Add($InputObject)
+            if ($null -ne $InputObject.Analysis) {
+
+                if ($null -ne $InputObject.Analysis.Silence) {
+                    foreach ($e in @($InputObject.Analysis.Silence)) {
+                        if (Test-PCXAnalysisEvent -InputObject $e) {
+                            $Events.Add($e)
+                        }
+                    }
+                }
+
+                if ($null -ne $InputObject.Analysis.BlackFrames) {
+                    foreach ($e in @($InputObject.Analysis.BlackFrames)) {
+                        if (Test-PCXAnalysisEvent -InputObject $e) {
+                            $Events.Add($e)
+                        }
+                    }
+                }
+
+            }
+
+        }
+        elseif (Test-PCXAnalysisEvent -InputObject $InputObject) {
+            $Events.Add($InputObject)
+        }
+        else {
+            throw "InputObject must be a PCXLab.VideoAnalysis object or a valid analysis event conforming to the PCXLab analysis event contract."
+        }
 
     }
 
@@ -125,4 +150,4 @@ function Get-PCXVideoSegments {
 
     }
 
-}
+}

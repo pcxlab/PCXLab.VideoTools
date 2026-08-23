@@ -29,6 +29,28 @@ Describe 'Get-PCXVideoSegments' {
         @($segments | Where-Object Action -eq 'Remove').Count | Should -BeGreaterThan 0
     }
 
+    It 'Builds Keep and Remove segments from a complete PCXLab.VideoAnalysis container' {
+        $analysis = & $module {
+            param($TestVideo)
+
+            $sil = New-PCXSilenceObject `
+                -Start ([TimeSpan]::FromSeconds(2)) `
+                -End ([TimeSpan]::FromSeconds(5)) `
+                -DurationSeconds 3 `
+                -SourcePath $TestVideo
+
+            New-PCXVideoAnalysisObject `
+                -SourcePath $TestVideo `
+                -Media ([PSCustomObject]@{ DurationSeconds = 10 }) `
+                -Silence @($sil)
+        } $script:TestVideo
+
+        $segments = @($analysis | Get-PCXVideoSegments)
+        $segments.Count | Should -BeGreaterThan 1
+        $segments[0].Action | Should -Be 'Keep'
+        $segments[1].Action | Should -Be 'Remove'
+    }
+
     It 'Builds Keep and Remove segments from a custom future analysis event' {
         $customEvent = [PSCustomObject]@{
             SourcePath = $script:TestVideo

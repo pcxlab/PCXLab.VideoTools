@@ -2,15 +2,15 @@ function ConvertTo-PCXPremiereMarkerScript {
 
     <#
     .SYNOPSIS
-        Converts PCXLab.VideoSegment objects into a Premiere Pro ExtendScript.
+        Converts Premiere marker definitions into a Premiere Pro ExtendScript.
 
     .DESCRIPTION
         Produces an ExtendScript payload that creates range comment markers on
-        the active Adobe Premiere Pro sequence. Markers are created for every
-        segment, labelled by action.
+        the active Adobe Premiere Pro sequence for analysis visualization or
+        segment review.
 
     .PARAMETER Marker
-        PCXLab.VideoSegment objects to represent as Premiere Pro markers.
+        PCXLab.PremiereMarker, PCXLab.VideoSegment, or analysis event objects to represent as Premiere Pro markers.
 
     .PARAMETER TimeOffsetSeconds
         Offset added to every marker position. Use this when the source clip
@@ -29,6 +29,7 @@ function ConvertTo-PCXPremiereMarkerScript {
 
         [Parameter(Mandatory)]
         [ValidateNotNullOrEmpty()]
+        [Alias('Markers')]
         [object[]]$Marker,
 
         [Parameter()]
@@ -36,24 +37,24 @@ function ConvertTo-PCXPremiereMarkerScript {
 
     )
 
-    $invariantCulture = [System.Globalization.CultureInfo]::InvariantCulture
+    $markerData = foreach ($rawItem in $Marker) {
 
-    $markerData = foreach ($item in $Marker) {
+        $items = ConvertTo-PCXPremiereMarker -InputObject $rawItem
 
-        if ($item.PSTypeNames -notcontains 'PCXLab.VideoSegment') {
-            throw 'InputObject must be a PCXLab.VideoSegment object.'
+        foreach ($item in $items) {
+
+            $start = [Math]::Round(([double]$item.StartSeconds + $TimeOffsetSeconds), 3)
+            $end = [Math]::Round(([double]$item.EndSeconds + $TimeOffsetSeconds), 3)
+
+            [PSCustomObject]@{
+                Start    = $start
+                End      = $end
+                Name     = $item.Name
+                Comments = $item.Comments
+            }
+
         }
 
-        $start = [Math]::Round(([double]$item.StartSeconds + $TimeOffsetSeconds), 3)
-        $end = [Math]::Round(([double]$item.EndSeconds + $TimeOffsetSeconds), 3)
-        $duration = ([double]$item.DurationSeconds).ToString('0.###', $invariantCulture)
-
-        [PSCustomObject]@{
-            Start    = $start
-            End      = $end
-            Name     = "VideoSegment - $($item.Action)"
-            Comments = "Detected segment: $duration seconds. Action: $($item.Action)."
-        }
     }
 
     $json = ConvertTo-Json -InputObject @($markerData) -Compress

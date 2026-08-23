@@ -28,19 +28,34 @@ Describe 'Export-PCXPremiereMarkers' {
 
     }
 
-    It 'Rejects non-VideoSegment input' {
+    It 'Exports Silence analysis events to a Premiere marker script' {
 
-        $silence = New-Object PSObject -Property @{
-            SourcePath = $script:TestVideo
-            Start      = [TimeSpan]::Zero
-            End        = [TimeSpan]::FromSeconds(5)
-            Duration   = [TimeSpan]::FromSeconds(5)
-        }
-        $silence.PSTypeNames.Insert(0, 'PCXLab.Silence')
+        $silence = & $script:Module {
+            param($TestVideo)
+            @(
+                New-PCXSilenceObject -SourcePath $TestVideo -Start ([TimeSpan]::FromSeconds(2)) -End ([TimeSpan]::FromSeconds(8)) -DurationSeconds 6
+            )
+        } $script:TestVideo
 
-        { $silence | Export-PCXPremiereMarkers -Path "$TestDrive\Test-Rejected.jsx" } | Should -Throw '*PCXLab.VideoSegment*'
+        $result = $silence | Export-PCXPremiereMarkers -Path "$TestDrive\Test-Silence-Markers.jsx"
+
+        $result | Should -Not -BeNullOrEmpty
+        $result.FullName | Should -Exist
+
+        $scriptContent = Get-Content -LiteralPath $result.FullName -Raw
+        $scriptContent | Should -Match 'Silence - EditCandidate'
+        $scriptContent | Should -Match 'Detected silence: 6 seconds'
 
     }
 
+    It 'Rejects invalid input' {
+
+        $invalid = [PSCustomObject]@{
+            InvalidProperty = 'Not an event or segment'
+        }
+
+        { $invalid | Export-PCXPremiereMarkers -Path "$TestDrive\Test-Rejected.jsx" } | Should -Throw '*InputObject must be a PCXLab.VideoSegment*'
+
+    }
 
 }
