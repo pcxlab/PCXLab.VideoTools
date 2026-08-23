@@ -46,13 +46,16 @@ function ConvertTo-PCXPremiereMarkerScript {
             $start = [Math]::Round(([double]$item.StartSeconds + $TimeOffsetSeconds), 3)
             $end = [Math]::Round(([double]$item.EndSeconds + $TimeOffsetSeconds), 3)
 
-            [PSCustomObject]@{
-                Start    = $start
-                End      = $end
-                Name     = $item.Name
-                Comments = $item.Comments
-            }
+            $colorIndex = Resolve-PCXPremiereMarkerColor -Marker $item
 
+            [PSCustomObject]@{
+                Start      = $start
+                End        = $end
+                Name       = $item.Name
+                Comments   = $item.Comments
+                MarkerType = $item.MarkerType
+                ColorIndex = $colorIndex
+            }
         }
 
     }
@@ -80,8 +83,23 @@ function ConvertTo-PCXPremiereMarkerScript {
 
         marker.name = item.Name;
         marker.comments = item.Comments;
-        marker.type = 'Comment';
+        if (item.MarkerType !== null && item.MarkerType !== undefined) {
+            marker.type = item.MarkerType;
+        }
         marker.end = item.End;
+
+        if (
+            item.ColorIndex !== null &&
+            item.ColorIndex !== undefined &&
+            typeof marker.setColorByIndex === "function"
+        ) {
+            try {
+                marker.setColorByIndex(item.ColorIndex);
+            }
+            catch (e) {
+                // Ignore if Premiere version doesn't support marker colors.
+            }
+        }
 
         added++;
     }

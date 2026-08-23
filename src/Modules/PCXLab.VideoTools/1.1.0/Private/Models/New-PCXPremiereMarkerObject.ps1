@@ -51,7 +51,8 @@ function New-PCXPremiereMarkerObject {
         [string]$MarkerType = 'Comment',
 
         [Parameter()]
-        [int]$ColorIndex = 0
+        [Nullable[int]]
+        $ColorIndex = $null
 
     )
 
