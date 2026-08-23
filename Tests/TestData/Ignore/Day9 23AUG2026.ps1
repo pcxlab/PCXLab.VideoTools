@@ -54,6 +54,12 @@ Edit-PCXRecordingSession `
     "C:\Recording seg TestONLOY\20260127 TEST Recording once\RG_20260127_025337_004\bandicam 2026-01-27 02-53-49-253.mp4.webcam.mp4"
 )
 
+
+Edit-PCXRecordingSession `
+    -ReferencePath "C:\Recording seg TestONLOY\20260127 TEST Recording once\RG_20260127_025337_004\bandicam 2026-01-27 02-53-49-253.mp4"
+
+
+
 #1. VideoAnalysis.json
 Analyze-PCXVideo `
     -Path "C:\Recording seg TestONLOY\20260127 TEST Recording once\RG_20260127_025337_004\bandicam 2026-01-27 02-53-49-253.mp4" |
@@ -154,6 +160,17 @@ Where-Object Action -eq 'Remove' |
 Export-PCXPremiereEditPoints -Force
 
 
+Analyze-PCXVideo `
+    -Path "C:\Recording seg TestONLOY\20260127 TEST Recording once\RG_20260127_025337_004\bandicam 2026-01-27 02-53-49-253.mp4" |
+Get-PCXVideoSegments |
+Export-PCXPremiereMarkers -Force
+
+Analyze-PCXVideo `
+    -Path "C:\Recording seg TestONLOY\20260127 TEST Recording once\RG_20260127_025337_004\bandicam 2026-01-27 02-53-49-253.mp4" |
+Get-PCXVideoSegments |
+Export-PCXPremiereEditPoints -Force
+
+
 git add `
     "src/Modules/PCXLab.VideoTools/1.1.0/Public/Editing/Get-PCXVideoSegments.ps1" `
     "src/Modules/PCXLab.VideoTools/1.1.0/Public/Export/Export-PCXPremiereMarkers.ps1" `
@@ -240,12 +257,64 @@ Import-Module .\src\Modules\PCXLab.VideoTools -Force
 
 
 Analyze-PCXVideo `
--Path "C:\Recording seg TestONLOY\20260127 TEST Recording once\RG_20260127_025337_004\bandicam 2026-01-27 02-53-49-253_5min.mp4" |
+    -Path "C:\Recording seg TestONLOY\20260127 TEST Recording once\RG_20260127_025337_004\bandicam 2026-01-27 02-53-49-253_5min.mp4" |
 Export-PCXPremiereMarkers -Force
 
 
 Analyze-PCXVideo `
--Path "C:\Recording seg TestONLOY\20260127 TEST Recording once\RG_20260127_025337_004\bandicam 2026-01-27 02-53-49-253.mp4" |
+    -Path "C:\Recording seg TestONLOY\20260127 TEST Recording once\RG_20260127_025337_004\bandicam 2026-01-27 02-53-49-253.mp4" |
 Export-PCXPremiereMarkers -Force
 
+
+(Get-Content .\src\Modules\PCXLab.VideoTools\1.1.0\Private\Premiere\Resolve-PCXPremiereMarkerColor.ps1 | Measure-Object -Line).Lines
+
+Get-Content .\src\Modules\PCXLab.VideoTools\1.1.0\Private\Premiere\Resolve-PCXPremiereMarkerColor.ps1 | Select-Object -Last 25
+
+
+
+$tokens = $null
+$errors = $null
+
+$null = [System.Management.Automation.Language.Parser]::ParseFile(
+    "C:\Projects\PCXLab.VideoTools\src\Modules\PCXLab.VideoTools\1.1.0\Private\Premiere\Resolve-PCXPremiereMarkerColor.ps1",
+    [ref]$tokens,
+    [ref]$errors
+)
+
+$errors
+
+Import-Module .\src\Modules\PCXLab.VideoTools\1.1.0\PCXLab.VideoTools.psd1 -Force -Verbose
+
+
+Test-PCXSyntax "C:\Projects\PCXLab.VideoTools\src\Modules\PCXLab.VideoTools\1.1.0\Private\Premiere\Resolve-PCXPremiereMarkerColor.ps1"
+
+.\Development\Verify-Module.ps1
+
+Import-Module .\src\Modules\PCXLab.VideoTools -Force -Verbose
+
+
+Remove-Module PCXLab.VideoTools -Force -ErrorAction SilentlyContinue
+
+Import-Module .\src\Modules\PCXLab.VideoTools -Force
+
+
+
+Analyze-PCXVideo `
+    -Path "C:\Recording seg TestONLOY\20260127 TEST Recording once\RG_20260127_025337_004\bandicam 2026-01-27 02-53-49-253.mp4" |
+Export-PCXPremiereMarkers -Force
+
+
+Edit-PCXRecordingSession `
+    -ReferencePath "C:\Recording seg TestONLOY\20260127 TEST Recording once\RG_20260127_025337_004\bandicam 2026-01-27 02-53-49-253.mp4"
+
+
+###$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
+
+Analyze-PCXVideo `
+    -Path "C:\Recording seg TestONLOY\20260127 TEST Recording once\RG_20260127_025337_004\bandicam 2026-01-27 02-53-49-253.mp4" |
+Export-PCXPremiereMarkers -Force
+    
+Analyze-PCXVideo `
+    -Path "C:\Recording seg TestONLOY\20260127 TEST Recording once\RG_20260127_025337_004\bandicam 2026-01-27 02-53-49-253.mp4" |
+Export-PCXPremiereEditPoints -Force
 

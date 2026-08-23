@@ -66,8 +66,8 @@ Describe 'Export-PCXPremiereMarkers' {
 
         $content | Should -Match '#target premierepro'
         $content | Should -Match 'markerData'
-        $content | Should -Match 'VideoSegment - Keep'
-        $content | Should -Match 'VideoSegment - Remove'
+        $content | Should -Match '"Name":"Keep"'
+        $content | Should -Match '"Name":"Remove"'
     }
 
     It 'Applies a requested sequence offset' {
@@ -87,8 +87,8 @@ Describe 'Export-PCXPremiereMarkers' {
             Export-PCXPremiereMarkers -Path $outputPath | Should -Exist
 
         $content = Get-Content -LiteralPath $outputPath -Raw
-        $content | Should -Match 'Silence - EditCandidate'
-        $content | Should -Match 'Detected silence: 6 seconds. Classification: EditCandidate.'
+        $content | Should -Match '"Name":"Silence"'
+        $content | Should -Match 'Classification\s+: EditCandidate'
     }
 
     It 'Exports raw BlackFrame analysis events' {
@@ -98,8 +98,8 @@ Describe 'Export-PCXPremiereMarkers' {
             Export-PCXPremiereMarkers -Path $outputPath | Should -Exist
 
         $content = Get-Content -LiteralPath $outputPath -Raw
-        $content | Should -Match 'BlackFrame'
-        $content | Should -Match 'Detected black frames: 3 seconds.'
+        $content | Should -Match '"Name":"Black Frame"'
+        $content | Should -Match 'SubType\s+: BlackFrame'
     }
 
     It 'Exports complete VideoAnalysis container unpacking constituent events' {
@@ -118,8 +118,8 @@ Describe 'Export-PCXPremiereMarkers' {
         $analysis | Export-PCXPremiereMarkers -Path $outputPath | Should -Exist
 
         $content = Get-Content -LiteralPath $outputPath -Raw
-        $content | Should -Match 'Silence - EditCandidate'
-        $content | Should -Match 'BlackFrame'
+        $content | Should -Match '"Name":"Silence"'
+        $content | Should -Match '"Name":"Black Frame"'
     }
 
     It 'Rejects invalid input' {
