@@ -4,8 +4,8 @@ Import-Module "C:\Projects\PCXLab.VideoTools\src\Modules\PCXLab.VideoTools" -For
 # Configuration
 #----------------------------------------------------------
 
-$Root = "F:\Recordings"
-# $Root = "C:\Recording seg TestONLOY"
+# $Root = "F:\Recordings"
+$Root = "C:\Recording seg TestONLOY"
 
 #
 # Supported values:
@@ -16,7 +16,7 @@ $Root = "F:\Recordings"
 $Analyzer = 'BlackFrames'
 
 $Success = 0
-$Failed  = 0
+$Failed = 0
 $Skipped = 0
 
 $Stopwatch = [System.Diagnostics.Stopwatch]::StartNew()
@@ -77,7 +77,7 @@ foreach ($Video in $Videos) {
 
     $EditedVideo = Join-Path `
         $Video.DirectoryName `
-        ($Video.BaseName + "-Edited" + $Video.Extension)
+    ($Video.BaseName + "-Edited" + $Video.Extension)
 
     if (Test-Path -LiteralPath $EditedVideo) {
 
@@ -149,15 +149,15 @@ foreach ($Video in $Videos) {
 
         }
 
-                #
+        #
         # Export VideoSegments JSON
         #
 
         Write-Host "Exporting VideoSegments..." -ForegroundColor DarkCyan
 
         $Segments |
-            Export-PCXVideoSegment |
-            Out-Null
+        Export-PCXVideoSegment |
+        Out-Null
 
         #
         # Export Premiere Markers
@@ -166,8 +166,8 @@ foreach ($Video in $Videos) {
         Write-Host "Exporting Premiere Markers..." -ForegroundColor DarkCyan
 
         $Segments |
-            Export-PCXPremiereMarkers |
-            Out-Null
+        Export-PCXPremiereMarkers |
+        Out-Null
 
         #
         # Export Premiere Edit Points
@@ -176,8 +176,8 @@ foreach ($Video in $Videos) {
         Write-Host "Exporting Premiere Edit Points..." -ForegroundColor DarkCyan
 
         $Segments |
-            Export-PCXPremiereEditPoints |
-            Out-Null
+        Export-PCXPremiereEditPoints |
+        Out-Null
 
         #
         # Render edited video
@@ -186,8 +186,8 @@ foreach ($Video in $Videos) {
         Write-Host "Rendering Edited Video..." -ForegroundColor DarkCyan
 
         $Segments |
-            Edit-PCXVideoSegments |
-            Out-Null
+        Edit-PCXVideoSegments |
+        Out-Null
 
         $VideoTimer.Stop()
 
