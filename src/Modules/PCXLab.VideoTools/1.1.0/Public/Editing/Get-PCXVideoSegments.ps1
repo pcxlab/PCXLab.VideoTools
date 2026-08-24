@@ -87,6 +87,32 @@ function Get-PCXVideoSegments {
 
         $SourcePath = $Events[0].SourcePath
 
+        #
+        # Resolve cache path using existing artifact infrastructure
+        #
+
+        $cacheFile = Get-PCXArtifactPath `
+            -SourcePath $SourcePath `
+            -ArtifactType VideoSegment
+
+        #
+        # Cache hit
+        #
+
+        if (Test-PCXVideoSegmentCache -Path $cacheFile) {
+
+            Write-Verbose "Returning cached video segments from '$cacheFile'."
+            Import-PCXVideoSegment -Path $cacheFile
+            return
+
+        }
+
+        #
+        # Cache miss
+        #
+
+        Write-Verbose "No cache found at '$cacheFile'. Generating video segments."
+
         $VideoDuration = Get-PCXVideoDuration `
             -Path $SourcePath
 
@@ -146,8 +172,20 @@ function Get-PCXVideoSegments {
 
         }
 
-        $Segments | 
-            Optimize-PCXVideoSegments
+        $OptimizedSegments = @(
+            $Segments | 
+                Optimize-PCXVideoSegments
+        )
+
+        if ($OptimizedSegments.Count -gt 0) {
+
+            $null = $OptimizedSegments |
+                Export-PCXVideoSegment `
+                    -Path $cacheFile
+
+        }
+
+        $OptimizedSegments
 
     }
 
