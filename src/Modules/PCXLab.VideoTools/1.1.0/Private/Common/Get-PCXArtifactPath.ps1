@@ -46,6 +46,8 @@ function Get-PCXArtifactPath {
             'RecordingSession',
             'PremiereMarker',
             'PremiereEditPoint',
+            'EditedAnalysis',
+            'EditedVideoSegment',
             'EditedPremiereMarker',
             'EditedPremiereEditPoint',
             'EditedVideo'
