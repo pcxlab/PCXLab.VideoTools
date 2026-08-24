@@ -118,7 +118,8 @@ function Get-PCXVideoSegments {
             $Segment = Add-PCXRemoveSegment `
                 -SourcePath $SourcePath `
                 -Start $Item.Start `
-                -End $Item.End
+                -End $Item.End `
+                -AnalysisEvents @($Item)
 
             if ($null -ne $Segment) {
                 $Segments.Add($Segment)

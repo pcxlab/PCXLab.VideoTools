@@ -31,8 +31,9 @@ $script:PCXArtifactDefinitions = @{
     Silence           = @{ Suffix = 'Silence'; Extension = '.json'; Separator = '-' }
     VideoSegment      = @{ Suffix = 'VideoSegments'; Extension = '.json'; Separator = '-' }
     RecordingSession  = @{ Suffix = 'RecordingSession'; Extension = '.json'; Separator = '-'; PrefixSource = 'DirectoryName' }
-    PremiereMarker    = @{ Suffix = 'PremiereMarkers'; Extension = '.jsx'; Separator = '-' }
-    PremiereEditPoint = @{ Suffix = 'PremiereEditPoints'; Extension = '.jsx'; Separator = '-' }
-    EditedVideo       = @{ ConfiguredSuffixSetting = 'Output.Suffix'; DefaultSuffix = '-Edited'; Extension = $null; Separator = '' }
-
+    PremiereMarker          = @{ Suffix = 'PremiereMarkers'; Extension = '.jsx'; Separator = '-' }
+    PremiereEditPoint       = @{ Suffix = 'PremiereEditPoints'; Extension = '.jsx'; Separator = '-' }
+    EditedPremiereMarker    = @{ Suffix = 'EditedMarkers'; Extension = '.jsx'; Separator = '-' }
+    EditedPremiereEditPoint = @{ Suffix = 'EditedCuts'; Extension = '.jsx'; Separator = '-' }
+    EditedVideo             = @{ ConfiguredSuffixSetting = 'Output.Suffix'; DefaultSuffix = '-Edited'; Extension = $null; Separator = '' }
 }

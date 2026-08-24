@@ -17,7 +17,11 @@ function Add-PCXRemoveSegment {
         [TimeSpan]$Start,
 
         [Parameter(Mandatory)]
-        [TimeSpan]$End
+        [TimeSpan]$End,
+
+        [Parameter()]
+        [AllowEmptyCollection()]
+        [object[]]$AnalysisEvents = @()
 
     )
 
@@ -29,6 +33,7 @@ function Add-PCXRemoveSegment {
         -SourcePath $SourcePath `
         -Start $Start `
         -End $End `
-        -Action 'Remove'
+        -Action 'Remove' `
+        -AnalysisEvents $AnalysisEvents
 
 }

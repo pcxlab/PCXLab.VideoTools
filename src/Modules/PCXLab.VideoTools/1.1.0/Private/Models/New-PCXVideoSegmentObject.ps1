@@ -46,7 +46,11 @@ function New-PCXVideoSegmentObject {
             'Keep',
             'Remove'
         )]
-        [string]$Action
+        [string]$Action,
+
+        [Parameter()]
+        [AllowEmptyCollection()]
+        [object[]]$AnalysisEvents = @()
 
     )
 
@@ -90,6 +94,10 @@ function New-PCXVideoSegmentObject {
         # Classification
 
         Action          = $Action
+
+        # Associated In-Memory Analysis Events
+
+        AnalysisEvents  = @($AnalysisEvents)
 
     }
 

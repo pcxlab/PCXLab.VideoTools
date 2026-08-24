@@ -89,81 +89,179 @@ function Edit-PCXVideoSegments {
 
         }
 
-        if (-not (Test-PCXShouldGenerateArtifact -Path $OutputPath -Force:$Force)) {
-            return (Get-Item -LiteralPath $OutputPath)
-        }
-
         #
-        # Read source audio information & presence
+        # 1. Render Edited Video (FFmpeg) — evaluated independently
         #
 
-        $AudioInfo = Get-PCXAudioInformation -Path $SourcePath
-        $HasAudio = ($null -ne $AudioInfo -and $AudioInfo.HasAudio)
+        $shouldRenderVideo = Test-PCXShouldGenerateArtifact -Path $OutputPath -Force:$Force
 
-        #
-        # Resolve audio filter settings
-        #
+        if ($shouldRenderVideo) {
 
-        $AudioSettings = if ($HasAudio) {
-            [PSCustomObject]@{
-                Normalize      = Get-PCXSetting `
-                    -Name 'Audio.Normalize' `
-                    -DefaultValue $false
+            #
+            # Read source audio information & presence
+            #
 
-                Compression    = Get-PCXSetting `
-                    -Name 'Audio.Compression' `
-                    -DefaultValue $false
+            $AudioInfo = Get-PCXAudioInformation -Path $SourcePath
+            $HasAudio = ($null -ne $AudioInfo -and $AudioInfo.HasAudio)
 
-                RepairChannels = Get-PCXSetting `
-                    -Name 'Audio.RepairChannels' `
-                    -DefaultValue $false
+            #
+            # Resolve audio filter settings
+            #
+
+            $AudioSettings = if ($HasAudio) {
+                [PSCustomObject]@{
+                    Normalize      = Get-PCXSetting `
+                        -Name 'Audio.Normalize' `
+                        -DefaultValue $false
+
+                    Compression    = Get-PCXSetting `
+                        -Name 'Audio.Compression' `
+                        -DefaultValue $false
+
+                    RepairChannels = Get-PCXSetting `
+                        -Name 'Audio.RepairChannels' `
+                        -DefaultValue $false
+                }
             }
+            else {
+                $null
+            }
+
+            #
+            # Build timeline filter graph
+            #
+
+            $FilterGraph = $Segments |
+            ConvertTo-PCXFFmpegFilterGraph `
+                -InputIndex 0 `
+                -HasAudio:$HasAudio `
+                -AudioSettings $AudioSettings
+
+            #
+            # Read source audio sample rate
+            #
+
+            $SampleRate = if ($HasAudio -and $AudioInfo.SampleRate) {
+                $AudioInfo.SampleRate
+            }
+            else {
+                0
+            }
+
+            #
+            # Create FFmpeg render job
+            #
+
+            $Job = New-PCXFFmpegRenderJobObject `
+                -SourcePath $SourcePath `
+                -OutputPath $OutputPath `
+                -FilterGraph $FilterGraph `
+                -SampleRate $SampleRate `
+                -HasAudio:$HasAudio
+
+            #
+            # Execute job
+            #
+
+            if ($PSCmdlet.ShouldProcess($OutputPath, 'Render edited video')) {
+
+                Invoke-PCXFFmpegEdit `
+                    -RenderJob $Job | Out-Null
+
+            }
+
         }
-        else {
-            $null
+
+        #
+        # 2. Companion Edited Timeline Artifacts — evaluated independently
+        #
+        try {
+
+            $timelineMap = New-PCXTimelineMapObject -Segments $Segments
+
+            # A. Edited Cuts (.jsx) — seam join points on the edited timeline
+            $cutPoints = @(Get-PCXEditedCutPoints -TimelineMap $timelineMap)
+
+            if ($cutPoints.Count -gt 0) {
+
+                $editedCutsPath = Get-PCXArtifactPath `
+                    -SourcePath $SourcePath `
+                    -ArtifactType EditedPremiereEditPoint
+
+                if (Test-PCXShouldGenerateArtifact -Path $editedCutsPath -Force:$Force) {
+
+                    $cutScript = ConvertTo-PCXPremiereEditPointScript `
+                        -CutPointsSeconds @($cutPoints)
+
+                    Set-Content -LiteralPath $editedCutsPath -Value $cutScript -Encoding UTF8
+
+                }
+
+            }
+
+            # B. Edited Markers (.jsx) — projected from in-memory pipeline data
+            $inMemoryEvents = [System.Collections.Generic.List[object]]::new()
+            foreach ($seg in $Segments) {
+                if ($null -ne $seg.AnalysisEvents) {
+                    foreach ($ev in @($seg.AnalysisEvents)) {
+                        if ($null -ne $ev) {
+                            $inMemoryEvents.Add($ev)
+                        }
+                    }
+                }
+            }
+
+            $markersToProject = [System.Collections.Generic.List[object]]::new()
+
+            # Include Keep segment markers
+            foreach ($keepSeg in @($Segments | Where-Object Action -eq 'Keep')) {
+                $markersToProject.Add((ConvertTo-PCXPremiereMarker -InputObject $keepSeg))
+            }
+
+            # Include any attached analysis events
+            if ($inMemoryEvents.Count -gt 0) {
+                foreach ($ev in $inMemoryEvents) {
+                    $markersToProject.Add((ConvertTo-PCXPremiereMarker -InputObject $ev))
+                }
+            }
+
+            if ($markersToProject.Count -gt 0) {
+
+                $editedMarkers = @(
+                    ConvertTo-PCXEditedTimelineMarker `
+                        -Marker $markersToProject `
+                        -TimelineMap $timelineMap
+                )
+
+                if ($editedMarkers.Count -gt 0) {
+
+                    $editedMarkersPath = Get-PCXArtifactPath `
+                        -SourcePath $SourcePath `
+                        -ArtifactType EditedPremiereMarker
+
+                    if (Test-PCXShouldGenerateArtifact -Path $editedMarkersPath -Force:$Force) {
+
+                        $markerScript = ConvertTo-PCXPremiereMarkerScript `
+                            -Marker $editedMarkers
+
+                        Set-Content -LiteralPath $editedMarkersPath -Value $markerScript -Encoding UTF8
+
+                    }
+
+                }
+
+            }
+
+        }
+        catch {
+            Write-Warning "Failed to generate companion edited timeline artifacts: $($_.Exception.Message)"
         }
 
         #
-        # Build timeline filter graph
+        # Return the edited video FileInfo object
         #
-
-        $FilterGraph = $Segments |
-        ConvertTo-PCXFFmpegFilterGraph `
-            -InputIndex 0 `
-            -HasAudio:$HasAudio `
-            -AudioSettings $AudioSettings
-
-        #
-        # Read source audio sample rate
-        #
-
-        $SampleRate = if ($HasAudio -and $AudioInfo.SampleRate) {
-            $AudioInfo.SampleRate
-        }
-        else {
-            0
-        }
-
-        #
-        # Create FFmpeg render job
-        #
-
-        $Job = New-PCXFFmpegRenderJobObject `
-            -SourcePath $SourcePath `
-            -OutputPath $OutputPath `
-            -FilterGraph $FilterGraph `
-            -SampleRate $SampleRate `
-            -HasAudio:$HasAudio
-
-        #
-        # Execute job
-        #
-
-        if ($PSCmdlet.ShouldProcess($OutputPath, 'Render edited video')) {
-
-            Invoke-PCXFFmpegEdit `
-                -RenderJob $Job
-
+        if (Test-Path -LiteralPath $OutputPath) {
+            return (Get-Item -LiteralPath $OutputPath)
         }
 
     }
