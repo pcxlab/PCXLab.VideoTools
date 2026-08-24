@@ -42,13 +42,17 @@ function ConvertTo-PCXPremiereEditPointScript {
         optional edit-point workflow.
     #>
 
-    [CmdletBinding()]
+    [CmdletBinding(DefaultParameterSetName = 'FromSegments')]
     [OutputType([string])]
     param(
 
-        [Parameter(Mandatory)]
+        [Parameter(Mandatory, ParameterSetName = 'FromSegments')]
         [ValidateNotNullOrEmpty()]
         [object[]]$Segment,
+
+        [Parameter(Mandatory, ParameterSetName = 'FromCutPoints')]
+        [ValidateNotNullOrEmpty()]
+        [double[]]$CutPointsSeconds,
 
         [Parameter()]
         [double]$TimeOffsetSeconds = 0,
@@ -69,21 +73,34 @@ function ConvertTo-PCXPremiereEditPointScript {
         [string]$TrackMode = 'Selected'
     )
 
-    foreach ($item in $Segment) {
-        if ($item.PSTypeNames -notcontains 'PCXLab.VideoSegment') {
-            throw 'InputObject must be a PCXLab.VideoSegment object.'
+    $editPoints = if ($PSCmdlet.ParameterSetName -eq 'FromCutPoints') {
+
+        foreach ($sec in $CutPointsSeconds) {
+            ConvertTo-PCXPremiereTimecode `
+                -Seconds ($sec + $TimeOffsetSeconds) `
+                -FrameRate $FrameRate
         }
+
     }
+    else {
 
-    $editPoints = foreach ($item in $Segment) {
+        foreach ($item in $Segment) {
+            if ($item.PSTypeNames -notcontains 'PCXLab.VideoSegment') {
+                throw 'InputObject must be a PCXLab.VideoSegment object.'
+            }
+        }
 
-        ConvertTo-PCXPremiereTimecode `
-            -Seconds ($item.StartSeconds + $TimeOffsetSeconds) `
-            -FrameRate $FrameRate
-    
-        ConvertTo-PCXPremiereTimecode `
-            -Seconds ($item.EndSeconds + $TimeOffsetSeconds) `
-            -FrameRate $FrameRate
+        foreach ($item in $Segment) {
+
+            ConvertTo-PCXPremiereTimecode `
+                -Seconds ($item.StartSeconds + $TimeOffsetSeconds) `
+                -FrameRate $FrameRate
+        
+            ConvertTo-PCXPremiereTimecode `
+                -Seconds ($item.EndSeconds + $TimeOffsetSeconds) `
+                -FrameRate $FrameRate
+        }
+
     }
 
     $editPoints = @($editPoints | Sort-Object -Unique)

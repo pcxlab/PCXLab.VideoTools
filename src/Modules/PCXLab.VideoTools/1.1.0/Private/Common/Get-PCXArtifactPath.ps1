@@ -46,6 +46,8 @@ function Get-PCXArtifactPath {
             'RecordingSession',
             'PremiereMarker',
             'PremiereEditPoint',
+            'EditedPremiereMarker',
+            'EditedPremiereEditPoint',
             'EditedVideo'
         )]
         [string]$ArtifactType,

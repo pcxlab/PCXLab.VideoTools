@@ -40,6 +40,16 @@ Describe 'Get-PCXArtifactPath' {
         $result | Should -Be 'C:\Temp\Test-Edited.mp4'
     }
 
+    It 'Resolves EditedPremiereMarker artifact path' {
+        $result = & $script:Module { Get-PCXArtifactPath -SourcePath 'C:\Temp\Test.mp4' -ArtifactType EditedPremiereMarker }
+        $result | Should -Be 'C:\Temp\Test-EditedMarkers.jsx'
+    }
+
+    It 'Resolves EditedPremiereEditPoint artifact path' {
+        $result = & $script:Module { Get-PCXArtifactPath -SourcePath 'C:\Temp\Test.mp4' -ArtifactType EditedPremiereEditPoint }
+        $result | Should -Be 'C:\Temp\Test-EditedCuts.jsx'
+    }
+
     It 'Returns explicit OutputPath when provided' {
         $result = & $script:Module { Get-PCXArtifactPath -SourcePath 'C:\Temp\Test.mp4' -ArtifactType Analysis -OutputPath 'C:\Custom\Path.json' }
         $result | Should -Be 'C:\Custom\Path.json'

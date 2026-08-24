@@ -78,11 +78,14 @@ function Optimize-PCXVideoSegments {
 
             if ($Previous.Action -eq $Current.Action) {
 
+                $mergedEvents = @($Previous.AnalysisEvents) + @($Current.AnalysisEvents)
+
                 $Previous = New-PCXVideoSegmentObject `
                     -SourcePath $Previous.SourcePath `
                     -Start $Previous.Start `
                     -End $Current.End `
-                    -Action $Previous.Action
+                    -Action $Previous.Action `
+                    -AnalysisEvents $mergedEvents
 
                 continue
 

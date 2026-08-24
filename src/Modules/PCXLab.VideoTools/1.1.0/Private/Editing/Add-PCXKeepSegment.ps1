@@ -33,7 +33,11 @@ function Add-PCXKeepSegment {
         [TimeSpan]$Start,
 
         [Parameter(Mandatory)]
-        [TimeSpan]$End
+        [TimeSpan]$End,
+
+        [Parameter()]
+        [AllowEmptyCollection()]
+        [object[]]$AnalysisEvents = @()
 
     )
 
@@ -45,6 +49,7 @@ function Add-PCXKeepSegment {
         -SourcePath $SourcePath `
         -Start $Start `
         -End $End `
-        -Action 'Keep'
+        -Action 'Keep' `
+        -AnalysisEvents $AnalysisEvents
 
 }
