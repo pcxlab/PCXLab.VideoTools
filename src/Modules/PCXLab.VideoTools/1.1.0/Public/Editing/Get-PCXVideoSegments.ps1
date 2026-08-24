@@ -34,12 +34,19 @@ function Get-PCXVideoSegments {
     begin {
 
         $Events = [System.Collections.Generic.List[object]]::new()
+        $VideoAnalysis = $null
 
     }
 
     process {
 
         if ($InputObject.PSTypeNames -contains 'PCXLab.VideoAnalysis') {
+
+            if ($null -ne $VideoAnalysis -or $Events.Count -gt 0) {
+                throw 'InputObject must contain either one PCXLab.VideoAnalysis object or loose analysis events, not both or multiple containers.'
+            }
+
+            $VideoAnalysis = $InputObject
 
             if ($null -ne $InputObject.Analysis) {
 
@@ -63,6 +70,11 @@ function Get-PCXVideoSegments {
 
         }
         elseif (Test-PCXAnalysisEvent -InputObject $InputObject) {
+
+            if ($null -ne $VideoAnalysis) {
+                throw 'InputObject must contain either one PCXLab.VideoAnalysis object or loose analysis events, not both.'
+            }
+
             $Events.Add($InputObject)
         }
         else {
@@ -79,13 +91,22 @@ function Get-PCXVideoSegments {
             return
         }
 
-        $uniqueSourcePaths = @($Events.SourcePath | Sort-Object -Unique)
+        if ($null -ne $VideoAnalysis) {
+            $SourcePath = [string]$VideoAnalysis.SourcePath
 
-        if ($uniqueSourcePaths.Count -gt 1) {
-            throw "All input objects must belong to the same source. Found: $($uniqueSourcePaths -join ', ')."
+            if ([string]::IsNullOrWhiteSpace($SourcePath)) {
+                throw 'PCXLab.VideoAnalysis must provide a non-empty SourcePath.'
+            }
         }
+        else {
+            $uniqueSourcePaths = @($Events.SourcePath | Sort-Object -Unique)
 
-        $SourcePath = $Events[0].SourcePath
+            if ($uniqueSourcePaths.Count -gt 1) {
+                throw "All input objects must belong to the same source. Found: $($uniqueSourcePaths -join ', ')."
+            }
+
+            $SourcePath = $Events[0].SourcePath
+        }
 
         #
         # Resolve cache path using existing artifact infrastructure
@@ -113,8 +134,14 @@ function Get-PCXVideoSegments {
 
         Write-Verbose "No cache found at '$cacheFile'. Generating video segments."
 
-        $VideoDuration = Get-PCXVideoDuration `
-            -Path $SourcePath
+        $VideoDuration = if ($null -ne $VideoAnalysis) {
+            Resolve-PCXVideoAnalysisDuration `
+                -VideoAnalysis $VideoAnalysis
+        }
+        else {
+            Get-PCXVideoDuration `
+                -Path $SourcePath
+        }
 
         $CurrentPosition = [TimeSpan]::Zero
 

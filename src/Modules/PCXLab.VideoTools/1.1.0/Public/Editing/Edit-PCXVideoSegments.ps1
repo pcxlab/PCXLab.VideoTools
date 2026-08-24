@@ -90,90 +90,7 @@ function Edit-PCXVideoSegments {
         }
 
         #
-        # 1. Render Edited Video (FFmpeg) — evaluated independently
-        #
-
-        $shouldRenderVideo = Test-PCXShouldGenerateArtifact -Path $OutputPath -Force:$Force
-
-        if ($shouldRenderVideo) {
-
-            #
-            # Read source audio information & presence
-            #
-
-            $AudioInfo = Get-PCXAudioInformation -Path $SourcePath
-            $HasAudio = ($null -ne $AudioInfo -and $AudioInfo.HasAudio)
-
-            #
-            # Resolve audio filter settings
-            #
-
-            $AudioSettings = if ($HasAudio) {
-                [PSCustomObject]@{
-                    Normalize      = Get-PCXSetting `
-                        -Name 'Audio.Normalize' `
-                        -DefaultValue $false
-
-                    Compression    = Get-PCXSetting `
-                        -Name 'Audio.Compression' `
-                        -DefaultValue $false
-
-                    RepairChannels = Get-PCXSetting `
-                        -Name 'Audio.RepairChannels' `
-                        -DefaultValue $false
-                }
-            }
-            else {
-                $null
-            }
-
-            #
-            # Build timeline filter graph
-            #
-
-            $FilterGraph = $Segments |
-            ConvertTo-PCXFFmpegFilterGraph `
-                -InputIndex 0 `
-                -HasAudio:$HasAudio `
-                -AudioSettings $AudioSettings
-
-            #
-            # Read source audio sample rate
-            #
-
-            $SampleRate = if ($HasAudio -and $AudioInfo.SampleRate) {
-                $AudioInfo.SampleRate
-            }
-            else {
-                0
-            }
-
-            #
-            # Create FFmpeg render job
-            #
-
-            $Job = New-PCXFFmpegRenderJobObject `
-                -SourcePath $SourcePath `
-                -OutputPath $OutputPath `
-                -FilterGraph $FilterGraph `
-                -SampleRate $SampleRate `
-                -HasAudio:$HasAudio
-
-            #
-            # Execute job
-            #
-
-            if ($PSCmdlet.ShouldProcess($OutputPath, 'Render edited video')) {
-
-                Invoke-PCXFFmpegEdit `
-                    -RenderJob $Job | Out-Null
-
-            }
-
-        }
-
-        #
-        # 2. Companion Edited Timeline Artifacts — evaluated independently
+        # 1. Companion Edited Timeline Artifacts — evaluated before rendering for failure recovery
         #
         try {
 
@@ -252,9 +169,133 @@ function Edit-PCXVideoSegments {
 
             }
 
+            # C. Edited Analysis (.json) — projected VideoAnalysis container checkpoint
+            if ($inMemoryEvents.Count -gt 0) {
+
+                $editedAnalysisPath = Get-PCXArtifactPath `
+                    -SourcePath $SourcePath `
+                    -ArtifactType EditedAnalysis
+
+                if (Test-PCXShouldGenerateArtifact -Path $editedAnalysisPath -Force:$Force) {
+
+                    $silenceEvents = @($inMemoryEvents | Where-Object EventType -eq 'Silence')
+                    $blackFrameEvents = @($inMemoryEvents | Where-Object EventType -eq 'BlackFrame')
+
+                    $syntheticAnalysis = New-PCXVideoAnalysisObject `
+                        -SourcePath $SourcePath `
+                        -Media ([PSCustomObject]@{ DurationSeconds = $timelineMap.OriginalDurationSeconds }) `
+                        -Silence $silenceEvents `
+                        -BlackFrames $blackFrameEvents
+
+                    $projectedAnalysis = $syntheticAnalysis |
+                        Convert-PCXVideoAnalysisToEdited `
+                            -TimelineMap $timelineMap `
+                            -EditedSourcePath $OutputPath
+
+                    $null = $projectedAnalysis |
+                        Export-PCXVideoAnalysis `
+                            -Path $editedAnalysisPath `
+                            -Force
+
+                    # D. Edited VideoSegments (.json) — delegate to Get-PCXVideoSegments (single authoritative producer)
+                    $null = $projectedAnalysis |
+                        Get-PCXVideoSegments
+
+                }
+                else {
+
+                    # If Edited-Analysis.json already existed, load it and pass through Get-PCXVideoSegments
+                    $existingEditedAnalysis = Import-PCXVideoAnalysis -Path $editedAnalysisPath
+                    $null = $existingEditedAnalysis |
+                        Get-PCXVideoSegments
+
+                }
+
+            }
+
         }
         catch {
             Write-Warning "Failed to generate companion edited timeline artifacts: $($_.Exception.Message)"
+        }
+
+        #
+        # 2. Render Edited Video via FFmpeg
+        #
+        if (Test-PCXShouldGenerateArtifact -Path $OutputPath -Force:$Force) {
+
+            #
+            # Read source audio information & presence
+            #
+
+            $AudioInfo = Get-PCXAudioInformation -Path $SourcePath
+            $HasAudio = ($null -ne $AudioInfo -and $AudioInfo.HasAudio)
+
+            #
+            # Resolve audio filter settings
+            #
+
+            $AudioSettings = if ($HasAudio) {
+                [PSCustomObject]@{
+                    Normalize      = Get-PCXSetting `
+                        -Name 'Audio.Normalize' `
+                        -DefaultValue $false
+
+                    Compression    = Get-PCXSetting `
+                        -Name 'Audio.Compression' `
+                        -DefaultValue $false
+
+                    RepairChannels = Get-PCXSetting `
+                        -Name 'Audio.RepairChannels' `
+                        -DefaultValue $false
+                }
+            }
+            else {
+                $null
+            }
+
+            #
+            # Build timeline filter graph
+            #
+
+            $FilterGraph = $Segments |
+            ConvertTo-PCXFFmpegFilterGraph `
+                -InputIndex 0 `
+                -HasAudio:$HasAudio `
+                -AudioSettings $AudioSettings
+
+            #
+            # Read source audio sample rate
+            #
+
+            $SampleRate = if ($HasAudio -and $AudioInfo.SampleRate) {
+                $AudioInfo.SampleRate
+            }
+            else {
+                0
+            }
+
+            #
+            # Create FFmpeg render job
+            #
+
+            $Job = New-PCXFFmpegRenderJobObject `
+                -SourcePath $SourcePath `
+                -OutputPath $OutputPath `
+                -FilterGraph $FilterGraph `
+                -SampleRate $SampleRate `
+                -HasAudio:$HasAudio
+
+            #
+            # Execute job
+            #
+
+            if ($PSCmdlet.ShouldProcess($OutputPath, 'Render edited video')) {
+
+                Invoke-PCXFFmpegEdit `
+                    -RenderJob $Job | Out-Null
+
+            }
+
         }
 
         #

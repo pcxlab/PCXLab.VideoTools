@@ -163,8 +163,41 @@ Analyze-PCXVideo `
 Get-PCXVideoSegments |
 Edit-PCXVideoSegments
 
+Remove-Module PCXLab.VideoTools -Force -ErrorAction SilentlyContinue
+Import-Module .\src\Modules\PCXLab.VideoTools -Force
 
 Analyze-PCXVideo `
     -Path "C:\Recording seg TestONLOY\20260127 TEST Recording once\RG_20260412_030812_001\bandicam 2026-04-12 03-08-19-300.mp4" |
 Get-PCXVideoSegments |
 Edit-PCXVideoSegments
+
+Remove-Module PCXLab.VideoTools -Force -ErrorAction SilentlyContinue
+Import-Module .\src\Modules\PCXLab.VideoTools -Force
+
+Analyze-PCXVideo `
+    -Path "C:\Recording seg TestONLOY\20260127 TEST Recording once\RG_20260412_030812_001\bandicam 2026-04-12 03-08-19-300.mp4" |
+Get-PCXVideoSegments |
+Edit-PCXVideoSegments
+
+Analyze-PCXVideo.ps1
+Get-PCXVideoAnalysis.ps1
+Get-PCXVideoSegments.ps1
+Edit-PCXVideoSegments.ps1
+
+
+Get-PCXVideoAnalysis `
+    -Path "C:\Recording seg TestONLOY\20260127 TEST Recording once\RG_20260412_030812_001\bandicam 2026-04-12 03-08-19-300.mp4" |
+Get-PCXVideoSegments |
+Edit-PCXVideoSegments
+
+Public\Export\Export-PCXPremiereMarkers.ps1
+
+Public\Export\Export-PCXPremiereEditPoints.ps1
+
+
+Get-PCXVideoAnalysis `
+    -Path "C:\Recording seg TestONLOY\20260127 TEST Recording once\RG_20260412_030812_001\bandicam 2026-04-12 03-08-19-300.mp4" |
+Get-PCXVideoSegments |
+Edit-PCXVideoSegments
+
+

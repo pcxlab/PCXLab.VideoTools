@@ -67,6 +67,29 @@ Describe 'Get-PCXVideoSegments' {
         $segments[1].Action | Should -Be 'Remove'
     }
 
+    It 'Uses the VideoAnalysis SourcePath as the authoritative media identity' {
+        $analysis = & $module {
+            param($TestVideo)
+
+            $sil = New-PCXSilenceObject `
+                -Start ([TimeSpan]::FromSeconds(2)) `
+                -End ([TimeSpan]::FromSeconds(5)) `
+                -DurationSeconds 3 `
+                -SourcePath 'C:\Media\ChildEventSource.mp4'
+
+            New-PCXVideoAnalysisObject `
+                -SourcePath $TestVideo `
+                -Media ([PSCustomObject]@{ DurationSeconds = 10 }) `
+                -Silence @($sil)
+        } $script:TestVideo
+
+        $segments = @($analysis | Get-PCXVideoSegments)
+
+        $segments.Count | Should -BeGreaterThan 0
+        @($segments | Where-Object SourcePath -ne $script:TestVideo).Count | Should -Be 0
+        (Test-Path -LiteralPath $script:CheckpointFile) | Should -Be $true
+    }
+
     It 'Builds Keep and Remove segments from a custom future analysis event' {
         $customEvent = [PSCustomObject]@{
             SourcePath = $script:TestVideo
