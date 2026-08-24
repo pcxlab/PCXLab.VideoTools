@@ -55,11 +55,45 @@ function Import-PCXVideoSegment {
                 $Start = [TimeSpan]::FromTicks([Int64]$Item.Start.Ticks)
                 $End = [TimeSpan]::FromTicks([Int64]$Item.End.Ticks)
 
+                $AnalysisEvents = [System.Collections.Generic.List[object]]::new()
+                $eventsProp = $Item.PSObject.Properties['AnalysisEvents']
+                if ($null -ne $eventsProp -and $null -ne $eventsProp.Value) {
+                    foreach ($Event in $eventsProp.Value) {
+                        $startProp = $Event.PSObject.Properties['Start']
+                        if ($null -ne $startProp -and $null -ne $startProp.Value -and $null -ne $startProp.Value.Ticks) {
+                            $Event.Start = [TimeSpan]::FromTicks([Int64]$startProp.Value.Ticks)
+                        }
+
+                        $endProp = $Event.PSObject.Properties['End']
+                        if ($null -ne $endProp -and $null -ne $endProp.Value -and $null -ne $endProp.Value.Ticks) {
+                            $Event.End = [TimeSpan]::FromTicks([Int64]$endProp.Value.Ticks)
+                        }
+
+                        $durationProp = $Event.PSObject.Properties['Duration']
+                        if ($null -ne $durationProp -and $null -ne $durationProp.Value -and $null -ne $durationProp.Value.Ticks) {
+                            $Event.Duration = [TimeSpan]::FromTicks([Int64]$durationProp.Value.Ticks)
+                        }
+
+                        $eventTypeProp = $Event.PSObject.Properties['EventType']
+                        $eventType = if ($null -ne $eventTypeProp) { $eventTypeProp.Value } else { $null }
+
+                        if ($eventType -eq 'Silence' -and $Event.PSTypeNames -notcontains 'PCXLab.Silence') {
+                            $Event.PSObject.TypeNames.Insert(0, 'PCXLab.Silence')
+                        }
+                        elseif ($eventType -eq 'BlackFrame' -and $Event.PSTypeNames -notcontains 'PCXLab.BlackFrame') {
+                            $Event.PSObject.TypeNames.Insert(0, 'PCXLab.BlackFrame')
+                        }
+
+                        [void]$AnalysisEvents.Add($Event)
+                    }
+                }
+
                 New-PCXVideoSegmentObject `
                     -SourcePath $Item.SourcePath `
                     -Start $Start `
                     -End $End `
-                    -Action $Item.Action
+                    -Action $Item.Action `
+                    -AnalysisEvents $AnalysisEvents
 
             }
 
