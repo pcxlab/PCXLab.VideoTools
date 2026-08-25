@@ -69,4 +69,13 @@ Get-PCXVideoSegments |
 Where-Object Action -eq 'Remove' |
 Export-PCXPremiereMarkers -Force
 
+ ########################################
+
+ #Synced
  
+Edit-PCXRecordingSession `
+    -ReferencePath "C:\Recording seg TestONLOY\20260127 TEST Recording once\RG_20260412_030812_001 - SYNCTEST\bandicam 2026-04-12 03-08-19-300.mp4" `
+    -SourcePaths @(
+    "C:\Recording seg TestONLOY\20260127 TEST Recording once\RG_20260412_030812_001 - SYNCTEST\VID_20260412_030812.mp4",
+    "C:\Recording seg TestONLOY\20260127 TEST Recording once\RG_20260412_030812_001 - SYNCTEST\bandicam 2026-04-12 03-08-19-300.mp4.webcam.mp4"
+)
