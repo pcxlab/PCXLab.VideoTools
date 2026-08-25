@@ -18,8 +18,8 @@ function Initialize-PCXVideoTools {
     $script:PCXSettings = Import-PCXSettings
 
     # Resolve important module paths
-    $versionRoot = Split-Path (Split-Path $PSScriptRoot -Parent) -Parent
-    $moduleRoot = Split-Path $versionRoot -Parent
+    $moduleRoot = Split-Path (Split-Path $PSScriptRoot -Parent) -Parent
+    $versionRoot = $moduleRoot
     $projectRoot = Split-Path (Split-Path (Split-Path $moduleRoot -Parent) -Parent) -Parent
 
     # Initialize module context

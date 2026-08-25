@@ -24,7 +24,7 @@
 param(
 
     [string]$ModuleRoot = (
-        Join-Path $PSScriptRoot '..\src\Modules\PCXLab.VideoTools\1.1.0'
+        Join-Path $PSScriptRoot '..\src\Modules\PCXLab.VideoTools'
     )
 
 )
