@@ -96,6 +96,12 @@ function Edit-PCXVideoSegments {
 
             $timelineMap = New-PCXTimelineMapObject -Segments $Segments
 
+            $editedSegments = @(
+                ConvertTo-PCXEditedSegments `
+                    -VideoSegments @($Segments) `
+                    -TimelineMap $timelineMap
+            )
+
             # A. Edited Cuts (.jsx) — seam join points on the edited timeline
             $cutPoints = @(Get-PCXEditedCutPoints -TimelineMap $timelineMap)
 
@@ -127,6 +133,23 @@ function Edit-PCXVideoSegments {
                     }
                 }
             }
+
+            $videoSegmentsPath = Get-PCXArtifactPath `
+                -SourcePath $SourcePath `
+                -ArtifactType VideoSegment
+
+            $premiereMarkersPath = Get-PCXArtifactPath `
+                -SourcePath $SourcePath `
+                -ArtifactType PremiereMarker
+
+            $premiereEditPointsPath = Get-PCXArtifactPath `
+                -SourcePath $SourcePath `
+                -ArtifactType PremiereEditPoint
+
+            $sourceDirectory = [System.IO.Path]::GetDirectoryName($SourcePath)
+            $sourceBaseName = [System.IO.Path]::GetFileNameWithoutExtension($SourcePath)
+            $removeMarkersPath = Join-Path $sourceDirectory "$sourceBaseName-RemoveMarkers.jsx"
+            $removeEditPointsPath = Join-Path $sourceDirectory "$sourceBaseName-RemoveEditPoints.jsx"
 
             $markersToProject = [System.Collections.Generic.List[object]]::new()
 
@@ -195,23 +218,69 @@ function Edit-PCXVideoSegments {
                     $null = $projectedAnalysis |
                         Export-PCXVideoAnalysis `
                             -Path $editedAnalysisPath `
-                            -Force
-
-                    # D. Edited VideoSegments (.json) — delegate to Get-PCXVideoSegments (single authoritative producer)
-                    $null = $projectedAnalysis |
-                        Get-PCXVideoSegments
+                            -Force:$Force
 
                 }
                 else {
 
-                    # If Edited-Analysis.json already existed, load it and pass through Get-PCXVideoSegments
-                    $existingEditedAnalysis = Import-PCXVideoAnalysis -Path $editedAnalysisPath
-                    $null = $existingEditedAnalysis |
-                        Get-PCXVideoSegments
-
                 }
 
             }
+
+            if ($editedSegments.Count -gt 0) {
+                $editedVideoSegmentsPath = Get-PCXArtifactPath `
+                    -SourcePath $SourcePath `
+                    -ArtifactType EditedVideoSegment
+
+                $null = $editedSegments |
+                    Export-PCXVideoSegment `
+                        -Path $editedVideoSegmentsPath `
+                        -Force:$Force
+
+                $editedRemoveSegments = @($Segments | Where-Object Action -eq 'Remove')
+
+                if ($editedRemoveSegments.Count -gt 0) {
+                    $editedRemoveMarkersPath = Join-Path $sourceDirectory "$sourceBaseName-EditedRemoveMarkers.jsx"
+                    $editedRemoveEditPointsPath = Join-Path $sourceDirectory "$sourceBaseName-EditedRemoveEditPoints.jsx"
+
+                    $null = $editedRemoveSegments |
+                        Export-PCXPremiereMarkers `
+                            -Path $editedRemoveMarkersPath `
+                            -Force:$Force
+
+                    $null = $editedRemoveSegments |
+                        Export-PCXPremiereEditPoints `
+                            -Path $editedRemoveEditPointsPath `
+                            -Force:$Force
+                }
+            }
+
+            $null = $Segments |
+                Export-PCXVideoSegment `
+                    -Path $videoSegmentsPath `
+                    -Force:$Force
+
+            $null = $Segments |
+                Export-PCXPremiereMarkers `
+                    -Path $premiereMarkersPath `
+                    -Force:$Force
+
+            $null = $Segments |
+                Export-PCXPremiereEditPoints `
+                    -Path $premiereEditPointsPath `
+                    -Force:$Force
+
+            $removeSegments = @($Segments | Where-Object Action -eq 'Remove')
+
+            $null = $removeSegments |
+                Export-PCXPremiereMarkers `
+                    -Path $removeMarkersPath `
+                    -Force:$Force
+
+            $null = $removeSegments |
+                Export-PCXPremiereEditPoints `
+                    -Path $removeEditPointsPath `
+                    -Force:$Force
 
         }
         catch {
