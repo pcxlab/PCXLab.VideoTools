@@ -14,6 +14,7 @@ Tests/TestData/A.Reference/
 Tests/TestData/B.MediumQuality/
 Tests/TestData/D.VerySmall/
 Tests/TestData/E.Tiny/
+Tests/TestData/.Ignore/
 
 # Miscellaneous test output
 Tests/TestData/Test.mp4
