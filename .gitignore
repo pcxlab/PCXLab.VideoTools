@@ -1,11 +1,22 @@
-# Ignore ffmpeg exes
+# Ignore FFmpeg executables
 Tools/FFmpeg/bin/ffmpeg.exe
 Tools/FFmpeg/bin/ffplay.exe
 Tools/FFmpeg/bin/ffprobe.exe
 
-# Ignore test file
-Tests/TestData/Test.mp4
-
 # Ignore folder
 # Tests/TestData/Ignore/
 
+# ---------------------------------------------------------------------------
+# Generated test media
+# Keep only Original and C.Repository under source control.
+# ---------------------------------------------------------------------------
+Tests/TestData/A.Reference/
+Tests/TestData/B.MediumQuality/
+Tests/TestData/D.VerySmall/
+Tests/TestData/E.Tiny/
+
+# Miscellaneous test output
+Tests/TestData/Test.mp4
+
+#Scratch notes
+Scratch/
