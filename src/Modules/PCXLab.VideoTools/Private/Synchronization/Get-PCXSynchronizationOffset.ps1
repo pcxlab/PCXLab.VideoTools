@@ -81,14 +81,16 @@ function Get-PCXSynchronizationOffset {
 
     $correlationResult = Search-PCXAudioCorrelation @correlationArgs
 
-    Write-Verbose "Synchronization offset determined: $($correlationResult.BestOffset)s (Correlation: $($correlationResult.Correlation))."
+    $confidence = Measure-PCXCorrelationConfidence -CorrelationResult $correlationResult
+
+    Write-Verbose "Synchronization offset determined: $($correlationResult.BestOffset)s (Correlation: $($correlationResult.Correlation), Confidence: $confidence)."
 
     return [PSCustomObject]@{
         ReferencePath     = $ReferencePath
         ComparisonPath    = $ComparisonPath
         Offset            = $correlationResult.BestOffset
         Correlation       = $correlationResult.Correlation
-        Confidence        = $correlationResult.Confidence
+        Confidence        = $confidence
         FrameRate         = $refTimeline.FrameRate
         Method            = 'AudioCorrelation'
         CorrelationResult = $correlationResult

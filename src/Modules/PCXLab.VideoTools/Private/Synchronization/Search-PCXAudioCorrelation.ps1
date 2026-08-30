@@ -9,6 +9,21 @@ function Search-PCXAudioCorrelation {
         comparison timeline produced by Get-PCXAudioActivity using normalized
         cross-correlation over frame activity measurements.
 
+        In addition to the best-fit offset and its Pearson correlation coefficient,
+        the function returns:
+
+        - SecondPeakCorrelation: the highest PCC found at any lag position that is
+          separated from the primary peak by at least PeakExclusionWindow seconds,
+          making it a genuinely independent competing alignment candidate. Returns
+          $null when the search range contains no lag outside the exclusion zone.
+
+        - OverlapFraction: the ratio of FramesCompared to the length of the shorter
+          timeline, expressing what fraction of the maximum achievable overlap was
+          used at the best alignment. Range [0, 1].
+
+        Confidence is not computed here; it is the responsibility of
+        Measure-PCXCorrelationConfidence, which accepts this result object.
+
     .PARAMETER ReferenceTimeline
         Reference audio activity timeline object.
 
@@ -78,14 +93,14 @@ function Search-PCXAudioCorrelation {
         $stepFrames = [int][Math]::Max(1, [Math]::Round($StepDuration / $frameDuration))
     }
 
-    $minLag = -($compSignal.Length - 1)
+    $minLag = - ($compSignal.Length - 1)
     $maxLag = $refSignal.Length - 1
 
     $effectiveSearchWindow = $null
     if ($null -ne $SearchWindow) {
         $effectiveSearchWindow = [double]$SearchWindow
         $windowLag = [int][Math]::Ceiling($SearchWindow / $frameDuration)
-        $minLag = [Math]::Max($minLag, -$windowLag)
+        $minLag = [Math]::Max($minLag, - $windowLag)
         $maxLag = [Math]::Min($maxLag, $windowLag)
     }
     else {
@@ -96,83 +111,38 @@ function Search-PCXAudioCorrelation {
         throw 'SearchWindow bounds resulted in an invalid lag range.'
     }
 
-    $bestLag = 0
-    $bestCorrelation = -2.0
-    $bestOverlap = 0
-
-    for ($lag = $minLag; $lag -le $maxLag; $lag += $stepFrames) {
-
-        $refIndex = 0
-        $compIndex = 0
-
-        if ($lag -ge 0) {
-            $compIndex = $lag
-        }
-        else {
-            $refIndex = -$lag
-        }
-
-        $overlap = [Math]::Min($refSignal.Length - $refIndex, $compSignal.Length - $compIndex)
-        if ($overlap -lt 1) { continue }
-
-        $refSum = 0.0
-        $compSum = 0.0
-        $refSquares = 0.0
-        $compSquares = 0.0
-        $dotProduct = 0.0
-
-        for ($i = 0; $i -lt $overlap; $i++) {
-            $rVal = $refSignal[$refIndex + $i]
-            $cVal = $compSignal[$compIndex + $i]
-
-            $refSum += $rVal
-            $compSum += $cVal
-            $refSquares += $rVal * $rVal
-            $compSquares += $cVal * $cVal
-            $dotProduct += $rVal * $cVal
-        }
-
-        $refMean = $refSum / $overlap
-        $compMean = $compSum / $overlap
-
-        $refVar = $refSquares - ($overlap * $refMean * $refMean)
-        $compVar = $compSquares - ($overlap * $compMean * $compMean)
-
-        $covariance = $dotProduct - ($overlap * $refMean * $compMean)
-
-        $correlation = 0.0
-        if ($refVar -gt 1e-12 -and $compVar -gt 1e-12) {
-            $correlation = $covariance / [Math]::Sqrt($refVar * $compVar)
-        }
-        elseif ($refVar -le 1e-12 -and $compVar -le 1e-12) {
-            if ($refMean -gt 1e-6 -and [Math]::Abs($refMean - $compMean) -lt 1e-6) {
-                $correlation = 1.0
-            }
-        }
-
-        if ($correlation -gt $bestCorrelation -or ($correlation -eq $bestCorrelation -and $overlap -gt $bestOverlap)) {
-            $bestCorrelation = $correlation
-            $bestLag = $lag
-            $bestOverlap = $overlap
-        }
-
+    if (-not ([System.Management.Automation.PSTypeName]'PCXLab.VideoTools.Private.AudioCorrelationEngine').Type) {
+        $csPath = Join-Path $PSScriptRoot 'AudioCorrelationEngine.cs'
+        Add-Type -Path $csPath
     }
 
-    if ($bestCorrelation -lt -1.0) {
-        $bestCorrelation = 0.0
-    }
+    $engineResult = [PCXLab.VideoTools.Private.AudioCorrelationEngine]::Search(
+        $refSignal,
+        $compSignal,
+        $minLag,
+        $maxLag,
+        $stepFrames,
+        $frameDuration,
+        1.0
+    )
 
-    $bestOffset = [Math]::Round($bestLag * $frameDuration, 6)
-    $bestCorrelation = [Math]::Round($bestCorrelation, 6)
+    $bestOffset = $engineResult.BestOffset
+    $bestCorrelation = $engineResult.Correlation
+    $bestLag = $engineResult.BestLag
+    $bestOverlap = $engineResult.FramesCompared
+    $secondPeakCorrelation = $engineResult.SecondPeakCorrelation
+    $overlapFraction = $engineResult.OverlapFraction
 
-    Write-Verbose "Best timeline alignment: offset $bestOffset s (lag $bestLag frames, correlation $bestCorrelation)."
+    Write-Verbose "Best timeline alignment: offset ${bestOffset}s (lag $bestLag frames, correlation $bestCorrelation)."
 
     return [PSCustomObject]@{
-        BestOffset     = $bestOffset
-        Correlation    = $bestCorrelation
-        Confidence     = $null
-        FramesCompared = $bestOverlap
-        SearchWindow   = $effectiveSearchWindow
+        BestOffset            = $bestOffset
+        Correlation           = $bestCorrelation
+        Confidence            = $null
+        FramesCompared        = $bestOverlap
+        SearchWindow          = $effectiveSearchWindow
+        SecondPeakCorrelation = $secondPeakCorrelation
+        OverlapFraction       = $overlapFraction
     }
 
 }

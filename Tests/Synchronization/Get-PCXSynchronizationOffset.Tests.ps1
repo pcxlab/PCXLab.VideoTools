@@ -20,7 +20,10 @@ Describe 'Get-PCXSynchronizationOffset' {
         $result.ComparisonPath | Should -Be $script:TestVideo
         $result.Offset | Should -Be 0.0
         $result.Correlation | Should -Be 1.0
-        $result.Confidence | Should -BeNullOrEmpty
+        # Confidence is now computed by Measure-PCXCorrelationConfidence and must be a [0,1] double.
+        $result.Confidence | Should -Not -BeNullOrEmpty
+        $result.Confidence | Should -BeGreaterOrEqual 0.0
+        $result.Confidence | Should -BeLessOrEqual 1.0
         $result.FrameRate | Should -Be 100
         $result.Method | Should -Be 'AudioCorrelation'
         $result.CorrelationResult | Should -Not -BeNullOrEmpty
@@ -40,6 +43,11 @@ Describe 'Get-PCXSynchronizationOffset' {
         $corr.Correlation | Should -Be $result.Correlation
         $corr.SearchWindow | Should -Be 5.0
         $corr.FramesCompared | Should -BeGreaterThan 0
+        # Stage 3A fields must be present on the correlation result.
+        $corr.PSObject.Properties.Name | Should -Contain 'SecondPeakCorrelation'
+        $corr.PSObject.Properties.Name | Should -Contain 'OverlapFraction'
+        $corr.OverlapFraction | Should -BeGreaterThan 0.0
+        $corr.OverlapFraction | Should -BeLessOrEqual 1.0
 
     }
 
@@ -62,6 +70,27 @@ Describe 'Get-PCXSynchronizationOffset' {
                 Get-PCXSynchronizationOffset -ReferencePath $ref -ComparisonPath 'C:\NonExistentComp.mp4'
             } $script:TestVideo
         } | Should -Throw
+
+    }
+
+    It 'Propagates Confidence as a numeric score from Measure-PCXCorrelationConfidence' {
+
+        $result = & $script:Module {
+            param($ref, $comp)
+            Get-PCXSynchronizationOffset -ReferencePath $ref -ComparisonPath $comp
+        } $script:TestVideo $script:TestVideo
+
+        # The orchestrator must populate Confidence via Measure-PCXCorrelationConfidence.
+        # Identical recordings produce maximum correlation and overlap, so confidence
+        # should be positive and well-defined.
+        $result.Confidence | Should -Not -BeNullOrEmpty
+        $result.Confidence | Should -BeOfType [double]
+        $result.Confidence | Should -BeGreaterThan 0.0
+        $result.Confidence | Should -BeLessOrEqual 1.0
+
+        # Confidence in the orchestrator output must match what CorrelationResult implies.
+        # (CorrelationResult.Confidence stays $null — confidence lives only in the outer object.)
+        $result.CorrelationResult.Confidence | Should -BeNullOrEmpty
 
     }
 
