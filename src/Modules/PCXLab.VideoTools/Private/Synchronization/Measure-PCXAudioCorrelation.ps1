@@ -31,14 +31,14 @@ function Measure-PCXAudioCorrelation {
 
         [Parameter(Mandatory)]
         [ValidateScript({
-            Test-Path -LiteralPath $_ -PathType Leaf
-        })]
+                Test-Path -LiteralPath $_ -PathType Leaf
+            })]
         [string]$ReferencePath,
 
         [Parameter(Mandatory)]
         [ValidateScript({
-            Test-Path -LiteralPath $_ -PathType Leaf
-        })]
+                Test-Path -LiteralPath $_ -PathType Leaf
+            })]
         [string]$TargetPath,
 
         [Parameter()]
@@ -75,6 +75,7 @@ function Measure-PCXAudioCorrelation {
         -SampleRate $sampleRate `
         -StartSeconds 0 `
         -DurationSeconds $targetWindowSeconds
+
 
     if ($referenceSamples.Length -lt $coarseFactor) {
         throw "Reference audio is too short for correlation."
@@ -168,7 +169,7 @@ function Measure-PCXAudioCorrelation {
             $targetIndex = $lag
         }
         else {
-            $referenceIndex = -$lag
+            $referenceIndex = - $lag
         }
 
         $overlapLength = $referenceCentered.Length - $referenceIndex
@@ -209,8 +210,10 @@ function Measure-PCXAudioCorrelation {
         $correlation = $covariance / [Math]::Sqrt($refVariance * $targetVariance)
 
         if ($correlation -gt $bestPcmCorrelation) {
+
             $bestPcmCorrelation = $correlation
             $bestPcmLag = $lag
+
         }
 
     }
@@ -226,13 +229,13 @@ function Measure-PCXAudioCorrelation {
         $targetWindowStart = $bestPcmLag
     }
     else {
-        $referenceWindowStart = -$bestPcmLag
+        $referenceWindowStart = - $bestPcmLag
     }
 
     $description = "Normalized cross-correlation peak at lag {0} samples ({1:F3} seconds) with correlation {2:F4}." -f
-        $bestPcmLag,
-        ($bestPcmLag / $sampleRate),
-        $bestPcmCorrelation
+    $bestPcmLag,
+    ($bestPcmLag / $sampleRate),
+    $bestPcmCorrelation
 
     New-PCXSynchronizationEvidenceObject `
         -Method 'AudioCorrelation' `

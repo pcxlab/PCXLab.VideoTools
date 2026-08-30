@@ -62,11 +62,11 @@ function Convert-PCXAnalysisEventToSource {
     begin {
 
         if ($PSCmdlet.ParameterSetName -eq 'BySourceOffset') {
-            $resolvedSourcePath    = $SourceOffset.SourcePath
+            $resolvedSourcePath = $SourceOffset.SourcePath
             $resolvedOffsetSeconds = $SourceOffset.OffsetSeconds
         }
         else {
-            $resolvedSourcePath    = $SourcePath
+            $resolvedSourcePath = $SourcePath
             $resolvedOffsetSeconds = $OffsetSeconds
         }
 
@@ -80,8 +80,11 @@ function Convert-PCXAnalysisEventToSource {
                 throw "Input object must conform to the PCXLab analysis event contract."
             }
 
-            $startSeconds = $currentEvent.Start.TotalSeconds - $resolvedOffsetSeconds
-            $endSeconds   = $currentEvent.End.TotalSeconds - $resolvedOffsetSeconds
+            #$startSeconds = $currentEvent.Start.TotalSeconds - $resolvedOffsetSeconds
+            #$endSeconds   = $currentEvent.End.TotalSeconds - $resolvedOffsetSeconds
+
+            $startSeconds = $currentEvent.Start.TotalSeconds + $resolvedOffsetSeconds
+            $endSeconds = $currentEvent.End.TotalSeconds + $resolvedOffsetSeconds
 
             # If the event ended before or at the start of the target media, it does not exist on this timeline
             if ($endSeconds -le 0) {
@@ -99,8 +102,8 @@ function Convert-PCXAnalysisEventToSource {
                 continue
             }
 
-            $newStart    = [TimeSpan]::FromSeconds($startSeconds)
-            $newEnd      = [TimeSpan]::FromSeconds($endSeconds)
+            $newStart = [TimeSpan]::FromSeconds($startSeconds)
+            $newEnd = [TimeSpan]::FromSeconds($endSeconds)
             $newDuration = [TimeSpan]::FromSeconds($durationSeconds)
 
             $translated = [PSCustomObject]@{}

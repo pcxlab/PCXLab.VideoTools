@@ -2,7 +2,7 @@ Set-StrictMode -Version Latest
 
 $script:FFmpeg = "C:\Projects\PCXLab.VideoTools\Tools\FFmpeg\bin\ffmpeg.exe"
 
-function New-TestVideoVariant {
+function New-PCXTestVideoVariant {
 
     [CmdletBinding()]
     param(
