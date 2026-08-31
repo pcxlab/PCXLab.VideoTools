@@ -1,23 +1,28 @@
-# Ignore FFmpeg executables
+# ============================================================================
+# FFmpeg binaries
+# ============================================================================
 Tools/FFmpeg/bin/ffmpeg.exe
 Tools/FFmpeg/bin/ffplay.exe
 Tools/FFmpeg/bin/ffprobe.exe
 
-# Ignore folder
-# Tests/TestData/Ignore/
-
-# ---------------------------------------------------------------------------
-# Generated test media
-# Keep only Original and C.Repository under source control.
-# ---------------------------------------------------------------------------
-Tests/TestData/A.Reference/
-Tests/TestData/B.MediumQuality/
-Tests/TestData/D.VerySmall/
-Tests/TestData/E.Tiny/
-Tests/TestData/.Ignore/
-
-# Miscellaneous test output
-Tests/TestData/Test.mp4
-
-#Scratch notes
+# ============================================================================
+# Development scratch work
+# ============================================================================
 Scratch/
+
+# ============================================================================
+# Generated test output
+# ============================================================================
+
+# ============================================================================
+# Temporary media created during development
+# (Repository media under /Media is intentionally tracked.)
+# ============================================================================
+Media/Temp/
+Media/Generated/
+
+# ============================================================================
+# Temporary synchronization output (if created)
+# ============================================================================
+*.wav.tmp
+*.pcm
