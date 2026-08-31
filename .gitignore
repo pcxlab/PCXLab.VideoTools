@@ -26,3 +26,8 @@ Media/Generated/
 # ============================================================================
 *.wav.tmp
 *.pcm
+
+# Generated recording session artifacts
+MediaSamples/**/*-*.json
+# Adobe ExtendScript files
+MediaSamples/**/*-*.jsx
