@@ -89,16 +89,12 @@ function Edit-PCXRecordingSession {
 
         [Parameter()]
         [double]$NoiseFloor = (
-            Get-PCXSetting `
-                -Name 'Analysis.SilenceThreshold' `
-                -DefaultValue -35
+            (Get-PCXAnalysisPolicy).Silence.NoiseFloor
         ),
 
         [Parameter()]
         [double]$MinimumDuration = (
-            Get-PCXSetting `
-                -Name 'Analysis.MinimumSilenceDuration' `
-                -DefaultValue 1
+            (Get-PCXAnalysisPolicy).Silence.MinimumDuration
         ),
 
         [Parameter()]

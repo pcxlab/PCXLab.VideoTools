@@ -45,11 +45,15 @@ function Find-PCXBlackFrames {
 
         [Parameter()]
         [ValidateRange(0.1, 3600)]
-        [double]$MinimumDuration = 0.5,
+        [double]$MinimumDuration = (
+            (Get-PCXAnalysisPolicy).BlackFrames.MinimumDuration
+        ),
 
         [Parameter()]
         [ValidateRange(0.0, 1.0)]
-        [double]$Threshold = 0.10 # changed from 0.98
+        [double]$Threshold = (
+            (Get-PCXAnalysisPolicy).BlackFrames.Threshold
+        )
 
     )
 

@@ -64,17 +64,13 @@ function Find-PCXSilence {
         [Parameter(ParameterSetName = 'ByPath')]
         [ValidateRange(-120,0)]
         [double]$NoiseFloor = (
-            Get-PCXSetting `
-                -Name 'Analysis.SilenceThreshold' `
-                -DefaultValue -35
+            (Get-PCXAnalysisPolicy).Silence.NoiseFloor
         ),
 
         [Parameter(ParameterSetName = 'ByPath')]
         [ValidateRange(0.1,3600)]
         [double]$MinimumDuration = (
-            Get-PCXSetting `
-                -Name 'Analysis.MinimumSilenceDuration' `
-                -DefaultValue 1
+            (Get-PCXAnalysisPolicy).Silence.MinimumDuration
         )
 
     )
