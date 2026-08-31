@@ -63,34 +63,9 @@ if ($null -ne $InputObject.Media) {
 
 if ($null -ne $InputObject.Analysis.Silence) {
 
-    foreach ($Item in $InputObject.Analysis.Silence) {
-
-        if ($Item.PSTypeNames -notcontains 'PCXLab.Silence') {
-
-            $Item.PSObject.TypeNames.Insert(
-                0,
-                'PCXLab.Silence'
-            )
-
-        }
-
-        #
-        # Restore TimeSpan properties
-        #
-
-        $Item.Start = [TimeSpan]::FromTicks(
-            [Int64]$Item.Start.Ticks
-        )
-
-        $Item.End = [TimeSpan]::FromTicks(
-            [Int64]$Item.End.Ticks
-        )
-
-        $Item.Duration = [TimeSpan]::FromTicks(
-            [Int64]$Item.Duration.Ticks
-        )
-
-    }
+    Restore-PCXAnalysisEventTimeSpans `
+        -Items $InputObject.Analysis.Silence `
+        -TypeName 'PCXLab.Silence'
 
 }
 
@@ -100,34 +75,9 @@ if ($null -ne $InputObject.Analysis.Silence) {
 
 if ($null -ne $InputObject.Analysis.BlackFrames) {
 
-    foreach ($Item in $InputObject.Analysis.BlackFrames) {
-
-        if ($Item.PSTypeNames -notcontains 'PCXLab.BlackFrame') {
-
-            $Item.PSObject.TypeNames.Insert(
-                0,
-                'PCXLab.BlackFrame'
-            )
-
-        }
-
-        #
-        # Restore TimeSpan properties
-        #
-
-        $Item.Start = [TimeSpan]::FromTicks(
-            [Int64]$Item.Start.Ticks
-        )
-
-        $Item.End = [TimeSpan]::FromTicks(
-            [Int64]$Item.End.Ticks
-        )
-
-        $Item.Duration = [TimeSpan]::FromTicks(
-            [Int64]$Item.Duration.Ticks
-        )
-
-    }
+    Restore-PCXAnalysisEventTimeSpans `
+        -Items $InputObject.Analysis.BlackFrames `
+        -TypeName 'PCXLab.BlackFrame'
 
 }
 

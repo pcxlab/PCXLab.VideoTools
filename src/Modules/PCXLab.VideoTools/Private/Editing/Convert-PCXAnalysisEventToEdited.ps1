@@ -79,20 +79,7 @@ function Convert-PCXAnalysisEventToEdited {
 
                         $pStart = [Math]::Round(($eStart + ($mStart - $iStart)), 3)
 
-                        #
-                        # Construct projected clone preserving all properties & type names
-                        #
-                        $clone = [PSCustomObject]@{ }
-
-                        foreach ($tn in $event.PSTypeNames) {
-                            if ($clone.PSTypeNames -notcontains $tn) {
-                                $clone.PSObject.TypeNames.Add($tn)
-                            }
-                        }
-
-                        foreach ($prop in $event.PSObject.Properties) {
-                            $clone | Add-Member -NotePropertyName $prop.Name -NotePropertyValue $prop.Value -Force
-                        }
+                        $clone = Copy-PCXAnalysisEventClone -InputObject $event
 
                         $clone.Start = [TimeSpan]::FromSeconds($pStart)
                         $clone.End = [TimeSpan]::FromSeconds($pStart)
@@ -117,20 +104,7 @@ function Convert-PCXAnalysisEventToEdited {
                         $pEnd = [Math]::Round(($eStart + ($overlapEnd - $iStart)), 3)
                         $pDur = [Math]::Round(($pEnd - $pStart), 3)
 
-                        #
-                        # Construct projected clone preserving all properties & type names
-                        #
-                        $clone = [PSCustomObject]@{ }
-
-                        foreach ($tn in $event.PSTypeNames) {
-                            if ($clone.PSTypeNames -notcontains $tn) {
-                                $clone.PSObject.TypeNames.Add($tn)
-                            }
-                        }
-
-                        foreach ($prop in $event.PSObject.Properties) {
-                            $clone | Add-Member -NotePropertyName $prop.Name -NotePropertyValue $prop.Value -Force
-                        }
+                        $clone = Copy-PCXAnalysisEventClone -InputObject $event
 
                         $clone.Start = [TimeSpan]::FromSeconds($pStart)
                         $clone.End = [TimeSpan]::FromSeconds($pEnd)
