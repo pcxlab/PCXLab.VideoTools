@@ -85,8 +85,6 @@ function Get-PCXVideoSegments {
 
     end {
 
-        $Segments = [System.Collections.Generic.List[object]]::new()
-
         if ($Events.Count -eq 0) {
             return
         }
@@ -143,64 +141,13 @@ function Get-PCXVideoSegments {
                 -Path $SourcePath
         }
 
-        $CurrentPosition = [TimeSpan]::Zero
-
-        foreach ($Item in ($Events | Sort-Object Start)) {
-
-            #
-            # KEEP
-            #
-
-            if ($Item.Start -gt $CurrentPosition) {
-
-                $Segment = Add-PCXKeepSegment `
-                    -SourcePath $SourcePath `
-                    -Start $CurrentPosition `
-                    -End $Item.Start
-
-                if ($null -ne $Segment) {
-                    $Segments.Add($Segment)
-                }
-
-            }
-
-            #
-            # REMOVE
-            #
-
-            $Segment = Add-PCXRemoveSegment `
-                -SourcePath $SourcePath `
-                -Start $Item.Start `
-                -End $Item.End `
-                -AnalysisEvents @($Item)
-
-            if ($null -ne $Segment) {
-                $Segments.Add($Segment)
-            }
-
-            $CurrentPosition = $Item.End
-
-        }
-
-        #
-        # Final KEEP segment
-        #
-
-        if ($CurrentPosition -lt $VideoDuration) {
-
-            $Segment = Add-PCXKeepSegment `
-                -SourcePath $SourcePath `
-                -Start $CurrentPosition `
-                -End $VideoDuration
-
-            if ($null -ne $Segment) {
-                $Segments.Add($Segment)
-            }
-
-        }
+        $RawSegments = Select-PCXEditBoundaries `
+            -Events $Events `
+            -SourcePath $SourcePath `
+            -Duration $VideoDuration
 
         $OptimizedSegments = @(
-            $Segments | 
+            $RawSegments | 
                 Optimize-PCXVideoSegments
         )
 
