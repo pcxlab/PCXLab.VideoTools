@@ -1,4 +1,4 @@
-# Media
+# MediaSamples
 
 This folder contains small media files used for testing and development.
 
