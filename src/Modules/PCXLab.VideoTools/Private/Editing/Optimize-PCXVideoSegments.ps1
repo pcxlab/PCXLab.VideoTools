@@ -37,7 +37,7 @@ function Optimize-PCXVideoSegments {
 
         [Parameter()]
         [TimeSpan]$MinimumDuration = (
-            [TimeSpan]::FromMilliseconds(250)
+            (Get-PCXEditPolicy).MinimumSegmentDuration
         )
 
     )
