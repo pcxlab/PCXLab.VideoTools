@@ -128,16 +128,7 @@ function Convert-PCXAnalysisEventToSource {
 
             # If silence, update classification to match new duration
             if ($currentEvent.EventType -eq 'Silence') {
-                $editPolicy = Get-PCXEditPolicy
-                $classification = if ($durationSeconds -ge $editPolicy.RecordingBreakThreshold.TotalSeconds) {
-                    'RecordingBreak'
-                }
-                elseif ($durationSeconds -ge $editPolicy.EditCandidateThreshold.TotalSeconds) {
-                    'EditCandidate'
-                }
-                else {
-                    'ShortPause'
-                }
+                $classification = Resolve-PCXSilenceClassification -DurationSeconds $durationSeconds
                 $translated | Add-Member -NotePropertyName 'Classification' -NotePropertyValue $classification -Force
             }
 

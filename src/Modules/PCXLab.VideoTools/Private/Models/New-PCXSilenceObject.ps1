@@ -23,18 +23,7 @@ function New-PCXSilenceObject {
 
     )
 
-    $editPolicy = Get-PCXEditPolicy
-
-    $classification =
-    if ($DurationSeconds -ge $editPolicy.RecordingBreakThreshold.TotalSeconds) {
-        'RecordingBreak'
-    }
-    elseif ($DurationSeconds -ge $editPolicy.EditCandidateThreshold.TotalSeconds) {
-        'EditCandidate'
-    }
-    else {
-        'ShortPause'
-    }
+    $classification = Resolve-PCXSilenceClassification -DurationSeconds $DurationSeconds
 
     [PSCustomObject]@{
 
