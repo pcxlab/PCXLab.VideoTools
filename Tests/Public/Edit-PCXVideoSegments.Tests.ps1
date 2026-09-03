@@ -67,4 +67,23 @@ Describe 'Edit-PCXVideoSegments Companion Artifact Lifecycle' {
         $markersContent | Should -Match 'Keep'
     }
 
+    It 'Sets HorizontalFlip on incoming segments when -HorizontalFlip is passed' {
+        $tempSource = Join-Path $TestDrive 'TestMedia2.mp4'
+        $tempEditedVideo = Join-Path $TestDrive 'TestMedia2-Edited.mp4'
+
+        Set-Content -LiteralPath $tempSource -Value 'source'
+        Set-Content -LiteralPath $tempEditedVideo -Value 'pre-existing edited video'
+
+        $seg = & $script:Module {
+            param($src)
+            New-PCXVideoSegmentObject -SourcePath $src -Start ([TimeSpan]::Zero) -End ([TimeSpan]::FromSeconds(5)) -Action 'Keep'
+        } $tempSource
+
+        $seg.HorizontalFlip | Should -Be $false
+
+        $result = @($seg) | Edit-PCXVideoSegments -HorizontalFlip
+
+        $seg.HorizontalFlip | Should -Be $true
+    }
+
 }

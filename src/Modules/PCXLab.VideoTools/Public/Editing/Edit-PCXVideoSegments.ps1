@@ -64,6 +64,12 @@ function Edit-PCXVideoSegments {
             throw 'No video segments were supplied.'
         }
 
+        if ($HorizontalFlip) {
+            foreach ($seg in $Segments) {
+                $seg.HorizontalFlip = $true
+            }
+        }
+
         $uniqueSourcePaths = @($Segments.SourcePath | Sort-Object -Unique)
 
         if ($uniqueSourcePaths.Count -gt 1) {
@@ -329,21 +335,11 @@ function Edit-PCXVideoSegments {
             # Build timeline filter graph
             #
 
-            $VideoSettings = if ($HorizontalFlip) {
-                [PSCustomObject]@{
-                    HorizontalFlip = $true
-                }
-            }
-            else {
-                $null
-            }
-
             $FilterGraph = $Segments |
             ConvertTo-PCXFFmpegFilterGraph `
                 -InputIndex 0 `
                 -HasAudio:$HasAudio `
-                -AudioSettings $AudioSettings `
-                -VideoSettings $VideoSettings
+                -AudioSettings $AudioSettings
 
             #
             # Read source audio sample rate

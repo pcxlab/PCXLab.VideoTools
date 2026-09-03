@@ -26,10 +26,6 @@ function ConvertTo-PCXFFmpegFilterGraph {
         Optional settings object containing audio post-processing flags (Normalize,
         Compression, RepairChannels).
 
-    .PARAMETER VideoSettings
-        Optional settings object containing video post-processing flags (HorizontalFlip).
-        If omitted, video settings are derived from the supplied video segments.
-
     .OUTPUTS
         System.String
     #>
@@ -53,10 +49,7 @@ function ConvertTo-PCXFFmpegFilterGraph {
         [switch]$HasAudio = $true,
 
         [Parameter()]
-        [object]$AudioSettings,
-
-        [Parameter()]
-        [object]$VideoSettings
+        [object]$AudioSettings
 
     )
 
@@ -92,39 +85,21 @@ function ConvertTo-PCXFFmpegFilterGraph {
             -HasAudio:$HasAudio
 
         #
-        # Resolve video settings from parameter or segments
+        # Process and merge video filters if segments have video metadata
         #
 
-        $effectiveVideoSettings = if ($null -ne $VideoSettings) {
-            $VideoSettings
-        }
-        else {
-            $hasFlip = $false
-            foreach ($seg in $Segments) {
-                if ($seg.HorizontalFlip -eq $true) {
-                    $hasFlip = $true
-                    break
-                }
-            }
-
-            if ($hasFlip) {
-                [PSCustomObject]@{
-                    HorizontalFlip = $true
-                }
-            }
-            else {
-                $null
+        $hasFlip = $false
+        foreach ($seg in $Segments) {
+            if ($seg.HorizontalFlip -eq $true) {
+                $hasFlip = $true
+                break
             }
         }
 
-        #
-        # Process and merge video filters if video settings are enabled
-        #
-
-        if ($null -ne $effectiveVideoSettings) {
+        if ($hasFlip) {
 
             $VideoFilter = ConvertTo-PCXVideoFilter `
-                -Settings $effectiveVideoSettings
+                -Settings ([PSCustomObject]@{ HorizontalFlip = $true })
 
             if (-not [string]::IsNullOrWhiteSpace($VideoFilter)) {
 
