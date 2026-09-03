@@ -1,25 +1,33 @@
-function Invoke-PCXSynchronizedEditingInternal {
+function Invoke-PCXSynchronizedEditingOrchestrator {
 
     <#
     .SYNOPSIS
-        Internal implementation of the synchronized editing workflow.
+        Coordinates the synchronized editing workflow.
 
     .DESCRIPTION
-        Shared implementation used by the public synchronized editing
-        commands.
+    Acts as the orchestration layer for the synchronized editing pipeline.
 
-        This command is internal to the module and is intentionally not
-        exported.
+    This function coordinates the end-to-end synchronized editing workflow by:
 
-        Public callers:
+    - Resolving the reference source
+    - Creating or loading the recording session
+    - Obtaining the reference video analysis
+    - Translating analysis events to synchronized sources
+    - Generating edited video segments
+    - Exporting reusable editing artifacts
+    - Rendering the final edited outputs
 
-            Invoke-PCXSynchronizedEditing
-            Edit-PCXRecordingSession (deprecated)
+    This function is intended for use by the module's public commands and is not exported as part of the module's public API.
+
+    Public callers:
+
+        Invoke-PCXSynchronizedEditing
+        Edit-PCXRecordingSession (deprecated)
 
     .NOTES
-        Internal helper.
-        Do not call directly.
-    #>
+    Workflow orchestrator for the synchronized editing pipeline.
+    Do not call directly from outside the module.
+        #>
 
     [CmdletBinding(DefaultParameterSetName = 'Path')]
     [OutputType([System.IO.FileInfo])]
