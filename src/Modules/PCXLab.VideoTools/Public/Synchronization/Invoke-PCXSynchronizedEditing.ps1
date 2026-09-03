@@ -70,7 +70,7 @@ function Invoke-PCXSynchronizedEditing {
 
     process {
 
-        Invoke-PCXSynchronizedEditingInternal @PSBoundParameters
+        Invoke-PCXSynchronizedEditingOrchestrator @PSBoundParameters
 
     }
 }

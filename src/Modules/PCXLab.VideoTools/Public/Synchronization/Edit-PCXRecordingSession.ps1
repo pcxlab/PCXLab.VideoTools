@@ -115,7 +115,7 @@ function Edit-PCXRecordingSession {
 
     process {
 
-        Invoke-PCXSynchronizedEditingInternal @PSBoundParameters
+        Invoke-PCXSynchronizedEditingOrchestrator @PSBoundParameters
 
     }
 
