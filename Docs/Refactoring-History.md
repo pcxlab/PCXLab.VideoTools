@@ -88,6 +88,19 @@ logic.
 
 ------------------------------------------------------------------------
 
+## Stage 6 — Video Rendering Metadata (HorizontalFlip)
+
+Status: Complete
+
+Summary:
+- Added optional `HorizontalFlip` rendering metadata to `PCXLab.VideoSegment`.
+- Created private video filter builder `ConvertTo-PCXVideoFilter`.
+- Integrated video post-processing filter compilation and pad rewiring into `ConvertTo-PCXFFmpegFilterGraph`.
+- Preserved rendering metadata across segment optimization, timeline projection, and JSON serialization.
+- Preserved 100% backward compatibility across all editing and rendering commands.
+
+------------------------------------------------------------------------
+
 # Future Stages
 
 Record future refactoring work here as it is completed.

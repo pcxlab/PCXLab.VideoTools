@@ -59,12 +59,20 @@ function ConvertTo-PCXEditedSegments {
             throw "TimelineMap and VideoSegments are inconsistent. No matching TimelineMap interval was found for Keep segment '$($segment.SourcePath)' from $($segment.StartSeconds) to $($segment.EndSeconds) seconds."
         }
 
+        $horizontalFlip = if ($null -ne $segment.PSObject.Properties['HorizontalFlip']) {
+            [bool]$segment.HorizontalFlip
+        }
+        else {
+            $false
+        }
+
         New-PCXVideoSegmentObject `
             -SourcePath $TimelineMap.SourcePath `
             -Start ([TimeSpan]::FromSeconds($interval.EditedStartSeconds)) `
             -End ([TimeSpan]::FromSeconds($interval.EditedEndSeconds)) `
             -Action 'Keep' `
-            -AnalysisEvents @($segment.AnalysisEvents)
+            -AnalysisEvents @($segment.AnalysisEvents) `
+            -HorizontalFlip $horizontalFlip
 
     }
 

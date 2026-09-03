@@ -88,12 +88,20 @@ function Import-PCXVideoSegment {
                     }
                 }
 
+                $horizontalFlip = if ($null -ne $Item.PSObject.Properties['HorizontalFlip'] -and $null -ne $Item.HorizontalFlip) {
+                    [bool]$Item.HorizontalFlip
+                }
+                else {
+                    $false
+                }
+
                 New-PCXVideoSegmentObject `
                     -SourcePath $Item.SourcePath `
                     -Start $Start `
                     -End $End `
                     -Action $Item.Action `
-                    -AnalysisEvents $AnalysisEvents
+                    -AnalysisEvents $AnalysisEvents `
+                    -HorizontalFlip $horizontalFlip
 
             }
 

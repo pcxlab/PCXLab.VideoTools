@@ -26,6 +26,10 @@ function ConvertTo-PCXFFmpegFilterGraph {
         Optional settings object containing audio post-processing flags (Normalize,
         Compression, RepairChannels).
 
+    .PARAMETER VideoSettings
+        Optional settings object containing video post-processing flags (HorizontalFlip).
+        If omitted, video settings are derived from the supplied video segments.
+
     .OUTPUTS
         System.String
     #>
@@ -49,7 +53,10 @@ function ConvertTo-PCXFFmpegFilterGraph {
         [switch]$HasAudio = $true,
 
         [Parameter()]
-        [object]$AudioSettings
+        [object]$AudioSettings,
+
+        [Parameter()]
+        [object]$VideoSettings
 
     )
 
@@ -85,6 +92,51 @@ function ConvertTo-PCXFFmpegFilterGraph {
             -HasAudio:$HasAudio
 
         #
+        # Resolve video settings from parameter or segments
+        #
+
+        $effectiveVideoSettings = if ($null -ne $VideoSettings) {
+            $VideoSettings
+        }
+        else {
+            $hasFlip = $false
+            foreach ($seg in $Segments) {
+                if ($seg.HorizontalFlip -eq $true) {
+                    $hasFlip = $true
+                    break
+                }
+            }
+
+            if ($hasFlip) {
+                [PSCustomObject]@{
+                    HorizontalFlip = $true
+                }
+            }
+            else {
+                $null
+            }
+        }
+
+        #
+        # Process and merge video filters if video settings are enabled
+        #
+
+        if ($null -ne $effectiveVideoSettings) {
+
+            $VideoFilter = ConvertTo-PCXVideoFilter `
+                -Settings $effectiveVideoSettings
+
+            if (-not [string]::IsNullOrWhiteSpace($VideoFilter)) {
+
+                $FilterGraph = $FilterGraph -replace '\[outv\]', '[outv_pre]'
+
+                $FilterGraph += ";[outv_pre]$VideoFilter[outv]"
+
+            }
+
+        }
+
+        #
         # Process and merge audio filters if audio is enabled
         #
 
@@ -95,7 +147,7 @@ function ConvertTo-PCXFFmpegFilterGraph {
 
             if (-not [string]::IsNullOrWhiteSpace($AudioFilter)) {
 
-                $FilterGraph = $FilterGraph -replace '\[outa\]$', '[outa_pre]'
+                $FilterGraph = $FilterGraph -replace '\[outa\]', '[outa_pre]'
 
                 $FilterGraph += ";[outa_pre]$AudioFilter[outa]"
 

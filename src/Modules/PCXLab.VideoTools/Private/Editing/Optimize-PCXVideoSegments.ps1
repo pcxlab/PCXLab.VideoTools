@@ -85,7 +85,8 @@ function Optimize-PCXVideoSegments {
                     -Start $Previous.Start `
                     -End $Current.End `
                     -Action $Previous.Action `
-                    -AnalysisEvents $mergedEvents
+                    -AnalysisEvents $mergedEvents `
+                    -HorizontalFlip ([bool]$Previous.HorizontalFlip)
 
                 continue
 

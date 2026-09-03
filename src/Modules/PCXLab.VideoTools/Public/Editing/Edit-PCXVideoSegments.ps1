@@ -35,6 +35,9 @@ function Edit-PCXVideoSegments {
         [string]$OutputPath,
 
         [Parameter()]
+        [switch]$HorizontalFlip,
+
+        [Parameter()]
         [switch]$Force
 
     )
@@ -326,11 +329,21 @@ function Edit-PCXVideoSegments {
             # Build timeline filter graph
             #
 
+            $VideoSettings = if ($HorizontalFlip) {
+                [PSCustomObject]@{
+                    HorizontalFlip = $true
+                }
+            }
+            else {
+                $null
+            }
+
             $FilterGraph = $Segments |
             ConvertTo-PCXFFmpegFilterGraph `
                 -InputIndex 0 `
                 -HasAudio:$HasAudio `
-                -AudioSettings $AudioSettings
+                -AudioSettings $AudioSettings `
+                -VideoSettings $VideoSettings
 
             #
             # Read source audio sample rate

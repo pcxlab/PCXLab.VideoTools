@@ -133,6 +133,22 @@ Accepted
 
 ------------------------------------------------------------------------
 
+## 2026-09 --- Model-Driven Video Rendering Metadata (HorizontalFlip)
+
+### Decision
+
+Attached `HorizontalFlip` rendering metadata directly to the `PCXLab.VideoSegment` model and extracted `ConvertTo-PCXVideoFilter` to translate rendering metadata to FFmpeg video filter expressions.
+
+### Reason
+
+Keep rendering behavior driven by explicit domain metadata carried with editing segments rather than inferred during rendering or hardcoded through heuristics.
+
+### Status
+
+Accepted
+
+------------------------------------------------------------------------
+
 ## Update Rules
 
 -   Record decisions, not implementation details.

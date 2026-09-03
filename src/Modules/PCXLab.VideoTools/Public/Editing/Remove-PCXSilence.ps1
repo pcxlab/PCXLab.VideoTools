@@ -50,7 +50,10 @@ function Remove-PCXSilence {
         [Parameter()]
         [double]$MinimumDuration = (
             (Get-PCXAnalysisPolicy).Silence.MinimumDuration
-        )
+        ),
+
+        [Parameter()]
+        [switch]$HorizontalFlip
 
     )
 
@@ -62,7 +65,8 @@ function Remove-PCXSilence {
             -MinimumDuration $MinimumDuration |
         Get-PCXVideoSegments |
         Edit-PCXVideoSegments `
-            -OutputPath $OutputPath
+            -OutputPath $OutputPath `
+            -HorizontalFlip:$HorizontalFlip
 
     }
 

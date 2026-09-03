@@ -36,6 +36,7 @@ Completed major improvements include:
 -   Extracted edit boundary selection
 -   Extracted silence classification helper
 -   Extracted analysis event conversion helpers
+-   Metadata-driven horizontal flip video rendering support
 -   Improved unit test coverage for private helpers
 -   Continued preservation of public APIs during refactoring
 -   Business rules continue to be extracted into reusable private providers and helper functions while preserving public APIs.
@@ -54,6 +55,7 @@ The project currently follows these architectural principles:
 - Preserve backward compatibility.
 - Maintain high unit test coverage.
 - Prefer incremental refactoring over large rewrites.
+- Rendering behavior should be driven by explicit metadata rather than inferred from filenames or media characteristics.
 
 ------------------------------------------------------------------------
 
@@ -107,7 +109,6 @@ Examples of future work already identified:
 
 -   Improve natural conversational pacing by refining silence padding.
 -   Validate synchronized JSX edit accuracy.
--   Horizontal flip support for selected video sources.
 -   Improve handling of recording sessions containing only two sources.
 -   Investigate low synchronization confidence cases.
 -   Investigate "SourceOffsets is an empty collection".

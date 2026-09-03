@@ -50,7 +50,10 @@ function New-PCXVideoSegmentObject {
 
         [Parameter()]
         [AllowEmptyCollection()]
-        [object[]]$AnalysisEvents = @()
+        [object[]]$AnalysisEvents = @(),
+
+        [Parameter()]
+        [bool]$HorizontalFlip = $false
 
     )
 
@@ -98,6 +101,10 @@ function New-PCXVideoSegmentObject {
         # Associated In-Memory Analysis Events
 
         AnalysisEvents  = @($AnalysisEvents)
+
+        # Rendering Metadata
+
+        HorizontalFlip  = $HorizontalFlip
 
     }
 

@@ -28,7 +28,7 @@ Before implementing:
    - Docs/Coding-Guidelines.md
    - Docs/Testing-Strategy.md
 
-2. Read only the architecture documents relevant to the requested feature.
+2. Read only the architecture and ADR documents relevant to the requested feature.
 
 3. Determine whether similar functionality already exists.
 

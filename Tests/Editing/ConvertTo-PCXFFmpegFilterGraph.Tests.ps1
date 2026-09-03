@@ -65,6 +65,65 @@ Describe 'ConvertTo-PCXFFmpegFilterGraph' {
         $filter | Should -Not -Match '\[outa_pre\]'
     }
 
+    It 'Applies video filter and performs pad rewiring when segments have HorizontalFlip enabled' {
+        $module = Get-Module PCXLab.VideoTools
+        $flippedSeg1 = & $module {
+            New-PCXVideoSegmentObject -SourcePath 'C:\Video.mp4' -Start ([TimeSpan]::FromSeconds(0)) -End ([TimeSpan]::FromSeconds(5)) -Action 'Keep' -HorizontalFlip $true
+        }
+        $flippedSeg2 = & $module {
+            New-PCXVideoSegmentObject -SourcePath 'C:\Video.mp4' -Start ([TimeSpan]::FromSeconds(10)) -End ([TimeSpan]::FromSeconds(15)) -Action 'Keep' -HorizontalFlip $true
+        }
+        $flippedSegments = @($flippedSeg1, $flippedSeg2)
+
+        $filter = & $module { param($s) $s | ConvertTo-PCXFFmpegFilterGraph } $flippedSegments
+        $filter | Should -Match 'concat=n=2:v=1:a=1\[outv_pre\]\[outa\]'
+        $filter | Should -Match ';\[outv_pre\]hflip\[outv\]'
+    }
+
+    It 'Applies video filter and performs pad rewiring when VideoSettings are explicitly provided' {
+        $module = Get-Module PCXLab.VideoTools
+        $videoSettings = [PSCustomObject]@{
+            HorizontalFlip = $true
+        }
+
+        $filter = & $module {
+            param($s, $settings)
+            $s | ConvertTo-PCXFFmpegFilterGraph -VideoSettings $settings
+        } $script:Segments $videoSettings
+
+        $filter | Should -Match 'concat=n=2:v=1:a=1\[outv_pre\]\[outa\]'
+        $filter | Should -Match ';\[outv_pre\]hflip\[outv\]'
+    }
+
+    It 'Merges both video and audio post-processing filters when both are active' {
+        $module = Get-Module PCXLab.VideoTools
+        $videoSettings = [PSCustomObject]@{ HorizontalFlip = $true }
+        $audioSettings = [PSCustomObject]@{ Normalize = $true }
+
+        $filter = & $module {
+            param($s, $vSettings, $aSettings)
+            $s | ConvertTo-PCXFFmpegFilterGraph -VideoSettings $vSettings -AudioSettings $aSettings
+        } $script:Segments $videoSettings $audioSettings
+
+        $filter | Should -Match 'concat=n=2:v=1:a=1\[outv_pre\]\[outa_pre\]'
+        $filter | Should -Match ';\[outv_pre\]hflip\[outv\]'
+        $filter | Should -Match ';\[outa_pre\]loudnorm\[outa\]'
+    }
+
+    It 'Applies video filter when HasAudio is False' {
+        $module = Get-Module PCXLab.VideoTools
+        $videoSettings = [PSCustomObject]@{ HorizontalFlip = $true }
+
+        $filter = & $module {
+            param($s, $settings)
+            $s | ConvertTo-PCXFFmpegFilterGraph -HasAudio:$false -VideoSettings $settings
+        } $script:Segments $videoSettings
+
+        $filter | Should -Match 'concat=n=2:v=1:a=0\[outv_pre\]'
+        $filter | Should -Match ';\[outv_pre\]hflip\[outv\]'
+        $filter | Should -Not -Match '\[outa\]'
+    }
+
     It 'Throws when non-VideoSegment objects are passed' {
         $module = Get-Module PCXLab.VideoTools
         {
